@@ -357,9 +357,12 @@ export const mainMenuTemplate = async (
                       filters: [{ name: 'CSS Files', extensions: ['css'] }],
                       properties: ['openFile', 'multiSelections'],
                     });
-                    if (filePaths) {
-                      config.set('options.themes', filePaths);
-                      innerRefreshMenu();
+                    if (filePaths.length > 0) {
+                      config.set(
+                        'options.themes',
+                        [...new Set([...(config.get('options.themes') ?? []), ...filePaths])],
+                      );
+                      await innerRefreshMenu();
                     }
                   },
                 },
@@ -586,7 +589,7 @@ export const mainMenuTemplate = async (
                     if (webContents.isDevToolsOpened()) {
                       webContents.closeDevTools();
                     } else {
-                     // webContents.openDevTools();
+                      webContents.openDevTools();
                     }
                   },
                 }

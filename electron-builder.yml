@@ -25,19 +25,31 @@ mac:
 win:
   icon: assets/generated/icons/win/icon.ico
   target:
-    - target: nsis-web
+    - target: nsis
       arch:
         - x64
-        - ia32
-        - arm64
     - target: portable
       arch:
         - x64
-        - ia32
-        - arm64
   compression: maximum
-nsisWeb:
+
+# Installation complète hors-ligne : menu Démarrer, raccourci Bureau,
+# choix du répertoire et désinstallation depuis Paramètres Windows.
+# Installé pour l'utilisateur courant sans droit administrateur.
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: 'YT Music'
   runAfterFinish: false
+  deleteAppDataOnUninstall: false
+  artifactName: 'YT-Music-Setup-Windows-x64.${ext}'
+
+# Le portable reste autonome et ne modifie plus aucun raccourci système.
+portable:
+  artifactName: 'YT-Music-Portable-Windows-x64.${ext}'
 linux:
   icon: assets/generated/icons/png
   category: AudioVideo

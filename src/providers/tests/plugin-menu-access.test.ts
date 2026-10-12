@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { createPluginMenuAccess } from '../plugin-menu-access';
+import { createPluginMenuAccess, selectPluginMenuItems } from '../plugin-menu-access';
 
 import type { MenuItemConstructorOptions } from 'electron';
 
@@ -53,4 +53,23 @@ test('le rafraîchissement des réglages reconstruit les deux points d’accès'
   expect(refreshed.toolbar.submenu).toBe(updated);
   expect(refreshed.settings.submenu).toBe(updated);
   expect((updated[0] as MenuItemConstructorOptions).checked).toBe(false);
+});
+
+test('Ajustements visuels retrouve les plugins ambiant et transparent', () => {
+  const ids = ['album-color-theme', 'ambient-mode', 'in-app-menu', 'transparent-player'];
+  const menus: MenuItemConstructorOptions[] = [
+    { label: 'Couleurs de la pochette', type: 'checkbox' },
+    { label: 'Mode ambiant', submenu: [{ label: 'Qualité' }] },
+    { label: 'Menu intégré', type: 'checkbox' },
+    { label: 'Mode transparent', submenu: [{ label: 'Opacité' }] },
+  ];
+
+  const visual = selectPluginMenuItems(ids, menus, [
+    'ambient-mode', 'transparent-player', 'unknown-plugin',
+  ]);
+  expect(visual).toHaveLength(2);
+  expect(visual[0]).toBe(menus[1]);
+  expect(visual[1]).toBe(menus[3]);
+  expect(visual[0].submenu).toHaveLength(1);
+  expect(visual[1].submenu).toHaveLength(1);
 });

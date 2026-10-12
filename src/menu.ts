@@ -18,7 +18,7 @@ import { APPLICATION_NAME, setLanguage, t } from '@/i18n';
 import * as config from './config';
 import { getAllMenuTemplate, loadAllMenuPlugins } from './loader/menu';
 import { restart } from './providers/app-controls';
-import { createPluginMenuAccess } from './providers/plugin-menu-access';
+import { createPluginMenuAccess, selectPluginMenuItems } from './providers/plugin-menu-access';
 import { startingPages } from './providers/extracted-data';
 import promptOptions from './providers/prompt-options';
 
@@ -154,6 +154,11 @@ export const mainMenuTemplate = async (
     pluginMenus,
     t('main.menu.plugins.label'),
   );
+  const visualPluginMenus = selectPluginMenuItems(
+    availablePlugins,
+    pluginMenus,
+    ['ambient-mode', 'transparent-player', 'album-color-theme', 'blur-nav-bar'],
+  );
 
   const langResources = await languageResources();
   const availableLanguages = Object.keys(langResources);
@@ -207,6 +212,11 @@ export const mainMenuTemplate = async (
         {
           label: t('main.menu.options.submenu.visual-tweaks.label'),
           submenu: [
+            {
+              label: 'Plugins visuels (ambiance, transparence, couleurs)',
+              submenu: visualPluginMenus,
+            },
+            { type: 'separator' },
             {
               label: t(
                 'main.menu.options.submenu.visual-tweaks.submenu.remove-upgrade-button',

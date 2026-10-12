@@ -8,7 +8,7 @@
   <img src="assets/icon.png" alt="Icône de l'application YouTube Music" width="92">
 
   <h1>🎵 YT Music</h1>
-  <h3>Édition personnelle basée sur Pear Desktop</h3>
+  <h3>Ton client musical indépendant pour ordinateur</h3>
 
   <p>
     <strong>Votre musique, à votre façon.</strong><br>
@@ -36,13 +36,28 @@
 
 ## 🎧 Le projet
 
-**YT Music** est une édition personnelle de **[Pear Desktop](https://github.com/pear-devs/pear-desktop)**, client de bureau communautaire pour YouTube Music.
+**YT Music** est un projet de bureau autonome maintenu dans **[ce dépôt GitHub](https://github.com/anderson76389/YT-Music)**. Il reprend et adapte du code open source de l'écosystème YouTube Music ; il n'a besoin d'aucun dépôt Pear Desktop pour être compilé à partir des sources enregistrées ici.
 
 L'objectif est de retrouver l'expérience du service musical dans une véritable application de bureau, tout en profitant des possibilités offertes par l'écosystème de plugins : **apparence, lecture, paroles, audio, raccourcis et intégrations**.
 
 Ce dépôt héberge les **fichiers sources** de cette édition. Il ne représente pas un client officiel de Google ou de YouTube et ne fournit pas de catalogue musical indépendant : la lecture et certaines fonctionnalités dépendent du service YouTube Music.
 
 > **État du dépôt :** le code source est disponible. Les installateurs et versions portables ne sont **pas encore publiés** dans les [Releases](https://github.com/anderson76389/YT-Music/releases). Les commandes de compilation ci-dessous correspondent à la configuration du projet ; elles ne constituent pas une garantie de fonctionnement sur chaque machine.
+
+## 🔒 Projet indépendant de Pear Desktop
+
+Ce dépôt **n'est pas un fork GitHub** de Pear Desktop. Son code source, ses correctifs, ses ressources, ses workflows et sa licence sont hébergés dans `anderson76389/YT-Music`. Si le dépôt de l'ancien projet disparaît, **tes sources et tes commits restent disponibles ici**, tant que tu conserves ton propre dépôt ou une copie locale.
+
+- **Identité propre :** application `YT Music`, identifiant `com.github.anderson76389.yt-music`.
+- **Mises à jour :** aucune vérification vers le GitHub de Pear Desktop. Les mises à jour YT Music utiliseront uniquement [tes Releases](https://github.com/anderson76389/YT-Music/releases) ; elles sont désactivées par défaut jusqu'à ta première publication.
+- **Compilation portable :** [construire une version Windows x64 via GitHub Actions](.github/workflows/build-portable-windows.yml). Le bouton **Run workflow** génère un artefact téléchargeable depuis l'exécution lorsqu'elle réussit.
+- **Crédits et licence :** le fichier [`license`](license) contient la licence MIT d'origine et son attribution. Le respect des licences reste nécessaire même si leurs dépôts disparaissent.
+
+**Limites de cette indépendance :** YouTube Music est un service externe ; son site, ses API, l'authentification, les packages npm et les intégrations tierces ne sont pas hébergés dans ce dépôt. Leur disponibilité n'est pas garantie si leurs fournisseurs changent les règles ou interrompent les services.
+
+### Données et ancienne installation
+
+Le nouveau nom et l'identifiant d'application peuvent créer un **nouveau profil de configuration**. Les réglages, cookies ou extensions de l'ancienne installation ne sont pas supprimés automatiquement. Sauvegarde ton ancien dossier de données avant de supprimer une ancienne version ; ne copie pas à l'aveugle tout le répertoire, et vérifie les chemins lors de la migration.
 
 ## ✨ Fonctionnalités
 
@@ -143,7 +158,7 @@ Le dépôt contient le code source, pas les exécutables générés. Les fichier
 <details>
 <summary><strong>L'application est-elle officielle ?</strong></summary>
 
-Non. Il s'agit d'un projet communautaire basé sur Pear Desktop, sans affiliation officielle avec Google ou YouTube.
+Non. Il s'agit d'un projet communautaire indépendant, utilisant du code open source de prédécesseurs crédités plus bas, sans affiliation officielle avec Google ou YouTube.
 
 </details>
 
@@ -163,11 +178,11 @@ Plusieurs fonctions communiquent avec YouTube Music ou des services tiers. Leurs
 
 ## 🤝 Crédits et origine
 
-Cette édition repose sur le travail du projet **[pear-devs/pear-desktop](https://github.com/pear-devs/pear-desktop)** et de ses contributeurs, dans la continuité du client **[th-ch/youtube-music](https://github.com/th-ch/youtube-music)**.
+Le code réutilise des travaux historiques de **[pear-devs/pear-desktop](https://github.com/pear-devs/pear-desktop)** et de **[th-ch/youtube-music](https://github.com/th-ch/youtube-music)**. Ces liens servent uniquement de crédits et de référence historique : ils ne sont pas requis au démarrage ou à la compilation.
 
-Le code, les plugins et les bibliothèques tiers demeurent attribués à leurs auteurs respectifs. Le fichier `package.json` du projet déclare une licence MIT ; les notices de licence et obligations de redistribution des composants d'origine doivent être respectées.
+Le code, les plugins et les bibliothèques tiers demeurent attribués à leurs auteurs respectifs. La licence MIT originale est incluse localement dans [`license`](license) ; les notices de licence et obligations de redistribution des composants d'origine et dépendances doivent rester respectées.
 
-**YT Music est une édition communautaire indépendante, non affiliée à YouTube, Google ni à l'équipe officielle de Pear Desktop.**
+**YT Music est un projet communautaire indépendant, non affilié à YouTube, Google ni à l'équipe Pear Desktop.**
 
 ---
 

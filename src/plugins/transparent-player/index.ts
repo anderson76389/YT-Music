@@ -12,7 +12,13 @@ const defaultConfig: TransparentPlayerConfig = {
   type: MaterialType.NONE,
 };
 
-export default createPlugin({
+type TransparentRendererState = {
+  props: TransparentPlayerConfig;
+  applyVisuals(): void;
+  applyVariables(): void;
+};
+
+export default createPlugin<unknown, unknown, TransparentRendererState>({
   name: () => t('plugins.transparent-player.name'),
   description: () => t('plugins.transparent-player.description'),
   addedVersion: '3.11.x',

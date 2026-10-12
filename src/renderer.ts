@@ -19,6 +19,7 @@ import {
 } from './loader/renderer';
 import { startingPages } from './providers/extracted-data';
 import { setupSongInfo } from './providers/song-info-front';
+import { setupSidebarPolish } from './providers/sidebar-polish';
 
 import type { MusicPlayer } from '@/types/music-player';
 import type { MusicPlayerAppElement } from '@/types/music-player-app-element';
@@ -308,6 +309,8 @@ async function onApiLoaded() {
       window.ipcRenderer.send('peard:search-results', result);
     },
   );
+
+  setupSidebarPolish();
 
   const video = document.querySelector('video')!;
   const audioContext = new AudioContext();

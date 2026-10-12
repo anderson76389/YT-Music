@@ -4,18 +4,18 @@
 
 **Contrôle vérifiable :** [GitHub Actions #38194267434](https://github.com/anderson76389/YT-Music/actions/runs/38194267434)
 
-> Une compilation et des tests simulés ne prouvent pas que les commandes interagissent correctement avec YouTube Music, Discord ou un navigateur connecté. Ce rapport distingue les corrections vérifiées automatiquement des essais encore nécessaires.
+> Une compilation et des tests simulés ne prouvent pas que les commandes interagissent correctement avec YouTube Music ou des services externes. Ce rapport distingue les corrections vérifiées automatiquement des essais encore nécessaires.
 
 ## Organisation de la barre supérieure
 
 | Menu | Points de contrôle | Statut |
 |---|---|---|
-| **Plugins** | 42 entrées, activation/désactivation, sous-menus par plugin | Génération auditable, clic de case testé ; test GUI restant |
+| **Plugins** | 34 entrées, activation/désactivation, sous-menus par plugin | Génération auditable, clic de case testé ; test GUI restant |
 | **Options** | Mise à jour, reprise, page d'accueil, apparence, thème CSS, langue, démarrage, barre d'état, proxy et avancé | Callbacks vérifiés dans le code ; intégrations non toutes testées |
 | **Affichage** | Recharger, recharger sans cache, zoom, réinitialisation, plein écran | Traitement des rôles corrigé ; tests unitaires de dispatch réussis |
 | **Navigation** | Retour, avance, copie d’URL, redémarrage, fermeture | Actions câblées dans le code ; test GUI restant |
 
-Douze plugins disposent en outre de menus spécifiques `menu.ts` : `ambient-mode`, `api-server`, `auth-proxy-adapter`, `discord`, `downloader`, `in-app-menu`, `notifications`, `picture-in-picture`, `scrobbler`, `shortcuts`, `synced-lyrics`, `transparent-player`. Les 42 plugins sont listés dans le menu, même si certains n'ont pas de sous-menu spécifique.
+Après le nettoyage 3.12.1, les sous-menus des plugins conservés sont générés uniquement à partir de leurs sources présentes. Les huit anciens plugins ont été retirés intégralement.
 
 ## Défauts confirmés et corrections publiées
 
@@ -46,7 +46,7 @@ Le plugin [Anti-Pause & Purge Totale](../src/plugins/anti-pause/index.ts) combin
 
 1. Ouvrir le menu Plugins et vérifier l'apparition des 42 entrées.
 2. Activer/désactiver des plugins avec et sans sous-menu ; contrôler que le coche et les réglages survivent au redémarrage.
-3. Tester les sous-menus des 12 plugins concernés, notamment les commandes Discord, paroles, téléchargements et périphériques audio avec leurs services et autorisations réels.
+3. Tester les sous-menus des plugins conservés, notamment paroles, téléchargements et périphériques audio avec leurs services et autorisations réels.
 4. Tester toutes les entrées des menus Options, Affichage et Navigation.
 5. Écouter plusieurs titres avec annonces possibles et vérifier si le blocage réseau réduit ou élimine le flash ; désactiver puis réactiver Anti-Pause pour détecter les résidus.
 

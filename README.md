@@ -42,7 +42,7 @@ L'objectif est de retrouver l'expérience du service musical dans une véritable
 
 Ce dépôt héberge les **fichiers sources** de cette édition. Il ne représente pas un client officiel de Google ou de YouTube et ne fournit pas de catalogue musical indépendant : la lecture et certaines fonctionnalités dépendent du service YouTube Music.
 
-> **État du dépôt :** le code source est disponible. Les installateurs et versions portables ne sont **pas encore publiés** dans les [Releases](https://github.com/anderson76389/YT-Music/releases). Les commandes de compilation ci-dessous correspondent à la configuration du projet ; elles ne constituent pas une garantie de fonctionnement sur chaque machine.
+> **Téléchargement Windows :** les versions portables x64 sont compilées et publiées automatiquement dans **[GitHub Releases](https://github.com/anderson76389/YT-Music/releases/latest)** après succès de la compilation, de TypeScript et des tests. Ce sont des versions communautaires non officielles : le fonctionnement réel de chaque plugin nécessite encore des essais dans l'application.
 
 ## 🔒 Projet indépendant de Pear Desktop
 
@@ -87,13 +87,15 @@ Vous pouvez notamment adapter l'expérience selon vos préférences : améliorer
 
 ## 💻 Installation
 
-### Option 1 — Télécharger une version compilée
+### Option 1 — Télécharger YT Music Portable (Windows 64 bits)
 
-Lorsque des versions publiques seront proposées, elles seront accessibles ici :
+**➡️ [Dernière version Windows (GitHub Releases)](https://github.com/anderson76389/YT-Music/releases/latest)**
 
-**➡️ [Consulter les versions disponibles (GitHub Releases)](https://github.com/anderson76389/YT-Music/releases)**
+Ouvre la dernière Release puis télécharge le fichier **`YT-Music-Portable-Windows-x64.exe`**, dans la section *Assets*. Il s'agit d'un programme portable : tu peux lancer le fichier directement.
 
-La configuration de compilation prévoit pour Windows des **versions installables (NSIS web)** et **portables**. Cela ne signifie pas qu'un exécutable est déjà disponible au téléchargement.
+Chaque compilation réussie depuis `main` crée une nouvelle Release. Les anciennes versions restent dans [l'historique des Releases](https://github.com/anderson76389/YT-Music/releases), même après l'expiration des artefacts de GitHub Actions.
+
+Les versions sont créées par le workflow [`build-portable-windows.yml`](.github/workflows/build-portable-windows.yml). Les tests sont automatisés, mais ne valident pas le comportement publicitaire en conditions réelles.
 
 ### Option 2 — Lancer depuis le code source
 
@@ -151,7 +153,7 @@ Les résultats de compilation sont écrits dans des dossiers générés, notamme
 <details>
 <summary><strong>Pourquoi aucun fichier .exe n'apparaît-il dans le dépôt ?</strong></summary>
 
-Le dépôt contient le code source, pas les exécutables générés. Les fichiers de distribution peuvent être publiés séparément dans **Releases** lorsqu'une compilation est prête.
+Les exécutables Windows restent exclus du dépôt source (limite GitHub de 100 Mio par fichier). Ils sont construits et accessibles dans **[Releases](https://github.com/anderson76389/YT-Music/releases)**, sans avoir besoin de cloner le projet.
 
 </details>
 

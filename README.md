@@ -5,7 +5,7 @@
 
   <br><br>
 
-  <img src="assets/icon.png" alt="Icône de l'application YouTube Music" width="92">
+  <img src="assets/icon.svg" alt="Logo YouTube Music rouge et blanc" width="92">
 
   <h1>🎵 YT Music</h1>
   <h3>Ton client musical indépendant pour ordinateur</h3>

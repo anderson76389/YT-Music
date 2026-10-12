@@ -1,114 +1,63 @@
 :root {
-  --ytmd-transparent-player-transparency-color: #111;
-  --ytmd-transparent-player-transparent-background: rgb(
-    from var(--ytmd-transparent-player-transparency-color) r g b /
-      var(--ytmd-transparent-player-opacity, 0.5)
+  --ytmd-transparent-player-opacity: 0.5;
+  --ytmd-transparent-player-surface: rgb(
+    8 8 12 / var(--ytmd-transparent-player-opacity)
   );
-  --ytmd-transparent-player-transparent-background-dark: rgb(
-    from var(--ytmd-transparent-player-transparency-color) r g b / 0.8
-  );
+  --ytmd-transparent-player-elevated: rgb(16 16 20 / 0.62);
   --ytmd-transparent-player-backdrop-blur: blur(20px);
 }
 
-body.transparent-background-color {
-  background-color: var(
-    --ytmd-transparent-player-transparent-background
-  ) !important;
+/* Les fonds de la page et du site doivent être réellement transparents.
+   Changer uniquement body ne suffit pas : #layout est normalement opaque. */
+html:has(body.transparent-player),
+body.transparent-player,
+body.transparent-player ytmusic-app,
+body.transparent-player ytmusic-app-layout,
+body.transparent-player #layout,
+body.transparent-player #content,
+body.transparent-player #player-page {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
-body.transparent-player-backdrop-filter {
-  #layout {
-    #nav-bar-background,
-    #player-bar-background {
-      backdrop-filter: var(--ytmd-transparent-player-backdrop-blur) !important;
-    }
-  }
-
-  #search-page {
-    #tabs {
-      &.stuck {
-        backdrop-filter: var(
-          --ytmd-transparent-player-backdrop-blur
-        ) !important;
-      }
-    }
-  }
-
-  ytmusic-menu-popup-renderer {
-    backdrop-filter: var(--ytmd-transparent-player-backdrop-blur) !important;
-  }
-
-  #ytmd-title-bar-main-panel {
-    backdrop-filter: var(--ytmd-transparent-player-backdrop-blur) !important;
-  }
+body.transparent-player #nav-bar-background,
+body.transparent-player #player-bar-background,
+body.transparent-player ytmusic-player-bar,
+body.transparent-player #mini-guide-background,
+body.transparent-player #guide-wrapper,
+body.transparent-player #guide,
+body.transparent-player #background,
+body.transparent-player .background-gradient,
+body.transparent-player #browse-page {
+  background-color: transparent !important;
+  background-image: none !important;
 }
 
-body.transparent-player {
-  ytmusic-app {
-    ytmusic-app-layout[player-page-open] {
-      #nav-bar-background.ytmusic-app-layout,
-      #player-bar-background.ytmusic-app-layout {
-        opacity: 0 !important;
-      }
-    }
+body.transparent-player #nav-bar,
+body.transparent-player #guide,
+body.transparent-player #player-bar,
+body.transparent-player #side-panel {
+  background: var(--ytmd-transparent-player-surface) !important;
+}
 
-    #layout {
-      #nav-bar-background,
-      #player-bar-background {
-        background: var(
-          --ytmd-transparent-player-transparent-background-dark
-        ) !important;
-      }
+body.transparent-player #nav-bar-background,
+body.transparent-player #player-bar-background,
+body.transparent-player #search-page #tabs.stuck,
+body.transparent-player ytmusic-menu-popup-renderer,
+body.transparent-player #ytmd-title-bar-main-panel {
+  backdrop-filter: var(--ytmd-transparent-player-backdrop-blur) !important;
+}
 
-      #mini-guide-background {
-        background: none !important;
-        border: 0 !important;
-      }
+body.transparent-player #search-page #tabs.stuck,
+body.transparent-player #ytmd-title-bar-main-panel,
+body.transparent-player ytmusic-menu-popup-renderer {
+  background: var(--ytmd-transparent-player-elevated) !important;
+}
 
-      #guide {
-        #guide-wrapper {
-          background: none !important;
-          border: 0 !important;
-        }
-      }
+body.transparent-player nav[data-ytmd-main-panel] {
+  background-color: transparent !important;
+}
 
-      ytmusic-player-bar {
-        background: none !important;
-      }
-
-      #player-page {
-        background: none !important;
-      }
-
-      #search-page {
-        #tabs {
-          &.stuck {
-            background: var(
-              --ytmd-transparent-player-transparent-background
-            ) !important;
-          }
-        }
-      }
-
-      #browse-page {
-        #background {
-          display: none !important;
-        }
-
-        .background-gradient {
-          background: none !important;
-        }
-      }
-    }
-  }
-
-  /* Window Top Panel */
-  nav[data-ytmd-main-panel] {
-    background-color: transparent !important;
-  }
-
-  /* Video Toggle Plugin */
-  .av-toggle.ytmusic-av-toggle {
-    background-color: var(--ytmd-transparent-player-transparent-background);
-  }
+body.transparent-player .av-toggle.ytmusic-av-toggle {
+  background-color: var(--ytmd-transparent-player-elevated) !important;
 }

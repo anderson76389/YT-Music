@@ -20,6 +20,23 @@ export type IStore = InstanceType<
 >;
 
 const migrations = {
+  // Une seule suppression des préférences des huit plugins retirés.
+  // Les autres réglages, cookies et préférences restent intacts.
+  '>=3.12.1'(store: IStore) {
+    const removed = [
+      'auth-proxy-adapter',
+      'discord',
+      'clock',
+      'lumiastream',
+      'music-together',
+      'shortcuts',
+      'scrobbler',
+      'api-server',
+    ];
+    for (const id of removed) store.delete(`plugins.${id}`);
+    // Anciens identifiants de plugins déjà abandonnés.
+    store.delete('plugins.lastfm');
+  },
   '>=3.12.0'(store: IStore) {
     const blockerConfig = store.get('plugins.adblocker') as TrackerBlockerConfig;
     if (blockerConfig) {
@@ -54,88 +71,6 @@ const migrations = {
       }
 
       store.delete('plugins.lyrics-genius');
-    }
-  },
-  '>=3.3.0'(store: IStore) {
-    const lastfmConfig = store.get('plugins.lastfm') as {
-      enabled?: boolean;
-      token?: string;
-      session_key?: string;
-      api_root?: string;
-      api_key?: string;
-      secret?: string;
-    };
-    if (lastfmConfig) {
-      let scrobblerConfig = store.get('plugins.scrobbler') as
-        | {
-            enabled?: boolean;
-            scrobblers?: {
-              lastfm?: {
-                enabled?: boolean;
-                token?: string;
-                sessionKey?: string;
-                apiRoot?: string;
-                apiKey?: string;
-                secret?: string;
-              };
-            };
-          }
-        | undefined;
-
-      if (!scrobblerConfig) {
-        scrobblerConfig = {
-          enabled: lastfmConfig.enabled,
-        };
-      }
-
-      if (!scrobblerConfig.scrobblers) {
-        scrobblerConfig.scrobblers = {
-          lastfm: {},
-        };
-      }
-
-      scrobblerConfig.scrobblers.lastfm = {
-        enabled: lastfmConfig.enabled,
-        token: lastfmConfig.token,
-        sessionKey: lastfmConfig.session_key,
-        apiRoot: lastfmConfig.api_root,
-        apiKey: lastfmConfig.api_key,
-        secret: lastfmConfig.secret,
-      };
-      store.set('plugins.scrobbler', scrobblerConfig);
-      store.delete('plugins.lastfm');
-    }
-  },
-  '>=3.0.0'(store: IStore) {
-    const discordConfig = store.get('plugins.discord') as Record<
-      string,
-      unknown
-    >;
-    if (discordConfig) {
-      const oldActivityTimoutEnabled = store.get(
-        'plugins.discord.activityTimoutEnabled',
-      ) as boolean | undefined;
-      const oldActivityTimoutTime = store.get(
-        'plugins.discord.activityTimoutTime',
-      ) as number | undefined;
-      if (oldActivityTimoutEnabled !== undefined) {
-        discordConfig.activityTimeoutEnabled = oldActivityTimoutEnabled;
-        store.set('plugins.discord', discordConfig);
-      }
-      if (oldActivityTimoutTime !== undefined) {
-        discordConfig.activityTimeoutTime = oldActivityTimoutTime;
-        store.set('plugins.discord', discordConfig);
-      }
-    }
-  },
-  '>=2.1.3'(store: IStore) {
-    const listenAlong = store.get('plugins.discord.listenAlong');
-    if (listenAlong !== undefined) {
-      store.set(
-        'plugins.discord.playOn\u0059\u006f\u0075\u0054\u0075\u0062\u0065\u004d\u0075\u0073\u0069\u0063',
-        listenAlong,
-      );
-      store.delete('plugins.discord.listenAlong');
     }
   },
   '>=2.1.0'(store: IStore) {
@@ -195,49 +130,6 @@ const migrations = {
     if (store.get('plugins.hide-video-player.enabled')) {
       store.delete('plugins.hide-video-player');
       store.set('plugins.video-toggle.enabled', true);
-    }
-  },
-  '>=1.13.0'(store: IStore) {
-    if (store.get('plugins.discord.listenAlong') === undefined) {
-      store.set('plugins.discord.listenAlong', true);
-    }
-  },
-  '>=1.12.0'(store: IStore) {
-    const options = store.get('plugins.shortcuts') as
-      | Record<
-          string,
-          | {
-              action: string;
-              shortcut: unknown;
-            }[]
-          | Record<string, unknown>
-        >
-      | undefined;
-    if (options) {
-      let updated = false;
-      for (const optionType of ['global', 'local']) {
-        if (
-          Object.hasOwn(options, optionType) &&
-          Array.isArray(options[optionType])
-        ) {
-          const optionsArray = options[optionType] as {
-            action: string;
-            shortcut: unknown;
-          }[];
-          const updatedOptions: Record<string, unknown> = {};
-          for (const optionObject of optionsArray) {
-            if (optionObject.action && optionObject.shortcut) {
-              updatedOptions[optionObject.action] = optionObject.shortcut;
-            }
-          }
-
-          options[optionType] = updatedOptions;
-          updated = true;
-        }
-      }
-      if (updated) {
-        store.set('plugins.shortcuts', options);
-      }
     }
   },
   '>=1.11.0'(store: IStore) {

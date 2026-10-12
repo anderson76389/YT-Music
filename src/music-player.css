@@ -87,3 +87,28 @@ tp-yt-iron-dropdown,
 tp-yt-paper-dialog {
   app-region: no-drag;
 }
+
+/* Nettoyer uniquement la navigation principale, pas les actions des vidéos. */
+ytmusic-guide-entry-renderer[data-ytmd-subscribe-hidden] {
+  display: none !important;
+}
+
+/* Le fond noir ne doit pas donner l'impression que deux pages sont
+   sélectionnées simultanément (Accueil + Bibliothèque notamment). */
+#guide ytmusic-guide-entry-renderer:not([data-ytmd-active-nav]) tp-yt-paper-item,
+#guide-wrapper ytmusic-guide-entry-renderer:not([data-ytmd-active-nav]) tp-yt-paper-item,
+#guide ytmusic-guide-entry-renderer:not([data-ytmd-active-nav]) tp-yt-paper-item::before,
+#guide-wrapper ytmusic-guide-entry-renderer:not([data-ytmd-active-nav]) tp-yt-paper-item::before {
+  background-color: transparent !important;
+}
+
+#guide ytmusic-guide-entry-renderer:not([data-ytmd-active-nav]):hover tp-yt-paper-item,
+#guide-wrapper ytmusic-guide-entry-renderer:not([data-ytmd-active-nav]):hover tp-yt-paper-item {
+  background-color: rgb(255 255 255 / 0.055) !important;
+}
+
+#guide ytmusic-guide-entry-renderer[data-ytmd-active-nav] tp-yt-paper-item,
+#guide-wrapper ytmusic-guide-entry-renderer[data-ytmd-active-nav] tp-yt-paper-item {
+  background-color: rgb(255 255 255 / 0.13) !important;
+  border-radius: 8px !important;
+}

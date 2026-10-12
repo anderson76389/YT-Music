@@ -21,6 +21,31 @@ type AdState = {
 
 type DocumentProperty = 'hidden' | 'visibilityState' | 'webkitVisibilityState';
 
+type AntiPauseBackendState = {
+  blocker?: ElectronBlocker;
+  blockerWindow?: BrowserWindow;
+  running: boolean;
+};
+
+type AntiPauseRendererState = {
+  style?: HTMLStyleElement;
+  observer?: MutationObserver;
+  playerObserver?: MutationObserver;
+  player?: HTMLElement;
+  videoBinding?: VideoBinding;
+  adState?: AdState;
+  stopHeartbeat?: () => void;
+  dialogTimer?: number;
+  visibilityDescriptors?: Partial<
+    Record<DocumentProperty, PropertyDescriptor | null>
+  >;
+  onMenuClick?: (e: MouseEvent) => void;
+  onVisibilityChange?: (e: Event) => void;
+  skipAdIfPresent(): void;
+  restoreAdState(): void;
+};
+
+
 // CSS masquée dès que la classe publicitaire est présente (pas de garantie
 // d'absence totale de flash : YouTube peut modifier le DOM ou ses flux).
 const styles = `
@@ -50,7 +75,11 @@ const styles = `
   }
 `;
 
-export default createPlugin({
+export default createPlugin<
+  AntiPauseBackendState,
+  unknown,
+  AntiPauseRendererState
+>({
   name: () => 'Anti-Pause & Purge Totale',
   description: () =>
     'Passage des publicités, blocage réseau best-effort et lecture continue',
@@ -70,8 +99,7 @@ export default createPlugin({
       // démarrage. Un réseau indisponible ne doit pas empêcher l'application.
       try {
         const blocker = await ElectronBlocker.fromPrebuiltAdsOnly(
-          (input, init) =>
-            fetch(input, { ...init, signal: AbortSignal.timeout(8_000) }),
+          fetch,
           {
             path: join(app.getPath('userData'), 'anti-pause-ads.bin'),
             read: readFile,

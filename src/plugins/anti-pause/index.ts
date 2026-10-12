@@ -1,202 +1,363 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
+import { ElectronBlocker } from '@ghostery/adblocker-electron';
+import { app, type BrowserWindow } from 'electron';
+
 import { createPlugin } from '@/utils';
+
+import { dismissIdlePrompt, startIdleHeartbeat } from './runtime';
+
+type VideoBinding = {
+  video: HTMLVideoElement;
+  handler: () => void;
+};
+
+type AdState = {
+  video: HTMLVideoElement;
+  muted: boolean;
+  playbackRate: number;
+};
+
+type DocumentProperty = 'hidden' | 'visibilityState' | 'webkitVisibilityState';
+
+// CSS masquée dès que la classe publicitaire est présente (pas de garantie
+// d'absence totale de flash : YouTube peut modifier le DOM ou ses flux).
+const styles = `
+  ytmusic-settings-button,
+  .ytmusic-settings-button,
+  #right-content > ytmusic-settings-button,
+  yt-icon-button[icon="more_vert"],
+  tp-yt-paper-icon-button[icon="more_vert"],
+  button[aria-label*="Paramètres"],
+  button[aria-label*="Settings"] {
+    display: none !important;
+  }
+  .ytp-ad-player-overlay,
+  .ytp-ad-player-overlay-layout,
+  .ytp-ad-player-overlay-flyout-cta,
+  .ytp-ad-module,
+  ytmusic-mealbar-promo-renderer,
+  yt-mealbar-promo-renderer,
+  .ytp-ad-image-overlay,
+  .ytp-ad-text-overlay {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  #movie_player.ad-showing video,
+  #movie_player.ad-interrupting video {
+    visibility: hidden !important;
+  }
+`;
 
 export default createPlugin({
   name: () => 'Anti-Pause & Purge Totale',
-  description: () => 'Supprime définitivement les 3 points, le menu gris, les pubs et l’inactivité',
+  description: () =>
+    'Passage des publicités, blocage réseau best-effort et lecture continue',
   restartNeeded: false,
-  config: {
-    enabled: true,
-  },
-  renderer: {
-    start() {
-      // 1. STYLE GLOBAL AGRESSIF : MASQUAGE FORCÉ DES 3 POINTS ET DU MENU GRIS
-      const style = document.createElement('style');
-      style.textContent = `
-        /* Neutralisation stricte du bouton 3 points */
-        ytmusic-settings-button,
-        .ytmusic-settings-button,
-        tp-yt-paper-icon-button[icon="more_vert"],
-        yt-icon-button[icon="more_vert"],
-        button[aria-label*="Paramètres"],
-        button[aria-label*="Settings"],
-        #right-content > ytmusic-settings-button {
-          display: none !important;
-          visibility: hidden !important;
-          opacity: 0 !important;
-          pointer-events: none !important;
-          width: 0 !important;
-          height: 0 !important;
-          max-width: 0 !important;
-          max-height: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          position: absolute !important;
-          left: -9999px !important;
-        }
+  config: { enabled: true },
 
-        /* Masquage de l'overlay et des cadres publicitaires */
-        .ytp-ad-player-overlay,
-        .ytp-ad-player-overlay-layout,
-        .ytp-ad-player-overlay-flyout-cta,
-        .ytp-ad-module,
-        ytmusic-mealbar-promo-renderer,
-        yt-mealbar-promo-renderer {
-          display: none !important;
-          opacity: 0 !important;
-        }
-      `;
-      document.head.appendChild(style);
+  backend: {
+    blocker: undefined as ElectronBlocker | undefined,
+    blockerWindow: undefined as BrowserWindow | undefined,
+    running: false,
 
-      // 2. VERROUILLAGE ÉVÉNEMENTIEL : INTERCEPTION DU CLIC (PHASE CAPTURE)
-      // Empêche YouTube de recevoir l'ordre d'ouvrir le menu même si l'élément est cliqué
-      window.addEventListener(
-        'click',
-        (e) => {
-          const target = e.target as HTMLElement | null;
-          if (!target) return;
+    async start({ window }) {
+      this.running = true;
+      this.blockerWindow = window;
 
-          const isSettingsTrigger =
-            target.closest('ytmusic-settings-button') ||
-            target.closest('tp-yt-paper-icon-button[icon="more_vert"]') ||
-            target.closest('button[aria-label*="Paramètres"]') ||
-            target.closest('button[aria-label*="Settings"]');
-
-          if (isSettingsTrigger) {
-            e.stopImmediatePropagation();
-            e.preventDefault();
-          }
-        },
-        true
-      );
-
-      // 3. PURGE DOM CHIRURGICALE CONTINUE (BOUTON + CONTENEUR FLOTTANT DU MENU)
-      const eradicateElements = () => {
-        // A. Suppression du bouton 3 points (Light DOM et Shadow DOM)
-        const selectors = [
-          'ytmusic-settings-button',
-          'tp-yt-paper-icon-button[icon="more_vert"]',
-          'button[aria-label*="Paramètres"]',
-          'button[aria-label*="Settings"]',
-        ];
-
-        selectors.forEach((sel) => {
-          document.querySelectorAll(sel).forEach((el) => el.remove());
-        });
-
-        const navBar = document.querySelector('ytmusic-nav-bar');
-        if (navBar?.shadowRoot) {
-          selectors.forEach((sel) => {
-            navBar.shadowRoot?.querySelectorAll(sel).forEach((el) => el.remove());
-          });
-        }
-
-        // B. Destruction immédiate du menu gris s'il tente d'apparaître
-        document.querySelectorAll('ytmusic-menu-popup-renderer, tp-yt-iron-dropdown').forEach((popup) => {
-          const content = popup.textContent || '';
-          if (
-            content.includes('Music Premium') ||
-            content.includes('Paramètres') ||
-            content.includes('Conditions d') ||
-            content.includes('Résilier') ||
-            content.includes('Aide')
-          ) {
-            popup.remove();
-          }
-        });
-      };
-
-      eradicateElements();
-      setInterval(eradicateElements, 100);
-
-      // 4. SAUT INSTANTANÉ DES ANNONCES AUDIO/VIDÉO (0 LATENCE)
-      const fastSkipAd = (video: HTMLVideoElement) => {
-        const player = document.getElementById('movie_player') as (HTMLElement & { skipAd?: () => void }) | null;
-        const isAd = player?.classList.contains('ad-showing') || player?.classList.contains('ad-interrupting');
-
-        if (isAd) {
-          video.muted = true;
-          video.playbackRate = 16.0;
-
-          if (!isNaN(video.duration) && isFinite(video.duration)) {
-            video.currentTime = video.duration;
-          } else {
-            video.currentTime = 99999;
-          }
-
-          if (typeof player?.skipAd === 'function') {
-            player.skipAd();
-          }
-
-          const skipSelectors = [
-            '.ytp-ad-skip-button',
-            '.ytp-ad-skip-button-modern',
-            '.ytp-skip-ad-button',
-            '.ytp-ad-skip-button-slot button',
-            'button.ytp-ad-overlay-close-button'
-          ];
-          for (const sel of skipSelectors) {
-            const btn = document.querySelector<HTMLElement>(sel);
-            if (btn) {
-              btn.click();
-              break;
-            }
-          }
-
-          video.dispatchEvent(new Event('ended'));
-        } else if (video.muted) {
-          video.muted = false;
-        }
-      };
-
-      const bindVideoEvents = () => {
-        const video = document.querySelector<HTMLVideoElement>('video');
-        if (video && !video.dataset.hooked) {
-          video.dataset.hooked = 'true';
-          video.addEventListener('timeupdate', () => fastSkipAd(video));
-          video.addEventListener('loadedmetadata', () => fastSkipAd(video));
-          video.addEventListener('play', () => fastSkipAd(video));
-        }
-      };
-
-      bindVideoEvents();
-      setInterval(bindVideoEvents, 500);
-
-      // 5. FALSIFICATION D'ACTIVITÉ ET MODALE D'INACTIVITÉ
-      Object.defineProperty(document, 'hidden', { get: () => false, configurable: true });
-      Object.defineProperty(document, 'visibilityState', { get: () => 'visible', configurable: true });
-      Object.defineProperty(document, 'webkitVisibilityState', { get: () => 'visible', configurable: true });
-      document.addEventListener('visibilitychange', (e) => e.stopImmediatePropagation(), true);
-
-      setInterval(() => {
-        try {
-          (window as unknown as { _lact: number })._lact = Date.now();
-        } catch {}
-
-        window.dispatchEvent(
-          new MouseEvent('mousemove', {
-            bubbles: true,
-            cancelable: true,
-            view: window,
-            clientX: Math.floor(Math.random() * 10) + 1,
-            clientY: Math.floor(Math.random() * 10) + 1,
-          })
+      // Les filtres sont mis en cache localement, pas téléchargés à chaque
+      // démarrage. Un réseau indisponible ne doit pas empêcher l'application.
+      try {
+        const blocker = await ElectronBlocker.fromPrebuiltAdsOnly(
+          (input, init) =>
+            fetch(input, { ...init, signal: AbortSignal.timeout(8_000) }),
+          {
+            path: join(app.getPath('userData'), 'anti-pause-ads.bin'),
+            read: readFile,
+            write: writeFile,
+          },
         );
-      }, 15000);
 
-      const observer = new MutationObserver(() => {
-        eradicateElements();
+        if (!this.running) return;
+        blocker.enableBlockingInSession(window.webContents.session);
+        this.blocker = blocker;
+      } catch (error) {
+        console.warn(
+          '[Anti-Pause] Listes réseau indisponibles : saut DOM de secours actif.',
+          error,
+        );
+      }
+    },
 
-        const dialog = document.querySelector('ytmusic-you-there-renderer');
-        if (dialog) {
-          const btn = dialog.querySelector<HTMLElement>('button, #button, yt-button-renderer');
-          if (btn) btn.click();
+    stop() {
+      this.running = false;
+      if (this.blocker && this.blockerWindow) {
+        this.blocker.disableBlockingInSession(
+          this.blockerWindow.webContents.session,
+        );
+      }
+      this.blocker = undefined;
+      this.blockerWindow = undefined;
+    },
+  },
 
-          const video = document.querySelector<HTMLVideoElement>('video');
-          if (video && video.paused) video.play().catch(() => {});
-        }
+  renderer: {
+    style: undefined as HTMLStyleElement | undefined,
+    observer: undefined as MutationObserver | undefined,
+    playerObserver: undefined as MutationObserver | undefined,
+    player: undefined as HTMLElement | undefined,
+    videoBinding: undefined as VideoBinding | undefined,
+    adState: undefined as AdState | undefined,
+    stopHeartbeat: undefined as (() => void) | undefined,
+    dialogTimer: undefined as number | undefined,
+    visibilityDescriptors: undefined as
+      | Partial<Record<DocumentProperty, PropertyDescriptor | null>>
+      | undefined,
+    onMenuClick: undefined as ((e: MouseEvent) => void) | undefined,
+    onVisibilityChange: undefined as ((e: Event) => void) | undefined,
+
+    start() {
+      this.style = document.createElement('style');
+      this.style.textContent = styles;
+      (document.head ?? document.documentElement).appendChild(this.style);
+
+      // L'horodatage est rafraîchi sans modifier les interactions de lecture.
+      this.stopHeartbeat = startIdleHeartbeat(window, {
+        now: () => Date.now(),
+        setInterval: (callback, interval) => window.setInterval(callback, interval),
+        clearInterval: (id) => window.clearInterval(id),
       });
 
-      observer.observe(document.documentElement, { childList: true, subtree: true });
+      // Compatibilité avec l'ancien dispositif anti-inactivité.
+      const saved: Partial<Record<DocumentProperty, PropertyDescriptor | null>> = {};
+      const values: Record<DocumentProperty, boolean | string> = {
+        hidden: false,
+        visibilityState: 'visible',
+        webkitVisibilityState: 'visible',
+      };
+      for (const property of Object.keys(values) as DocumentProperty[]) {
+        saved[property] =
+          Object.getOwnPropertyDescriptor(document, property) ?? null;
+        try {
+          Object.defineProperty(document, property, {
+            configurable: true,
+            get: () => values[property],
+          });
+        } catch {
+          // Certains moteurs n'autorisent pas la redéfinition.
+        }
+      }
+      this.visibilityDescriptors = saved;
+
+      this.onVisibilityChange = (event: Event) => {
+        event.stopImmediatePropagation();
+        window._lact = Date.now();
+      };
+      document.addEventListener('visibilitychange', this.onVisibilityChange, true);
+
+      this.onMenuClick = (event: MouseEvent) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        if (
+          target.closest(
+            'ytmusic-settings-button, tp-yt-paper-icon-button[icon="more_vert"], button[aria-label*="Paramètres"], button[aria-label*="Settings"]',
+          )
+        ) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      };
+      window.addEventListener('click', this.onMenuClick, true);
+
+      // Le contrôle de classe réagit à l'apparition de l'annonce sans attendre
+      // l'événement timeupdate (qui arrive après la première image).
+      const bindVideo = () => {
+        const video = document.querySelector<HTMLVideoElement>('video');
+        if (video !== this.videoBinding?.video) {
+          if (this.videoBinding) {
+            this.videoBinding.video.removeEventListener(
+              'timeupdate',
+              this.videoBinding.handler,
+            );
+            this.videoBinding.video.removeEventListener(
+              'loadedmetadata',
+              this.videoBinding.handler,
+            );
+            this.videoBinding.video.removeEventListener(
+              'play',
+              this.videoBinding.handler,
+            );
+          }
+          if (video) {
+            const handler = () => this.skipAdIfPresent();
+            video.addEventListener('timeupdate', handler);
+            video.addEventListener('loadedmetadata', handler);
+            video.addEventListener('play', handler);
+            this.videoBinding = { video, handler };
+          } else {
+            this.videoBinding = undefined;
+          }
+        }
+
+        const player = document.getElementById('movie_player');
+        if (player !== this.player) {
+          this.playerObserver?.disconnect();
+          this.player = player ?? undefined;
+          if (player) {
+            this.playerObserver = new MutationObserver(() =>
+              this.skipAdIfPresent(),
+            );
+            this.playerObserver.observe(player, {
+              attributes: true,
+              attributeFilter: ['class'],
+            });
+          }
+        }
+      };
+
+      const purgeSettings = () => {
+        document
+          .querySelectorAll(
+            'ytmusic-settings-button, #right-content > ytmusic-settings-button',
+          )
+          .forEach((element) => element.remove());
+      };
+
+      const refresh = () => {
+        purgeSettings();
+        bindVideo();
+        dismissIdlePrompt(document);
+        this.skipAdIfPresent();
+      };
+
+      this.observer = new MutationObserver(refresh);
+      this.observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
+
+      refresh();
+      // Vérification de secours pour les modales déjà présentes dont seule
+      // la visibilité change ; le contrôle continue même sans Mutation DOM.
+      this.dialogTimer = window.setInterval(() => {
+        bindVideo();
+        dismissIdlePrompt(document);
+        this.skipAdIfPresent();
+      }, 1_000);
+    },
+
+    skipAdIfPresent() {
+      const video = this.videoBinding?.video;
+      const player = this.player;
+      if (!video || !player) return;
+
+      const isAd =
+        player.classList.contains('ad-showing') ||
+        player.classList.contains('ad-interrupting');
+
+      if (!isAd) {
+        this.restoreAdState();
+        return;
+      }
+
+      if (!this.adState || this.adState.video !== video) {
+        this.restoreAdState();
+        this.adState = {
+          video,
+          muted: video.muted,
+          playbackRate: video.playbackRate,
+        };
+      }
+
+      video.muted = true;
+      video.playbackRate = 16;
+
+      if (Number.isFinite(video.duration) && video.duration > 0) {
+        try {
+          video.currentTime = Math.max(0, video.duration - 0.15);
+        } catch {
+          // Flux non seekable.
+        }
+      }
+
+      const skippable = player as HTMLElement & { skipAd?: () => void };
+      if (typeof skippable.skipAd === 'function') {
+        try {
+          skippable.skipAd();
+        } catch {
+          // API modifiée côté YouTube.
+        }
+      }
+
+      document
+        .querySelector<HTMLElement>(
+          '.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button, .ytp-ad-skip-button-slot button',
+        )
+        ?.click();
+    },
+
+    restoreAdState() {
+      const previous = this.adState;
+      if (!previous) return;
+      previous.video.muted = previous.muted;
+      previous.video.playbackRate = previous.playbackRate;
+      this.adState = undefined;
+    },
+
+    stop() {
+      this.observer?.disconnect();
+      this.observer = undefined;
+      this.playerObserver?.disconnect();
+      this.playerObserver = undefined;
+      this.player = undefined;
+      if (this.dialogTimer !== undefined) {
+        window.clearInterval(this.dialogTimer);
+        this.dialogTimer = undefined;
+      }
+      this.stopHeartbeat?.();
+      this.stopHeartbeat = undefined;
+
+      if (this.videoBinding) {
+        const { video, handler } = this.videoBinding;
+        video.removeEventListener('timeupdate', handler);
+        video.removeEventListener('loadedmetadata', handler);
+        video.removeEventListener('play', handler);
+      }
+      this.videoBinding = undefined;
+      this.restoreAdState();
+
+      if (this.onMenuClick) {
+        window.removeEventListener('click', this.onMenuClick, true);
+        this.onMenuClick = undefined;
+      }
+      if (this.onVisibilityChange) {
+        document.removeEventListener(
+          'visibilitychange',
+          this.onVisibilityChange,
+          true,
+        );
+        this.onVisibilityChange = undefined;
+      }
+
+      const properties = this.visibilityDescriptors;
+      if (properties) {
+        for (const property of Object.keys(properties) as DocumentProperty[]) {
+          const descriptor = properties[property];
+          try {
+            if (descriptor) {
+              Object.defineProperty(document, property, descriptor);
+            } else {
+              Reflect.deleteProperty(document, property);
+            }
+          } catch {
+            // Propriété du DOM verrouillée par le moteur.
+          }
+        }
+      }
+      this.visibilityDescriptors = undefined;
+      this.style?.remove();
+      this.style = undefined;
     },
   },
 });

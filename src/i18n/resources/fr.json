@@ -186,7 +186,7 @@
       },
       "plugins": {
         "enabled": "Activé",
-        "label": "Extensions",
+        "label": "Plugins",
         "new": "NOUVEAU"
       },
       "view": {

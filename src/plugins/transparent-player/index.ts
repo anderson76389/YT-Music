@@ -18,7 +18,7 @@ type TransparentRendererState = {
   applyVariables(): void;
 };
 
-export default createPlugin<unknown, unknown, TransparentRendererState>({
+export default createPlugin<unknown, unknown, TransparentRendererState, TransparentPlayerConfig>({
   name: () => t('plugins.transparent-player.name'),
   description: () => t('plugins.transparent-player.description'),
   addedVersion: '3.11.x',

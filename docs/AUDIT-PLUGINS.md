@@ -7,9 +7,9 @@
 ## Périmètre et résultats vérifiés
 
 - **42 points d’entrée de plugins** identifiés dans `src/plugins/` et repris par le générateur `vite-plugins/plugin-importer.mts`.
-- Sur **Windows** : installation des dépendances, lint, vérification TypeScript, cinq tests Playwright existants et compilation Electron **réussis**.
+- Sur **Windows** : installation des dépendances, lint, vérification TypeScript, huit tests Playwright (dont trois nouveaux pour Anti-Pause) et compilation Electron **réussis**.
 - **Formatage non conforme** : `pnpm format:check` signale 339 fichiers ; le workflow échoue donc au total. Le lint est toutefois passé.
-- Les **cinq tests unitaires** existants couvrent seulement le tri de segments SponsorBlock et la lecture/analyse des paroles LRC, **pas le comportement des 42 plugins dans YouTube Music**.
+- Les **huit tests unitaires** couvrent le tri de segments SponsorBlock, l'analyse des paroles LRC et une **simulation accélérée de 30 minutes** d'Anti-Pause (horloge, arrêt de minuterie et modale fictive). Ils ne valident pas le fonctionnement réel du service YouTube Music.
 - **Aucun test fonctionnel de bout en bout** n’a été réalisé dans une application Windows ouverte et connectée au service YouTube Music. Ni les intégrations tierces, ni la stabilité des sélecteurs DOM, ni les flux de téléchargement ne peuvent être déclarés validés.
 
 ## Inventaire complet et contrôle fonctionnel restant
@@ -20,7 +20,7 @@
 | [`album-color-theme`](../src/plugins/album-color-theme/index.ts) | Thème dérivé des couleurs de la pochette | À tester en application |
 | [`ambient-mode`](../src/plugins/ambient-mode/index.ts) | Éclairage ambiant et animations | À tester en application |
 | [`amuse`](../src/plugins/amuse/index.ts) | Intégration Amuse | À tester en application |
-| [`anti-pause`](../src/plugins/anti-pause/index.ts) | Anti-inactivité, suppression des menus et annonces — **défauts de nettoyage démontrés** | À tester en application |
+| [`anti-pause`](../src/plugins/anti-pause/index.ts) | Anti-inactivité, suppression des menus et annonces — **nettoyage corrigé, à tester en conditions réelles** | À tester en application |
 | [`api-server`](../src/plugins/api-server/index.ts) | Serveur API local, endpoints et authentification | À tester en application |
 | [`audio-compressor`](../src/plugins/audio-compressor.ts) | Compression dynamique du son | À tester en application |
 | [`auth-proxy-adapter`](../src/plugins/auth-proxy-adapter/index.ts) | Authentification via proxy | À tester en application |
@@ -61,11 +61,15 @@
 
 ## Défauts et risques effectivement identifiés dans le code
 
-### 1. Anti-Pause & Purge Totale — risque élevé
+### 1. Anti-Pause & Purge Totale — modifications réalisées, validation réelle encore requise
 
-[`src/plugins/anti-pause/index.ts`](../src/plugins/anti-pause/index.ts) définit trois intervalles périodiques, des écouteurs globaux et un `MutationObserver`, sans fonction `stop()` permettant de les arrêter à la désactivation. Il retire des éléments du DOM de YouTube Music, force des déplacements de curseur, modifie le volume muet et la vitesse de lecture lors des annonces.
+[`src/plugins/anti-pause/index.ts`](../src/plugins/anti-pause/index.ts) a été modifié. Le plugin installe désormais un bloqueur réseau Ghostery **AdsOnly** (filtrage avant chargement, avec cache et repli si réseau indisponible), ainsi qu'un saut publicitaire DOM conservé en secours. Le son muet et la vitesse de lecture antérieurs sont restaurés après une annonce.
 
-**Conséquences possibles :** effets persistants après désactivation, clics ou menus perturbés, réactivation intempestive d’un son volontairement coupé, conflits avec d’autres plugins.
+Le plugin rafraîchit la valeur `_lact` toutes les 15 secondes et tente de fermer `ytmusic-you-there-renderer` si la fenêtre d'inactivité apparaît. Les minuteries, observateurs et écouteurs sont désormais libérés à la désactivation.
+
+**Test automatisé :** un scénario de 30 minutes **simulées** a vérifié la régularité du rafraîchissement, l'arrêt du heartbeat et la tentative de fermeture d'une modale fictive. Cela **ne prouve pas** que le lecteur YouTube Music ne suspendra pas la lecture après 30 minutes réelles.
+
+**Risques résiduels :** listes publicitaires parfois incomplètes, filtres susceptibles d'affecter des requêtes légitimes, changements d'interface côté YouTube Music ; efficacité et absence totale de flash non confirmées dans un lecteur réel.
 
 Ce plugin est **activé par défaut** dans `src/config/defaults.ts`.
 
@@ -100,4 +104,4 @@ Ce sont des **risques de compatibilité ou de cycle de vie**, pas des dysfonctio
 6. **Tests de services externes** avec leurs applications ou comptes correspondants, sur la plateforme pertinente.
 7. **Tests de non-régression** après rechargement du client et redémarrage.
 
-**Conclusion :** la base compile et ses cinq tests passent. **La fiabilité individuelle des 42 plugins n’est pas encore certifiée.** Il serait factuellement incorrect de la déclarer acquise.
+**Conclusion :** la base compile et ses huit tests passent (la vérification de formatage reste non conforme). **La fiabilité individuelle des 42 plugins n’est pas encore certifiée.** Il serait factuellement incorrect de la déclarer acquise.

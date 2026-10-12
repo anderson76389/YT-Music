@@ -55,7 +55,8 @@ export const defaultConfig: DefaultConfig = {
     language: 'fr',
     tray: false,
     appVisible: true,
-    autoUpdates: true,
+    // Désactivé jusqu'à la première Release autonome de YT Music.
+    autoUpdates: false,
     alwaysOnTop: false,
     hideMenu: false,
     hideMenuWarned: false,

@@ -1,6 +1,11 @@
 name: Construire YT Music Portable Windows
 
 on:
+  push:
+    paths:
+      - assets/icon.svg
+      - tools/generate_ytmusic_icons.py
+      - .github/workflows/build-portable-windows.yml
   workflow_dispatch:
 
 permissions:
@@ -24,6 +29,17 @@ jobs:
         with:
           node-version: '22'
           cache: pnpm
+
+      - name: Installer Python pour les icones
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generer les icones officielles PNG et ICO
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check pillow==11.3.0
+          python tools/generate_ytmusic_icons.py
 
       - name: Installer les dependances
         run: pnpm install --frozen-lockfile

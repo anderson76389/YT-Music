@@ -7,9 +7,9 @@
 ## Périmètre et résultats vérifiés
 
 - **42 points d’entrée de plugins** identifiés dans `src/plugins/` et repris par le générateur `vite-plugins/plugin-importer.mts`.
-- Sur **Windows** : installation des dépendances, lint, vérification TypeScript, huit tests Playwright (dont trois nouveaux pour Anti-Pause) et compilation Electron **réussis**.
+- Sur **Windows** : installation des dépendances, lint, vérification TypeScript, seize tests Playwright (dont sept pour Anti-Pause : trois anti-inactivité et quatre saut publicitaire) et compilation Electron **réussis**.
 - **Formatage non conforme** : `pnpm format:check` signale 339 fichiers ; le workflow échoue donc au total. Le lint est toutefois passé.
-- Les **huit tests unitaires** couvrent le tri de segments SponsorBlock, l'analyse des paroles LRC et une **simulation accélérée de 30 minutes** d'Anti-Pause (horloge, arrêt de minuterie et modale fictive). Ils ne valident pas le fonctionnement réel du service YouTube Music.
+- Les **seize tests unitaires** couvrent notamment le tri de segments SponsorBlock, l'analyse des paroles LRC, les menus intégrés, une **simulation accélérée de 30 minutes** d'Anti-Pause ainsi que quatre scénarios de saut et restauration audio après une publicité fictive. Ils ne valident pas le fonctionnement réel du service YouTube Music.
 - **Aucun test fonctionnel de bout en bout** n’a été réalisé dans une application Windows ouverte et connectée au service YouTube Music. Ni les intégrations tierces, ni la stabilité des sélecteurs DOM, ni les flux de téléchargement ne peuvent être déclarés validés.
 
 ## Inventaire complet et contrôle fonctionnel restant
@@ -63,7 +63,7 @@
 
 ### 1. Anti-Pause & Purge Totale — modifications réalisées, validation réelle encore requise
 
-[`src/plugins/anti-pause/index.ts`](../src/plugins/anti-pause/index.ts) a été modifié. Le plugin installe désormais un bloqueur réseau Ghostery **AdsOnly** (filtrage avant chargement, avec cache et repli si réseau indisponible), ainsi qu'un saut publicitaire DOM conservé en secours. Le son muet et la vitesse de lecture antérieurs sont restaurés après une annonce.
+[`src/plugins/anti-pause/index.ts`](../src/plugins/anti-pause/index.ts) a été modifié. Le plugin installe désormais un bloqueur réseau Ghostery **AdsOnly** (filtrage avant chargement, avec cache et repli si réseau indisponible), ainsi qu'un saut publicitaire DOM conservé en secours. Le son muet et la vitesse de lecture antérieurs sont restaurés après une annonce ; quatre tests automatisés couvrent les transitions ad / non-ad, le son volontairement muet et les changements de vidéo. Le code ne retire plus les boutons de paramètres ni les menus normaux de YouTube Music.
 
 Le plugin rafraîchit la valeur `_lact` toutes les 15 secondes et tente de fermer `ytmusic-you-there-renderer` si la fenêtre d'inactivité apparaît. Les minuteries, observateurs et écouteurs sont désormais libérés à la désactivation.
 
@@ -104,4 +104,4 @@ Ce sont des **risques de compatibilité ou de cycle de vie**, pas des dysfonctio
 6. **Tests de services externes** avec leurs applications ou comptes correspondants, sur la plateforme pertinente.
 7. **Tests de non-régression** après rechargement du client et redémarrage.
 
-**Conclusion :** la base compile et ses huit tests passent (la vérification de formatage reste non conforme). **La fiabilité individuelle des 42 plugins n’est pas encore certifiée.** Il serait factuellement incorrect de la déclarer acquise.
+**Conclusion :** la base compile et ses seize tests passent (la vérification de formatage reste non conforme). **La fiabilité individuelle des 42 plugins n’est pas encore certifiée.** Il serait factuellement incorrect de la déclarer acquise.

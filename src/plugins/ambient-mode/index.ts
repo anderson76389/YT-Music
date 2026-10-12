@@ -33,7 +33,7 @@ type AmbientRendererState = {
   startVideoTicker(): void;
 };
 
-export default createPlugin<unknown, unknown, AmbientRendererState>({
+export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModePluginConfig>({
   name: () => t('plugins.ambient-mode.name'),
   description: () => t('plugins.ambient-mode.description'),
   restartNeeded: false,

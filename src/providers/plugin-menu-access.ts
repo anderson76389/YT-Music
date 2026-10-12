@@ -19,3 +19,16 @@ export function createPluginMenuAccess(
     settings: { label, submenu: items },
   };
 }
+
+/** Extrait les plugins visuels de la même liste triée que le menu général. */
+export function selectPluginMenuItems(
+  orderedIds: string[],
+  items: MenuItemConstructorOptions[],
+  wantedIds: string[],
+): MenuItemConstructorOptions[] {
+  const lookup = new Map(orderedIds.map((id, index) => [id, items[index]]));
+  return wantedIds.flatMap((id) => {
+    const item = lookup.get(id);
+    return item ? [item] : [];
+  });
+}

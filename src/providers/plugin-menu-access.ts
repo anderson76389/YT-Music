@@ -26,7 +26,12 @@ export function selectPluginMenuItems(
   items: MenuItemConstructorOptions[],
   wantedIds: string[],
 ): MenuItemConstructorOptions[] {
-  const lookup = new Map(orderedIds.map((id, index) => [id, items[index]]));
+  const lookup = new Map<string, MenuItemConstructorOptions | undefined>(
+    orderedIds.map((id, index): [string, MenuItemConstructorOptions | undefined] => [
+      id,
+      items[index],
+    ]),
+  );
   return wantedIds.flatMap((id) => {
     const item = lookup.get(id);
     return item ? [item] : [];

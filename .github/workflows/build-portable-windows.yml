@@ -1,22 +1,37 @@
-name: Construire YT Music Portable Windows
+name: Construire et publier YT Music Windows
 
 on:
   push:
+    branches: [main]
     paths:
-      - assets/icon.svg
-      - tools/generate_ytmusic_icons.py
-      - .github/workflows/build-portable-windows.yml
+      - 'src/**'
+      - 'assets/**'
+      - 'tools/generate_ytmusic_icons.py'
+      - 'vite-plugins/**'
+      - 'patches/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'electron-builder.yml'
+      - 'electron.vite.config.mts'
+      - '.github/workflows/build-portable-windows.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: yt-music-windows-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   portable-windows:
+    name: Build + tests + GitHub Release
+    if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
-    timeout-minutes: 50
+    timeout-minutes: 55
     steps:
-      - name: Recuperer les sources independantes
+      - name: Recuperer les sources de YT Music
         uses: actions/checkout@v4
 
       - name: Installer pnpm
@@ -35,32 +50,74 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Generer les icones officielles PNG et ICO
+      - name: Generer les icones PNG et ICO
         shell: pwsh
         run: |
           python -m pip install --disable-pip-version-check pillow==11.3.0
           python tools/generate_ytmusic_icons.py
 
-      - name: Installer les dependances
+      - name: Installer les dependances verrouillees
         run: pnpm install --frozen-lockfile
+
+      - name: Analyse statique
+        run: pnpm lint
 
       - name: Verifier les types
         run: pnpm typecheck
 
-      - name: Tester les plugins et les commandes
+      - name: Executer les tests de plugins et menus
         run: pnpm test
 
-      - name: Compiler le code
+      - name: Compiler le code Electron
         run: pnpm build
 
-      - name: Construire le portable 64 bits
+      - name: Construire le portable Windows x64
         run: pnpm exec electron-builder --win portable:x64 --publish never
 
-      - name: Publier l'executable en tant qu'artifact telechargeable
+      - name: Normaliser le nom de l'executable
+        shell: pwsh
+        run: |
+          $files = @(Get-ChildItem -Path pack -Filter '*.exe' -File)
+          if ($files.Count -ne 1) {
+            throw "Un seul .exe attendu dans pack, trouve : $($files.Count)"
+          }
+          Rename-Item -LiteralPath $files[0].FullName -NewName "YT-Music-Portable-Windows-x64.exe"
+
+      - name: Conserver un artefact temporaire de secours
         uses: actions/upload-artifact@v4
         with:
           name: YT-Music-Portable-Windows-x64
-          path: pack/*.exe
+          path: pack/YT-Music-Portable-Windows-x64.exe
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
+
+      - name: Publier automatiquement la version dans Releases
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $tag = "v$version-build.${{ github.run_number }}.${{ github.run_attempt }}"
+          $title = "YT Music $version - Windows portable (build ${{ github.run_number }})"
+          $notes = @"
+          ### YT Music — Windows x64
+
+          **Version portable non officielle.** Téléchargez `YT-Music-Portable-Windows-x64.exe` dans les assets de cette release.
+
+          - Programme compilé exclusivement depuis ce dépôt GitHub.
+          - L'analyse statique, la vérification TypeScript et les tests automatisés ont réussi avant publication.
+          - Inclut les correctifs de menus et les modules de plugins présents dans ce commit.
+          - La compilation ne garantit pas que les publicités et chaque plugin fonctionnent en conditions réelles.
+
+          Commit : ${{ github.sha }}
+          "@
+          $notes | Set-Content -Path release-notes.md -Encoding utf8
+          gh release create "$tag" "pack/YT-Music-Portable-Windows-x64.exe" --repo "$env:GITHUB_REPOSITORY" --target "$env:GITHUB_SHA" --title "$title" --notes-file release-notes.md --latest
+
+      - name: Afficher le lien permanent des versions
+        shell: pwsh
+        run: |
+          "## YT Music Windows — telechargement" >> $env:GITHUB_STEP_SUMMARY
+          "[Toutes les versions](https://github.com/$env:GITHUB_REPOSITORY/releases)" >> $env:GITHUB_STEP_SUMMARY
+          "[Derniere version](https://github.com/$env:GITHUB_REPOSITORY/releases/latest)" >> $env:GITHUB_STEP_SUMMARY

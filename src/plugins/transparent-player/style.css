@@ -61,3 +61,42 @@ body.transparent-player nav[data-ytmd-main-panel] {
 body.transparent-player .av-toggle.ytmusic-av-toggle {
   background-color: var(--ytmd-transparent-player-elevated) !important;
 }
+
+/* Renforcer la transparence sur les structures des lecteurs YouTube Music
+   actuels. Le thème de pochette ne doit pas redessiner un fond opaque par
+   dessus la surface transparente de la BrowserWindow. */
+body.transparent-player #player,
+body.transparent-player #main-panel,
+body.transparent-player #player-page #main-panel,
+body.transparent-player ytmusic-player-page,
+body.transparent-player ytmusic-browse-response,
+body.transparent-player ytmusic-browse-response #background,
+body.transparent-player #mini-guide,
+body.transparent-player #guide-section,
+body.transparent-player ytmusic-guide-renderer,
+body.transparent-player ytmusic-nav-bar,
+body.transparent-player #player-bar,
+body.transparent-player #player-bar-background,
+body.transparent-player #player-page #side-panel,
+body.transparent-player #player-page .background-gradient,
+body.transparent-player #content-scroller {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Les panneaux contextuels restent lisibles même avec 10 % d'opacité. */
+body.transparent-player tp-yt-iron-dropdown,
+body.transparent-player tp-yt-paper-dialog,
+body.transparent-player ytmusic-menu-popup-renderer,
+body.transparent-player #ytmd-title-bar-main-panel {
+  background-color: rgb(18 18 22 / 0.93) !important;
+  color: #fff !important;
+}
+
+body.transparent-player #guide,
+body.transparent-player #player-bar,
+body.transparent-player ytmusic-player-bar {
+  background: rgb(
+    8 8 12 / clamp(0.12, var(--ytmd-transparent-player-opacity, 0.5), 1)
+  ) !important;
+}

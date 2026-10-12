@@ -51,39 +51,18 @@ importers:
       '@ghostery/adblocker-electron-preload':
         specifier: 2.18.0
         version: 2.18.0(electron@42.5.0)
-      '@hono/node-server':
-        specifier: 2.0.6
-        version: 2.0.6(hono@4.12.27)
-      '@hono/swagger-ui':
-        specifier: 0.6.1
-        version: 0.6.1(hono@4.12.27)
-      '@hono/zod-openapi':
-        specifier: 1.4.0
-        version: 1.4.0(hono@4.12.27)(zod@4.4.3)
-      '@hono/zod-validator':
-        specifier: 0.8.0
-        version: 0.8.0(hono@4.12.27)(zod@4.4.3)
       '@indic-transliteration/sanscript':
         specifier: 1.3.3
         version: 1.3.3
-      '@jellybrick/dbus-next':
-        specifier: 0.11.1
-        version: 0.11.1
       '@jellybrick/electron-better-web-request':
         specifier: 2.0.0
         version: 2.0.0
-      '@jellybrick/mpris-service':
-        specifier: 2.2.0
-        version: 2.2.0
       '@mdui/icons':
         specifier: 1.0.3
         version: 1.0.3
       '@skyra/jaro-winkler':
         specifier: 1.1.1
         version: 1.1.1
-      '@xhayper/discord-rpc':
-        specifier: 1.3.4
-        version: 1.3.4(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       async-mutex:
         specifier: 0.5.0
         version: 0.5.0
@@ -150,9 +129,6 @@ importers:
       happy-dom:
         specifier: 20.10.6
         version: 20.10.6(bufferutil@4.1.0)(utf-8-validate@6.0.6)
-      hono:
-        specifier: 4.12.27
-        version: 4.12.27
       howler:
         specifier: 2.2.4
         version: 2.2.4
@@ -189,9 +165,6 @@ importers:
       node-id3:
         specifier: 0.2.9
         version: 0.2.9
-      peerjs:
-        specifier: 1.5.5
-        version: 1.5.5
       pinyin-pro:
         specifier: 3.28.1
         version: 3.28.1
@@ -201,9 +174,6 @@ importers:
       serve:
         specifier: 14.2.6
         version: 14.2.6
-      socks:
-        specifier: 2.8.9
-        version: 2.8.9
       solid-element:
         specifier: 1.9.1
         version: 1.9.1(solid-js@1.9.13)
@@ -277,9 +247,6 @@ importers:
       del-cli:
         specifier: 7.0.0
         version: 7.0.0
-      discord-api-types:
-        specifier: 0.38.49
-        version: 0.38.49
       electron:
         specifier: 42.5.0
         version: 42.5.0

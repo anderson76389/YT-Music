@@ -385,6 +385,10 @@ async function createMainWindow() {
   await initHook(win);
   initTheme(win);
 
+  // Installer le multiplexeur webRequest AVANT les plugins réseau.
+  // Sinon un plugin adblock peut écraser le gestionnaire des en-têtes.
+  removeContentSecurityPolicy();
+
   await loadAllMainPlugins(win);
 
   if (windowPosition) {
@@ -494,8 +498,6 @@ async function createMainWindow() {
       win.show();
     }
   });
-
-  removeContentSecurityPolicy();
 
   win.webContents.on('dom-ready', () => {
     if (useInlineMenu && is.windows()) {

@@ -1,0 +1,42 @@
+name: Verification du code
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-tests:
+    name: Verification Windows (code, tests, compilation)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v4
+
+      - name: Installer pnpm 11
+        uses: pnpm/action-setup@v4
+        with:
+          version: '11'
+
+      - name: Installer Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Installer les dependances verrouillees
+        run: pnpm install --frozen-lockfile
+
+      - name: Controle du code source
+        run: pnpm check
+
+      - name: Tests Playwright existants
+        run: pnpm test
+
+      - name: Compiler Electron (sans generer d'installateur)
+        run: pnpm build

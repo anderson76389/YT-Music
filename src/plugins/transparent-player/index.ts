@@ -28,21 +28,12 @@ export default createPlugin({
       type: defaultConfig.type,
     } as TransparentPlayerConfig,
     async start({ getConfig }) {
-      const config = await getConfig();
-      this.props = config;
-      if (config.enabled) {
-        document.body.classList.add('transparent-background-color');
-        document.body.classList.add('transparent-player-backdrop-filter');
-
-        if (!(await window.mainConfig.plugins.isEnabled('album-color-theme'))) {
-          document.body.classList.add('transparent-player');
-        }
-        this.applyVariables();
-      }
+      this.props = await getConfig();
+      this.applyVisuals();
     },
     onConfigChange(newConfig) {
       this.props = newConfig;
-      this.applyVariables();
+      this.applyVisuals();
     },
     stop() {
       document.body.classList.remove('transparent-background-color');
@@ -51,6 +42,12 @@ export default createPlugin({
       document.documentElement.style.removeProperty(
         '--ytmd-transparent-player-opacity',
       );
+    },
+    applyVisuals() {
+      document.body.classList.add('transparent-background-color');
+      document.body.classList.add('transparent-player-backdrop-filter');
+      document.body.classList.add('transparent-player');
+      this.applyVariables();
     },
     applyVariables(this: { props: TransparentPlayerConfig }) {
       const { opacity } = this.props;

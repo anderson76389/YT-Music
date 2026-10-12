@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1280 380" width="1280" height="380" role="img" aria-labelledby="title desc">
-  <title id="title">YT Music — Pear Desktop</title>
-  <desc id="desc">Bannière sombre et violette présentant l'édition personnelle de Pear Desktop, avec une onde musicale lumineuse.</desc>
+  <title id="title">YT Music — lecteur musical indépendant</title>
+  <desc id="desc">Bannière sombre de YT Music, avec le symbole rouge et blanc YouTube Music et des ondes lumineuses.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#0d1022"/>
@@ -60,9 +60,9 @@
     <rect x="1140" y="146.5" width="9" height="93" rx="4.5" fill="#5bd5ee" opacity="0.48"/>
     <rect x="1160" y="118.5" width="9" height="149" rx="4.5" fill="#a58bff" opacity="0.58"/>
     <rect x="1180" y="137.5" width="9" height="111" rx="4.5" fill="#5bd5ee" opacity="0.68"/></g>
-    <circle cx="954" cy="190" r="96" fill="#121329" fill-opacity=".78" stroke="url(#accent)" stroke-width="3" opacity=".96"/>
-    <circle cx="954" cy="190" r="77" fill="#332450" fill-opacity=".66" stroke="#c6aaff" stroke-opacity=".22"/>
-    <path d="M931 146 Q931 138 940 143 L1001 179 Q1018 189 1000 199 L940 236 Q931 242 931 230 Z" fill="url(#accent)"/>
+    <circle cx="954" cy="190" r="96" fill="#FF0033"/>
+    <circle cx="954" cy="190" r="54.4" fill="none" stroke="#FFFFFF" stroke-width="8.25"/>
+    <path d="M936.4 163.8 980.2 190 936.4 216.2Z" fill="#FFFFFF"/>
     <rect x="0" y="373" width="1280" height="7" fill="url(#accent)"/>
   </g>
 </svg>

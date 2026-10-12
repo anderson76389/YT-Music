@@ -255,6 +255,17 @@ const initHook = async (win: BrowserWindow) => {
         win.webContents.send('config-changed', id, config);
       }
     });
+
+    // Rafraîchir les cases et sous-menus après chaque changement effectif
+    // d'options/plugins. Sans cela, les menus gardent des coches périmées.
+    if (
+      !deepEqual(newValue?.plugins, oldValue?.plugins) ||
+      !deepEqual(newValue?.options, oldValue?.options)
+    ) {
+      void refreshMenu(win).catch((error: unknown) => {
+        console.error('[YTMusic] Impossible d’actualiser le menu', error);
+      });
+    }
   });
 };
 

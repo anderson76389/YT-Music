@@ -40,7 +40,7 @@ import {
 } from '@/loader/main';
 import { refreshMenu, setApplicationMenu } from '@/menu';
 import musicPlayerCss from '@/music-player.css?inline';
-import { fileExists, injectCSS, injectCSSAsFile } from '@/plugins/utils/main';
+import { injectCSS, injectCSSAsFile } from '@/plugins/utils/main';
 import { restart, setupAppControls } from '@/providers/app-controls';
 import {
   APP_PROTOCOL,
@@ -236,6 +236,12 @@ const initHook = async (win: BrowserWindow) => {
       }
     });
 
+    if (
+      !deepEqual(newValue?.options?.themes, oldValue?.options?.themes)
+    ) {
+      syncUserThemes(win);
+    }
+
     // Rafraîchir les cases et sous-menus après chaque changement effectif
     // d'options/plugins. Sans cela, les menus gardent des coches périmées.
     if (
@@ -291,31 +297,52 @@ const showNeedToRestartDialog = async (id: string) => {
   });
 };
 
-function initTheme(win: BrowserWindow) {
-  injectCSS(win.webContents, musicPlayerCss);
-  // Load user CSS
-  const themes: string[] = config.get('options.themes');
-  if (Array.isArray(themes)) {
-    for (const cssFile of themes) {
-      fileExists(
-        cssFile,
-        () => {
-          injectCSSAsFile(win.webContents, cssFile);
-        },
-        () => {
-          console.warn(
-            LoggerPrefix,
-            t('main.console.theme.css-file-not-found', { cssFile }),
-          );
-        },
-      );
-    }
+type RemoveTheme = () => Promise<void>;
+const activeUserThemes = new WeakMap<
+  Electron.WebContents,
+  Map<string, Promise<RemoveTheme>>
+>();
+
+function syncUserThemes(win: BrowserWindow) {
+  const webContents = win.webContents;
+  if (webContents.isDestroyed()) return;
+  const loaded = activeUserThemes.get(webContents) ?? new Map();
+  activeUserThemes.set(webContents, loaded);
+
+  const wanted = new Set(
+    (config.get('options.themes') ?? []).filter(
+      (p): p is string => typeof p === 'string' && p.length > 0,
+    ),
+  );
+
+  for (const [filepath, remover] of loaded) {
+    if (wanted.has(filepath)) continue;
+    loaded.delete(filepath);
+    void remover.then((remove) => remove());
   }
+
+  for (const filepath of wanted) {
+    if (loaded.has(filepath)) continue;
+    if (!fs.existsSync(filepath)) {
+      console.warn(
+        LoggerPrefix,
+        t('main.console.theme.css-file-not-found', { cssFile: filepath }),
+      );
+      continue;
+    }
+    // Le gestionnaire conserve ce style lors des navigations et recharge
+    // les fichiers lors de chaque nouvelle page.
+    loaded.set(filepath, injectCSSAsFile(webContents, filepath));
+  }
+}
+
+function initTheme(win: BrowserWindow) {
+  void injectCSS(win.webContents, musicPlayerCss);
+  syncUserThemes(win);
 
   win.webContents.once('did-finish-load', () => {
     if (is.dev()) {
       console.debug(LoggerPrefix, t('main.console.did-finish-load.dev-tools'));
-      // win.webContents.openDevTools();
     }
   });
 }

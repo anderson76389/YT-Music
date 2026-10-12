@@ -1,4 +1,4 @@
-# Audit des 42 plugins — YT Music
+# Audit des 34 plugins — YT Music (mise à jour 3.12.1)
 
 **Date :** 12 octobre 2026  
 **Code audité :** [dépôt YT-Music](https://github.com/anderson76389/YT-Music)  
@@ -6,7 +6,7 @@
 
 ## Périmètre et résultats vérifiés
 
-- **42 points d’entrée de plugins** identifiés dans `src/plugins/` et repris par le générateur `vite-plugins/plugin-importer.mts`.
+- **34 points d’entrée de plugins** conservés après la suppression de huit plugins et de leurs ressources. Les libellés « Beta » ont été retirés en français et en anglais.
 - Sur **Windows** : installation des dépendances, lint, vérification TypeScript, seize tests Playwright (dont sept pour Anti-Pause : trois anti-inactivité et quatre saut publicitaire) et compilation Electron **réussis**.
 - **Formatage non conforme** : `pnpm format:check` signale 339 fichiers ; le workflow échoue donc au total. Le lint est toutefois passé.
 - Les **seize tests unitaires** couvrent notamment le tri de segments SponsorBlock, l'analyse des paroles LRC, les menus intégrés, une **simulation accélérée de 30 minutes** d'Anti-Pause ainsi que quatre scénarios de saut et restauration audio après une publicité fictive. Ils ne valident pas le fonctionnement réel du service YouTube Music.
@@ -21,23 +21,17 @@
 | [`ambient-mode`](../src/plugins/ambient-mode/index.ts) | Éclairage ambiant et animations | À tester en application |
 | [`amuse`](../src/plugins/amuse/index.ts) | Intégration Amuse | À tester en application |
 | [`anti-pause`](../src/plugins/anti-pause/index.ts) | Anti-inactivité, suppression des menus et annonces — **nettoyage corrigé, à tester en conditions réelles** | À tester en application |
-| [`api-server`](../src/plugins/api-server/index.ts) | Serveur API local, endpoints et authentification | À tester en application |
 | [`audio-compressor`](../src/plugins/audio-compressor.ts) | Compression dynamique du son | À tester en application |
-| [`auth-proxy-adapter`](../src/plugins/auth-proxy-adapter/index.ts) | Authentification via proxy | À tester en application |
 | [`blur-nav-bar`](../src/plugins/blur-nav-bar/index.ts) | Effet de flou de la barre de navigation | À tester en application |
 | [`captions-selector`](../src/plugins/captions-selector/index.ts) | Sélection et chargement de sous-titres | À tester en application |
-| [`clock`](../src/plugins/clock/index.tsx) | Horloge dans le lecteur | À tester en application |
 | [`crossfade`](../src/plugins/crossfade/index.ts) | Fondu entre titres — **répétition d’un titre non prise en charge** | À tester en application |
 | [`custom-output-device`](../src/plugins/custom-output-device/index.ts) | Choix de la sortie audio | À tester en application |
 | [`disable-autoplay`](../src/plugins/disable-autoplay/index.ts) | Désactivation de la lecture automatique | À tester en application |
-| [`discord`](../src/plugins/discord/index.ts) | Présence Discord | À tester en application |
 | [`do-not-track`](../src/plugins/do-not-track/index.ts) | Blocage des requêtes de suivi selon le plugin | À tester en application |
 | [`downloader`](../src/plugins/downloader/index.ts) | Téléchargement de pistes/playlists et conversion audio | À tester en application |
 | [`equalizer`](../src/plugins/equalizer/index.ts) | Égaliseur et préréglages | À tester en application |
 | [`exponential-volume`](../src/plugins/exponential-volume/index.ts) | Courbe de volume | À tester en application |
 | [`in-app-menu`](../src/plugins/in-app-menu/index.ts) | Barre de titre et menu intégré | À tester en application |
-| [`lumiastream`](../src/plugins/lumiastream/index.ts) | Connexion Lumia Stream | À tester en application |
-| [`music-together`](../src/plugins/music-together/index.ts) | Lecture collaborative et connexion entre participants | À tester en application |
 | [`navigation`](../src/plugins/navigation/index.tsx) | Boutons précédent/suivant | À tester en application |
 | [`notifications`](../src/plugins/notifications/index.ts) | Notifications système | À tester en application |
 | [`performance-improvement`](../src/plugins/performance-improvement/index.ts) | Scripts CPU et optimisations d’affichage | À tester en application |
@@ -45,8 +39,6 @@
 | [`playback-speed`](../src/plugins/playback-speed/index.ts) | Réglage de vitesse de lecture | À tester en application |
 | [`precise-volume`](../src/plugins/precise-volume/index.ts) | Réglage numérique précis du volume | À tester en application |
 | [`quality-changer`](../src/plugins/quality-changer/index.tsx) | Sélecteur de qualité vidéo/audio — **arrêt potentiellement fragile** | À tester en application |
-| [`scrobbler`](../src/plugins/scrobbler/index.ts) | Last.fm et ListenBrainz | À tester en application |
-| [`shortcuts`](../src/plugins/shortcuts/index.ts) | Raccourcis système et commandes médias | À tester en application |
 | [`skip-disliked-songs`](../src/plugins/skip-disliked-songs/index.ts) | Passage automatique des titres non aimés | À tester en application |
 | [`skip-silences`](../src/plugins/skip-silences/index.ts) | Détection et saut des silences | À tester en application |
 | [`sponsorblock`](../src/plugins/sponsorblock/index.ts) | Segments SponsorBlock — test unitaire du tri uniquement | À tester en application |
@@ -104,4 +96,4 @@ Ce sont des **risques de compatibilité ou de cycle de vie**, pas des dysfonctio
 6. **Tests de services externes** avec leurs applications ou comptes correspondants, sur la plateforme pertinente.
 7. **Tests de non-régression** après rechargement du client et redémarrage.
 
-**Conclusion :** la base compile et ses seize tests passent (la vérification de formatage reste non conforme). **La fiabilité individuelle des 42 plugins n’est pas encore certifiée.** Il serait factuellement incorrect de la déclarer acquise.
+**Conclusion de l'audit précédent :** la base compilait et seize tests passaient (la vérification de formatage reste non conforme). **La fiabilité individuelle des 34 plugins n’est pas encore certifiée.** Il serait factuellement incorrect de la déclarer acquise.

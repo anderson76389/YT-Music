@@ -38,7 +38,7 @@
 
 **YT Music** est un projet de bureau autonome maintenu dans **[ce dépôt GitHub](https://github.com/anderson76389/YT-Music)**. Il reprend et adapte du code open source de l'écosystème YouTube Music ; il n'a besoin d'aucun dépôt Pear Desktop pour être compilé à partir des sources enregistrées ici.
 
-L'objectif est de retrouver l'expérience du service musical dans une véritable application de bureau, tout en profitant des possibilités offertes par l'écosystème de plugins : **apparence, lecture, paroles, audio, raccourcis et intégrations**.
+L'objectif est de retrouver l'expérience du service musical dans une véritable application de bureau, avec **34 plugins conservés : thèmes, transparence, mode ambiant, paroles, audio et contrôles du lecteur**.
 
 Ce dépôt héberge les **fichiers sources** de cette édition. Il ne représente pas un client officiel de Google ou de YouTube et ne fournit pas de catalogue musical indépendant : la lecture et certaines fonctionnalités dépendent du service YouTube Music.
 
@@ -71,11 +71,17 @@ Les modules ci-dessous sont **présents dans le code source**. Leur disponibilit
 | 🚫 | **SponsorBlock** | Module de gestion des segments communautaires lorsque la source et le service le permettent. |
 | 🖥️ | **Mini-lecteur et vidéo** | Mode image dans l'image, affichage discret et contrôle de la vidéo. |
 | 🌈 | **Visualiseurs** | Animations musicales et visualisations réactives à l'audio. |
-| 🎮 | **Discord** | Intégration de présence Discord via le plugin dédié. |
-| 🎼 | **Scrobbling** | Intégrations Last.fm et ListenBrainz. |
-| ⌨️ | **Contrôle rapide** | Raccourcis clavier, notifications et commandes de lecture. |
+| ⏯️ | **Contrôle du lecteur** | Notifications, commandes de lecture et contrôles multimédias Windows. |
 | 📥 | **Téléchargement** | Plugin de téléchargement présent dans le projet, selon ses limitations et celles des services concernés. |
 | 🌐 | **Langues** | Ressources de traduction comprenant notamment le français. |
+
+## 🧹 Nettoyage de la version 3.12.1
+
+Huit plugins ont été **supprimés des sources**, ainsi que leurs ressources : adaptateur de proxy d’authentification, Discord Rich Presence, Horloge, Lumia Stream, Music Together, Raccourcis & MPRIS, Scrobbler et Serveur API. Les autres **34 plugins sont conservés**.
+
+Les mentions « Beta/Bêta » ont été retirées des intitulés des plugins conservés, mais cela ne signifie pas que leurs fonctions ont toutes été certifiées en conditions réelles.
+
+Le gestionnaire de thèmes CSS a été corrigé pour réappliquer les styles après navigation et pour prendre en compte l’import et le retrait des fichiers CSS sans redémarrage. Le mode transparent nécessite toujours un redémarrage après activation afin de créer une fenêtre Electron transparente.
 
 ## 🧩 Une application modulaire
 

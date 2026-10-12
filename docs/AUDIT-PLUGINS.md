@@ -1,0 +1,103 @@
+# Audit des 42 plugins — YT Music
+
+**Date :** 12 octobre 2026  
+**Code audité :** [dépôt YT-Music](https://github.com/anderson76389/YT-Music)  
+**Journal des tests automatiques :** [GitHub Actions #38192084563](https://github.com/anderson76389/YT-Music/actions/runs/38192084563)
+
+## Périmètre et résultats vérifiés
+
+- **42 points d’entrée de plugins** identifiés dans `src/plugins/` et repris par le générateur `vite-plugins/plugin-importer.mts`.
+- Sur **Windows** : installation des dépendances, lint, vérification TypeScript, cinq tests Playwright existants et compilation Electron **réussis**.
+- **Formatage non conforme** : `pnpm format:check` signale 339 fichiers ; le workflow échoue donc au total. Le lint est toutefois passé.
+- Les **cinq tests unitaires** existants couvrent seulement le tri de segments SponsorBlock et la lecture/analyse des paroles LRC, **pas le comportement des 42 plugins dans YouTube Music**.
+- **Aucun test fonctionnel de bout en bout** n’a été réalisé dans une application Windows ouverte et connectée au service YouTube Music. Ni les intégrations tierces, ni la stabilité des sélecteurs DOM, ni les flux de téléchargement ne peuvent être déclarés validés.
+
+## Inventaire complet et contrôle fonctionnel restant
+
+| Plugin | Fonction à vérifier dans l’application | Validation réelle |
+|---|---|---|
+| [`album-actions`](../src/plugins/album-actions/index.tsx) | Boutons d’action de masse sur les albums et listes | À tester en application |
+| [`album-color-theme`](../src/plugins/album-color-theme/index.ts) | Thème dérivé des couleurs de la pochette | À tester en application |
+| [`ambient-mode`](../src/plugins/ambient-mode/index.ts) | Éclairage ambiant et animations | À tester en application |
+| [`amuse`](../src/plugins/amuse/index.ts) | Intégration Amuse | À tester en application |
+| [`anti-pause`](../src/plugins/anti-pause/index.ts) | Anti-inactivité, suppression des menus et annonces — **défauts de nettoyage démontrés** | À tester en application |
+| [`api-server`](../src/plugins/api-server/index.ts) | Serveur API local, endpoints et authentification | À tester en application |
+| [`audio-compressor`](../src/plugins/audio-compressor.ts) | Compression dynamique du son | À tester en application |
+| [`auth-proxy-adapter`](../src/plugins/auth-proxy-adapter/index.ts) | Authentification via proxy | À tester en application |
+| [`blur-nav-bar`](../src/plugins/blur-nav-bar/index.ts) | Effet de flou de la barre de navigation | À tester en application |
+| [`captions-selector`](../src/plugins/captions-selector/index.ts) | Sélection et chargement de sous-titres | À tester en application |
+| [`clock`](../src/plugins/clock/index.tsx) | Horloge dans le lecteur | À tester en application |
+| [`crossfade`](../src/plugins/crossfade/index.ts) | Fondu entre titres — **répétition d’un titre non prise en charge** | À tester en application |
+| [`custom-output-device`](../src/plugins/custom-output-device/index.ts) | Choix de la sortie audio | À tester en application |
+| [`disable-autoplay`](../src/plugins/disable-autoplay/index.ts) | Désactivation de la lecture automatique | À tester en application |
+| [`discord`](../src/plugins/discord/index.ts) | Présence Discord | À tester en application |
+| [`do-not-track`](../src/plugins/do-not-track/index.ts) | Blocage des requêtes de suivi selon le plugin | À tester en application |
+| [`downloader`](../src/plugins/downloader/index.ts) | Téléchargement de pistes/playlists et conversion audio | À tester en application |
+| [`equalizer`](../src/plugins/equalizer/index.ts) | Égaliseur et préréglages | À tester en application |
+| [`exponential-volume`](../src/plugins/exponential-volume/index.ts) | Courbe de volume | À tester en application |
+| [`in-app-menu`](../src/plugins/in-app-menu/index.ts) | Barre de titre et menu intégré | À tester en application |
+| [`lumiastream`](../src/plugins/lumiastream/index.ts) | Connexion Lumia Stream | À tester en application |
+| [`music-together`](../src/plugins/music-together/index.ts) | Lecture collaborative et connexion entre participants | À tester en application |
+| [`navigation`](../src/plugins/navigation/index.tsx) | Boutons précédent/suivant | À tester en application |
+| [`notifications`](../src/plugins/notifications/index.ts) | Notifications système | À tester en application |
+| [`performance-improvement`](../src/plugins/performance-improvement/index.ts) | Scripts CPU et optimisations d’affichage | À tester en application |
+| [`picture-in-picture`](../src/plugins/picture-in-picture/index.ts) | Image dans l’image | À tester en application |
+| [`playback-speed`](../src/plugins/playback-speed/index.ts) | Réglage de vitesse de lecture | À tester en application |
+| [`precise-volume`](../src/plugins/precise-volume/index.ts) | Réglage numérique précis du volume | À tester en application |
+| [`quality-changer`](../src/plugins/quality-changer/index.tsx) | Sélecteur de qualité vidéo/audio — **arrêt potentiellement fragile** | À tester en application |
+| [`scrobbler`](../src/plugins/scrobbler/index.ts) | Last.fm et ListenBrainz | À tester en application |
+| [`shortcuts`](../src/plugins/shortcuts/index.ts) | Raccourcis système et commandes médias | À tester en application |
+| [`skip-disliked-songs`](../src/plugins/skip-disliked-songs/index.ts) | Passage automatique des titres non aimés | À tester en application |
+| [`skip-silences`](../src/plugins/skip-silences/index.ts) | Détection et saut des silences | À tester en application |
+| [`sponsorblock`](../src/plugins/sponsorblock/index.ts) | Segments SponsorBlock — test unitaire du tri uniquement | À tester en application |
+| [`synced-lyrics`](../src/plugins/synced-lyrics/index.ts) | Recherche, analyse LRC et synchronisation des paroles — parser LRC testé | À tester en application |
+| [`taskbar-mediacontrol`](../src/plugins/taskbar-mediacontrol/index.ts) | Commandes de lecture dans la barre des tâches Windows | À tester en application |
+| [`touchbar`](../src/plugins/touchbar/index.ts) | Commandes Touch Bar macOS | À tester en application |
+| [`transparent-player`](../src/plugins/transparent-player/index.ts) | Fenêtre transparente | À tester en application |
+| [`tuna-obs`](../src/plugins/tuna-obs/index.ts) | Intégration Tuna/OBS | À tester en application |
+| [`unobtrusive-player`](../src/plugins/unobtrusive-player/index.ts) | Lecture/affichage discret | À tester en application |
+| [`video-toggle`](../src/plugins/video-toggle/index.tsx) | Affichage et masquage de la vidéo | À tester en application |
+| [`visualizer`](../src/plugins/visualizer/index.ts) | Visualiseurs et graphiques réactifs à l’audio | À tester en application |
+
+## Défauts et risques effectivement identifiés dans le code
+
+### 1. Anti-Pause & Purge Totale — risque élevé
+
+[`src/plugins/anti-pause/index.ts`](../src/plugins/anti-pause/index.ts) définit trois intervalles périodiques, des écouteurs globaux et un `MutationObserver`, sans fonction `stop()` permettant de les arrêter à la désactivation. Il retire des éléments du DOM de YouTube Music, force des déplacements de curseur, modifie le volume muet et la vitesse de lecture lors des annonces.
+
+**Conséquences possibles :** effets persistants après désactivation, clics ou menus perturbés, réactivation intempestive d’un son volontairement coupé, conflits avec d’autres plugins.
+
+Ce plugin est **activé par défaut** dans `src/config/defaults.ts`.
+
+### 2. Crossfade — limitation déclarée dans le code
+
+[`src/plugins/crossfade/index.ts`](../src/plugins/crossfade/index.ts) comporte explicitement le commentaire `does not support "repeat 1" mode`. Cette option n’est donc **pas prise en charge** par la logique de transition actuelle. Le comportement sur les autres modes reste à tester sur le lecteur réel.
+
+### 3. Quality Changer et Album Actions — points fragiles
+
+- Le nettoyage de [Quality Changer](../src/plugins/quality-changer/index.tsx) retire un élément du DOM en supposant qu’il se trouve encore dans le conteneur d’origine.
+- [Album Actions](../src/plugins/album-actions/index.tsx) utilise une assertion non nulle sur `#browse-page`, dont l’existence dépend du chargement réel de la page.
+
+Ce sont des **risques de compatibilité ou de cycle de vie**, pas des dysfonctionnements observés et reproduits.
+
+### 4. Mises à jour — référence conservée au projet d’origine
+
+[`src/index.ts`](../src/index.ts) ouvre encore l’adresse des Releases `pear-devs/pear-desktop` lorsqu'une mise à jour est proposée. Le réglage `autoUpdates` est activé par défaut. Une édition indépendante devrait définir sa propre politique de mise à jour avant distribution ; aucune modification automatique du mécanisme n’a été faite dans cet audit.
+
+## Nettoyage effectué sans supprimer de fonctionnalités
+
+- Quatre fichiers JSON **strictement vides** supprimés : `be-Latn`, `ckb`, `km` et `kmr`.
+- Création d’un `.gitignore` pour exclure `node_modules/`, `dist/`, `pack/` et les artefacts locaux.
+- Conservation des sources, scripts, tests existants, traductions non vides, images et icônes utilisés pour la compilation multiplateforme.
+
+## Conditions pour déclarer un plugin « fonctionne réellement »
+
+1. **Compilation** correcte (déjà passée).
+2. **Activation** dans les paramètres sans erreur console.
+3. **Exécution effective** de toutes ses commandes et réglages.
+4. **Changement de piste/page** sans dysfonctionnement.
+5. **Désactivation puis réactivation** sans timer, gestionnaire d’événement ou style résiduel.
+6. **Tests de services externes** avec leurs applications ou comptes correspondants, sur la plateforme pertinente.
+7. **Tests de non-régression** après rechargement du client et redémarrage.
+
+**Conclusion :** la base compile et ses cinq tests passent. **La fiabilité individuelle des 42 plugins n’est pas encore certifiée.** Il serait factuellement incorrect de la déclarer acquise.

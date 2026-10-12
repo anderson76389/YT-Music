@@ -701,49 +701,12 @@ app.whenReady().then(async () => {
     }, 20_000);
   }
 
-  // Register appID on windows
+  // Garder l'identité Windows stable sans modifier les raccourcis existants.
+  // Leur création/suppression appartient exclusivement à NSIS. Sinon la
+  // version portable écrase le raccourci de la version installée et le rend
+  // invalide au prochain déplacement du .exe.
   if (is.windows()) {
-    const appID = APP_ID;
-    app.setAppUserModelId(appID);
-    const appLocation = process.execPath;
-    const appData = app.getPath('appData');
-    // Check shortcut validity if not in dev mode / running portable app
-    if (
-      !is.dev() &&
-      !appLocation.startsWith(path.join(appData, '..', 'Local', 'Temp'))
-    ) {
-      const shortcutPath = path.join(
-        appData,
-        'Microsoft',
-        'Windows',
-        'Start Menu',
-        'Programs',
-        `${APPLICATION_NAME}.lnk`,
-      );
-      try {
-        // Check if shortcut is registered and valid
-        const shortcutDetails = shell.readShortcutLink(shortcutPath); // Throw error if it doesn't exist yet
-        if (
-          shortcutDetails.target !== appLocation ||
-          shortcutDetails.appUserModelId !== appID
-        ) {
-          // oxlint-disable-next-line typescript/only-throw-error
-          throw 'needUpdate';
-        }
-      } catch (error) {
-        // If not valid -> Register shortcut
-        shell.writeShortcutLink(
-          shortcutPath,
-          error === 'needUpdate' ? 'update' : 'create',
-          {
-            target: appLocation,
-            cwd: path.dirname(appLocation),
-            description: `${APPLICATION_NAME} Desktop App - including custom plugins`,
-            appUserModelId: appID,
-          },
-        );
-      }
-    }
+    app.setAppUserModelId(APP_ID);
   }
 
   ipcMain.on('get-renderer-script', (event) => {

@@ -344,6 +344,12 @@ async function createMainWindow() {
   const windowMaximized = config.get('window-maximized');
   const windowPosition: Electron.Point = config.get('window-position');
   const useInlineMenu = await config.plugins.isEnabled('in-app-menu');
+  // Sous Windows, une fenêtre Electron opaque ne peut pas devenir réellement
+  // transparente simplement via des CSS ou setBackgroundColor().
+  // Ce choix requiert un redémarrage, ce que signale déjà le plugin.
+  const useTransparentWindow =
+    (is.windows() || is.macOS() || is.linux()) &&
+    (await config.plugins.isEnabled('transparent-player'));
 
   const defaultTitleBarOverlayOptions: Electron.TitleBarOverlay = {
     color: '#00000000',
@@ -374,7 +380,8 @@ async function createMainWindow() {
     height: windowSize.height,
     minWidth: 325,
     minHeight: 425,
-    backgroundColor: '#000',
+    transparent: useTransparentWindow,
+    backgroundColor: useTransparentWindow ? '#00000000' : '#000000',
     show: false,
     webPreferences: {
       contextIsolation: true,

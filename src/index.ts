@@ -237,7 +237,10 @@ const initHook = async (win: BrowserWindow) => {
     });
 
     if (
-      !deepEqual(newValue?.options?.themes, oldValue?.options?.themes)
+      !deepEqual(
+        (newValue?.options as { themes?: string[] } | undefined)?.themes,
+        (oldValue?.options as { themes?: string[] } | undefined)?.themes,
+      )
     ) {
       syncUserThemes(win);
     }

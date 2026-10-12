@@ -98,8 +98,12 @@ export default createPlugin<
       // Les filtres sont mis en cache localement, pas téléchargés à chaque
       // démarrage. Un réseau indisponible ne doit pas empêcher l'application.
       try {
+        // Délai borné pour ne pas bloquer le lancement en cas de réseau HS.
+        const timedFetch: typeof fetch = (input, init) =>
+          fetch(input, { ...init, signal: AbortSignal.timeout(8_000) });
+
         const blocker = await ElectronBlocker.fromPrebuiltAdsOnly(
-          fetch,
+          timedFetch,
           {
             path: join(app.getPath('userData'), 'anti-pause-ads.bin'),
             read: readFile,
@@ -250,6 +254,23 @@ export default createPlugin<
             'ytmusic-settings-button, #right-content > ytmusic-settings-button',
           )
           .forEach((element) => element.remove());
+
+        // Préserver le masquage des anciens panneaux de paramètres déjà
+        // présents, sans effacer les menus ordinaires de la bibliothèque.
+        for (const popup of document.querySelectorAll(
+          'ytmusic-menu-popup-renderer, tp-yt-iron-dropdown',
+        )) {
+          const content = popup.textContent ?? '';
+          if (
+            content.includes('Music Premium') ||
+            content.includes('Paramètres') ||
+            content.includes('Conditions d') ||
+            content.includes('Résilier') ||
+            content.includes('Aide')
+          ) {
+            popup.remove();
+          }
+        }
       };
 
       const refresh = () => {

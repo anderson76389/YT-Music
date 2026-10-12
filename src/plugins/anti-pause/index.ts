@@ -6,17 +6,12 @@ import { app, type BrowserWindow } from 'electron';
 
 import { createPlugin } from '@/utils';
 
+import { processAdPlayback, restoreAdPlayback, type AdPlaybackSnapshot } from './ad-skip';
 import { dismissIdlePrompt, startIdleHeartbeat } from './runtime';
 
 type VideoBinding = {
   video: HTMLVideoElement;
   handler: () => void;
-};
-
-type AdState = {
-  video: HTMLVideoElement;
-  muted: boolean;
-  playbackRate: number;
 };
 
 type DocumentProperty = 'hidden' | 'visibilityState' | 'webkitVisibilityState';
@@ -25,6 +20,7 @@ type AntiPauseBackendState = {
   blocker?: ElectronBlocker;
   blockerWindow?: BrowserWindow;
   running: boolean;
+  generation: number;
 };
 
 type AntiPauseRendererState = {
@@ -33,31 +29,21 @@ type AntiPauseRendererState = {
   playerObserver?: MutationObserver;
   player?: HTMLElement;
   videoBinding?: VideoBinding;
-  adState?: AdState;
+  adState?: AdPlaybackSnapshot;
   stopHeartbeat?: () => void;
   dialogTimer?: number;
   visibilityDescriptors?: Partial<
     Record<DocumentProperty, PropertyDescriptor | null>
   >;
-  onMenuClick?: (e: MouseEvent) => void;
   onVisibilityChange?: (e: Event) => void;
   skipAdIfPresent(): void;
   restoreAdState(): void;
 };
 
 
-// CSS masquée dès que la classe publicitaire est présente (pas de garantie
-// d'absence totale de flash : YouTube peut modifier le DOM ou ses flux).
+// Masquer seulement les éléments publicitaires, jamais les paramètres ou
+// menus ordinaires de YouTube Music (nécessaires aux autres plugins).
 const styles = `
-  ytmusic-settings-button,
-  .ytmusic-settings-button,
-  #right-content > ytmusic-settings-button,
-  yt-icon-button[icon="more_vert"],
-  tp-yt-paper-icon-button[icon="more_vert"],
-  button[aria-label*="Paramètres"],
-  button[aria-label*="Settings"] {
-    display: none !important;
-  }
   .ytp-ad-player-overlay,
   .ytp-ad-player-overlay-layout,
   .ytp-ad-player-overlay-flyout-cta,
@@ -90,9 +76,11 @@ export default createPlugin<
     blocker: undefined as ElectronBlocker | undefined,
     blockerWindow: undefined as BrowserWindow | undefined,
     running: false,
+    generation: 0,
 
     async start({ window }) {
       this.running = true;
+      const generation = ++this.generation;
       this.blockerWindow = window;
 
       // Les filtres sont mis en cache localement, pas téléchargés à chaque
@@ -111,7 +99,7 @@ export default createPlugin<
           },
         );
 
-        if (!this.running) return;
+        if (!this.running || generation !== this.generation) return;
         blocker.enableBlockingInSession(window.webContents.session);
         this.blocker = blocker;
       } catch (error) {
@@ -124,6 +112,7 @@ export default createPlugin<
 
     stop() {
       this.running = false;
+      this.generation++;
       if (this.blocker && this.blockerWindow) {
         this.blocker.disableBlockingInSession(
           this.blockerWindow.webContents.session,
@@ -140,13 +129,12 @@ export default createPlugin<
     playerObserver: undefined as MutationObserver | undefined,
     player: undefined as HTMLElement | undefined,
     videoBinding: undefined as VideoBinding | undefined,
-    adState: undefined as AdState | undefined,
+    adState: undefined as AdPlaybackSnapshot | undefined,
     stopHeartbeat: undefined as (() => void) | undefined,
     dialogTimer: undefined as number | undefined,
     visibilityDescriptors: undefined as
       | Partial<Record<DocumentProperty, PropertyDescriptor | null>>
       | undefined,
-    onMenuClick: undefined as ((e: MouseEvent) => void) | undefined,
     onVisibilityChange: undefined as ((e: Event) => void) | undefined,
 
     start() {
@@ -187,20 +175,6 @@ export default createPlugin<
         window._lact = Date.now();
       };
       document.addEventListener('visibilitychange', this.onVisibilityChange, true);
-
-      this.onMenuClick = (event: MouseEvent) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        if (
-          target.closest(
-            'ytmusic-settings-button, tp-yt-paper-icon-button[icon="more_vert"], button[aria-label*="Paramètres"], button[aria-label*="Settings"]',
-          )
-        ) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-        }
-      };
-      window.addEventListener('click', this.onMenuClick, true);
 
       // Le contrôle de classe réagit à l'apparition de l'annonce sans attendre
       // l'événement timeupdate (qui arrive après la première image).
@@ -248,33 +222,7 @@ export default createPlugin<
         }
       };
 
-      const purgeSettings = () => {
-        document
-          .querySelectorAll(
-            'ytmusic-settings-button, #right-content > ytmusic-settings-button',
-          )
-          .forEach((element) => element.remove());
-
-        // Préserver le masquage des anciens panneaux de paramètres déjà
-        // présents, sans effacer les menus ordinaires de la bibliothèque.
-        for (const popup of document.querySelectorAll(
-          'ytmusic-menu-popup-renderer, tp-yt-iron-dropdown',
-        )) {
-          const content = popup.textContent ?? '';
-          if (
-            content.includes('Music Premium') ||
-            content.includes('Paramètres') ||
-            content.includes('Conditions d') ||
-            content.includes('Résilier') ||
-            content.includes('Aide')
-          ) {
-            popup.remove();
-          }
-        }
-      };
-
       const refresh = () => {
-        purgeSettings();
         bindVideo();
         dismissIdlePrompt(document);
         this.skipAdIfPresent();
@@ -305,30 +253,8 @@ export default createPlugin<
         player.classList.contains('ad-showing') ||
         player.classList.contains('ad-interrupting');
 
-      if (!isAd) {
-        this.restoreAdState();
-        return;
-      }
-
-      if (!this.adState || this.adState.video !== video) {
-        this.restoreAdState();
-        this.adState = {
-          video,
-          muted: video.muted,
-          playbackRate: video.playbackRate,
-        };
-      }
-
-      video.muted = true;
-      video.playbackRate = 16;
-
-      if (Number.isFinite(video.duration) && video.duration > 0) {
-        try {
-          video.currentTime = Math.max(0, video.duration - 0.15);
-        } catch {
-          // Flux non seekable.
-        }
-      }
+      this.adState = processAdPlayback(video, isAd, this.adState);
+      if (!isAd) return;
 
       const skippable = player as HTMLElement & { skipAd?: () => void };
       if (typeof skippable.skipAd === 'function') {
@@ -347,11 +273,7 @@ export default createPlugin<
     },
 
     restoreAdState() {
-      const previous = this.adState;
-      if (!previous) return;
-      previous.video.muted = previous.muted;
-      previous.video.playbackRate = previous.playbackRate;
-      this.adState = undefined;
+      this.adState = restoreAdPlayback(this.adState);
     },
 
     stop() {
@@ -376,10 +298,6 @@ export default createPlugin<
       this.videoBinding = undefined;
       this.restoreAdState();
 
-      if (this.onMenuClick) {
-        window.removeEventListener('click', this.onMenuClick, true);
-        this.onMenuClick = undefined;
-      }
       if (this.onVisibilityChange) {
         document.removeEventListener(
           'visibilitychange',

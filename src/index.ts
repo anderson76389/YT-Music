@@ -29,6 +29,7 @@ import { parse } from 'node-html-parser';
 import { languageResources } from 'virtual:i18n';
 import { allPlugins, mainPlugins } from 'virtual:plugins';
 
+import { APP_ID, RELEASES_FEED, RELEASES_URL } from '@/app-identity';
 import * as config from '@/config';
 import { APPLICATION_NAME, loadI18n, setLanguage, t } from '@/i18n';
 import {
@@ -130,13 +131,11 @@ if (is.linux()) {
   }
 
   // Overrides WM_CLASS for X11 to correspond to icon filename
-  app.setName(
-    'com.github.th-ch.\u0079\u006f\u0075\u0074\u0075\u0062\u0065\u002d\u006d\u0075\u0073\u0069\u0063',
-  );
+  app.setName(APP_ID);
   // for wayland
   app.commandLine.appendSwitch(
     'class',
-    'com.github.th-ch.\u0079\u006f\u0075\u0074\u0075\u0062\u0065\u002d\u006d\u0075\u0073\u0069\u0063',
+    APP_ID,
   );
 }
 
@@ -686,8 +685,7 @@ app.whenReady().then(async () => {
 
   // Register appID on windows
   if (is.windows()) {
-    const appID =
-      'com.github.th-ch.\u0079\u006f\u0075\u0074\u0075\u0062\u0065\u002d\u006d\u0075\u0073\u0069\u0063';
+    const appID = APP_ID;
     app.setAppUserModelId(appID);
     const appLocation = process.execPath;
     const appData = app.getPath('appData');
@@ -825,13 +823,18 @@ app.whenReady().then(async () => {
   });
 
   if (!is.dev() && config.get('options.autoUpdates')) {
+    // Ne plus jamais interroger les mises à jour de Pear Desktop.
+    // Les nouvelles versions proviennent exclusivement des Releases du dépôt
+    // personnel, lorsqu'une release a été publiée.
+    electronUpdater.autoUpdater.setFeedURL(RELEASES_FEED);
     const updateTimeout = setTimeout(() => {
-      electronUpdater.autoUpdater.checkForUpdatesAndNotify();
+      void electronUpdater.autoUpdater.checkForUpdatesAndNotify().catch((error: unknown) => {
+        console.warn('[YT Music] Aucune mise à jour disponible ou dépôt inaccessible', error);
+      });
       clearTimeout(updateTimeout);
     }, 2000);
     electronUpdater.autoUpdater.on('update-available', () => {
-      const downloadLink =
-        'https://github.com/pear-devs/pear-desktop/releases/latest';
+      const downloadLink = RELEASES_URL;
       const dialogOptions: Electron.MessageBoxOptions = {
         type: 'info',
         buttons: [

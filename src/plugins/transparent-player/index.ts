@@ -6,11 +6,15 @@ import { onMenu } from './menu';
 import style from './style.css?inline';
 import { MaterialType, type TransparentPlayerConfig } from './types';
 
+import type { BrowserWindow } from 'electron';
+
 const defaultConfig: TransparentPlayerConfig = {
   enabled: false,
   opacity: 0.5,
   type: MaterialType.NONE,
 };
+
+type TransparentBackendState = { window: BrowserWindow | null };
 
 type TransparentRendererState = {
   props: TransparentPlayerConfig;
@@ -18,7 +22,7 @@ type TransparentRendererState = {
   applyVariables(): void;
 };
 
-export default createPlugin<unknown, unknown, TransparentRendererState, TransparentPlayerConfig>({
+export default createPlugin<TransparentBackendState, unknown, TransparentRendererState, TransparentPlayerConfig>({
   name: () => t('plugins.transparent-player.name'),
   description: () => t('plugins.transparent-player.description'),
   addedVersion: '3.11.x',

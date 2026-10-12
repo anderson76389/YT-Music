@@ -1,12 +1,14 @@
 import {
+  app,
   BrowserWindow,
   Menu,
   type MenuItem,
   ipcMain,
   nativeImage,
-  type WebContents,
 } from 'electron';
 import { register } from 'electron-localshortcut';
+
+import { dispatchMenuEvent } from './menu-dispatch';
 
 import type { InAppMenuConfig } from './constants';
 import type { BackendContext } from '@/types/contexts';
@@ -52,15 +54,14 @@ export const onMainLoad = ({
   };
 
   ipcMain.handle('peard:menu-event', (event, commandId: number) => {
-    const target = getMenuItemById(commandId);
-    if (target)
-      (
-        target.click as (
-          args0: unknown,
-          args1: BrowserWindow | null,
-          args3: WebContents,
-        ) => void
-      )(undefined, BrowserWindow.fromWebContents(event.sender), event.sender);
+    if (!Number.isSafeInteger(commandId)) return false;
+
+    return dispatchMenuEvent(
+      getMenuItemById(commandId),
+      BrowserWindow.fromWebContents(event.sender),
+      event.sender,
+      app,
+    );
   });
 
   handle('get-menu-by-id', (commandId: number) => {

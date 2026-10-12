@@ -288,92 +288,9 @@
         "query": "Le serveur API d'Amuse est en cours d'exécution. GET /query pour obtenir des informations sur les chansons."
       }
     },
-    "api-server": {
-      "description": "Ajouter un serveur API pour contrôler le lecteur",
-      "dialog": {
-        "request": {
-          "buttons": {
-            "allow": "Autoriser",
-            "deny": "Interdire"
-          },
-          "message": "Autoriser {{ID}} ({{origin}}) à accéder à l'API ?",
-          "title": "Demande d'autorisation à l'API"
-        }
-      },
-      "menu": {
-        "auth-strategy": {
-          "label": "Plan d'autorisation",
-          "submenu": {
-            "auth-at-first": {
-              "label": "Autoriser lors de la première requête"
-            },
-            "none": {
-              "label": "Pas d'autorisation"
-            }
-          }
-        },
-        "hostname": {
-          "label": "Nom de l'hôte"
-        },
-        "https": {
-          "label": "HTTPS & Certificats",
-          "submenu": {
-            "cert": {
-              "dialogTitle": "Sélectionner le fichier de certificat HTTPS",
-              "label": "Fichier de certificat (.crt/.pem)"
-            },
-            "enable-https": {
-              "label": "Activer HTTPS"
-            },
-            "key": {
-              "dialogTitle": "Sélectionner le fichier de clé privée HTTPS",
-              "label": "Fichier de clé privée (.key/.pem)"
-            }
-          }
-        },
-        "port": {
-          "label": "Port"
-        }
-      },
-      "name": "Serveur API [Beta]",
-      "prompt": {
-        "hostname": {
-          "label": "Entrer le nom de l'hôte (par exemple : 0.0.0.0) pour le serveur API :",
-          "title": "Nom d'hôte"
-        },
-        "port": {
-          "label": "Entrez le port du serveur API :",
-          "title": "Port"
-        }
-      }
-    },
     "audio-compressor": {
       "description": "Appliquer une compression à l'audio (diminue le volume des parties les plus fortes du signal et augmente le volume des parties les plus faibles)",
       "name": "Compresseur audio"
-    },
-    "auth-proxy-adapter": {
-      "description": "Prise en charge de l'utilisation des services de proxy d'authentification",
-      "menu": {
-        "disable": "Désactiver l'Adaptateur Proxy",
-        "enable": "Activer l'Adaptateur Proxy",
-        "hostname": {
-          "label": "Nom d'hôte"
-        },
-        "port": {
-          "label": "Port"
-        }
-      },
-      "name": "Adaptateur de Proxy d'Authentification",
-      "prompt": {
-        "hostname": {
-          "label": "Saisir le nom d'hôte pour le serveur proxy local (nécessite un redémarrage) :",
-          "title": "Nom d'hôte du proxy"
-        },
-        "port": {
-          "label": "Saisir le port pour le serveur proxy local (nécessite un redémarrage) :",
-          "title": "Port du proxy"
-        }
-      }
     },
     "blur-nav-bar": {
       "description": "Rend la barre de navigation transparente et floue",
@@ -406,17 +323,6 @@
         "no-captions": "Aucun sous-titres disponibles pour cette chanson"
       }
     },
-    "clock": {
-      "description": "Ajoute une horloge a la barre de navigation",
-      "menu": {
-        "format": {
-          "24-hour-format": "Format 24 heures",
-          "display-seconds": "Afficher les secondes",
-          "label": "Format"
-        }
-      },
-      "name": "Horloge"
-    },
     "compact-sidebar": {
       "description": "Toujours définir la barre latérale en mode compact",
       "name": "Barre latérale compacte"
@@ -426,7 +332,7 @@
       "menu": {
         "advanced": "Avancé"
       },
-      "name": "Fondu enchaîné [Bêta]",
+      "name": "Fondu enchaîné",
       "prompt": {
         "options": {
           "multi-input": {
@@ -462,40 +368,6 @@
         "apply-once": "S'applique seulement au démarrage"
       },
       "name": "Désactiver la lecture automatique"
-    },
-    "discord": {
-      "backend": {
-        "already-connected": "Tentative de connexion avec une connexion active",
-        "connected": "Connecté à Discord",
-        "disconnected": "Déconnecté de Discord"
-      },
-      "description": "Montrez à vos amis ce que vous écoutez avec Rich Presence",
-      "menu": {
-        "auto-reconnect": "Reconnexion automatique",
-        "clear-activity": "Effacer l'activité",
-        "clear-activity-after-timeout": "Effacer l’activité après un délai d’attente",
-        "connected": "Connecté",
-        "disconnected": "Déconnecté",
-        "hide-duration-left": "Masquer la durée restante",
-        "hide-github-button": "Masquer le bouton du lien GitHub",
-        "play-on-application": "Jouer sur {{applicationName}}",
-        "set-inactivity-timeout": "Définir le délai d'inactivité",
-        "set-status-display-type": {
-          "label": "Texte d'état",
-          "submenu": {
-            "application": "Écoute {{applicationName}}",
-            "artist": "Écoute {artiste}",
-            "title": "Écoute {titre de la chanson}"
-          }
-        }
-      },
-      "name": "Discord Rich Presence",
-      "prompt": {
-        "set-inactivity-timeout": {
-          "label": "Entrez le délai d'inactivité en secondes :",
-          "title": "Définir le délai d'inactivité"
-        }
-      }
     },
     "do-not-track": {
       "description": "Bloque tous les traqueurs par défaut",
@@ -600,10 +472,6 @@
       },
       "name": "Menu intégré à l'application"
     },
-    "lumiastream": {
-      "description": "Ajoute la prise en charge de Lumia Stream",
-      "name": "Lumia Stream [Beta]"
-    },
     "lyrics-genius": {
       "description": "Ajoute la prise en charge des paroles pour la plupart des chansons",
       "menu": {
@@ -612,52 +480,6 @@
       "name": "Paroles Genius",
       "renderer": {
         "fetched-lyrics": "Paroles récupérées pour Genius"
-      }
-    },
-    "music-together": {
-      "description": "Partage une playlist avec d'autres personnes. Quand l'hôte joue un son, tout les participants entendront le même son",
-      "dialog": {
-        "enter-host": "Entrer l'identifiant de l'hôte"
-      },
-      "internal": {
-        "save": "Enregistrer",
-        "track-source": "Source de la piste audio",
-        "unknown-user": "Utilisateur inconnu"
-      },
-      "menu": {
-        "click-to-copy-id": "Copier l'identifiant de l'hôte",
-        "close": "Fermer Music Together",
-        "connected-users": "Utilisateurs connectés",
-        "disconnect": "Déconnecter Music Together",
-        "empty-user": "Aucun utilisateur connecté",
-        "host": "Hôte du Music Together",
-        "join": "Rejoindre le Music Together",
-        "permission": {
-          "all": "Autorisez les invités à contrôler la playlist et le lecteur",
-          "host-only": "Seulement l'hôte peut contrôler la playlist et le lecteur",
-          "playlist": "Autoriser les invités à contrôler la playlist"
-        },
-        "set-permission": "Changer les permissions de contrôle",
-        "status": {
-          "disconnected": "Déconnecté",
-          "guest": "Connecté en tant qu'invité",
-          "host": "Connecté en tant qu'hôte"
-        }
-      },
-      "name": "Music Together [BETA]",
-      "toast": {
-        "add-song-failed": "Echec d'ajout de musique",
-        "closed": "Music Together fermé",
-        "disconnected": "Music Together déconnecté",
-        "host-failed": "Echec de l'hébergement du Music Together",
-        "id-copied": "Identifiant de l'hôte copié dans le presse papier",
-        "id-copy-failed": "Echec de la copie de l'identifiant de l'hôte dans le presse papier",
-        "join-failed": "Echec en rejoignant le Music Together",
-        "joined": "Music Together rejoint",
-        "permission-changed": "Permission du Music Together changé à \"{{permission}}\"",
-        "remove-song-failed": "Echec du retrait de la piste",
-        "user-connected": "{{name}} à rejoint le Music Together",
-        "user-disconnected": "{{name}} à quitté le Music Together"
       }
     },
     "navigation": {
@@ -696,7 +518,7 @@
     },
     "performance-improvement": {
       "description": "Améliorer les performances en activant les scripts expérimentaux",
-      "name": "Amélioration des performances [Beta]"
+      "name": "Amélioration des performances"
     },
     "picture-in-picture": {
       "description": "Permet de basculer l’application en mode picture-in-picture",
@@ -766,60 +588,6 @@
       "renderer": {
         "quality-settings-button": {
           "label": "Ouvrir le sélecteur de qualité du lecteur"
-        }
-      }
-    },
-    "scrobbler": {
-      "description": "Ajouter le support de scrobbling (ex. last.fm, Listenbrainz)",
-      "dialog": {
-        "lastfm": {
-          "auth-failed": {
-            "message": "Erreur lors de l'authetification avec Last.fm\nCacher la popup jusqu'au prochain redémarrage.",
-            "title": "Authentification échouée"
-          }
-        }
-      },
-      "menu": {
-        "lastfm": {
-          "api-settings": "Paramètres API de Last.fm"
-        },
-        "listenbrainz": {
-          "token": "Entrer le token utilisateur de ListenBrainz"
-        },
-        "scrobble-alternative-artist": "Utilisez d'autres artistes",
-        "scrobble-alternative-title": "Utiliser des titres alternatifs",
-        "scrobble-other-media": "Scrobbler d'autres médias"
-      },
-      "name": "Scrobbler",
-      "prompt": {
-        "lastfm": {
-          "api-key": "Clé API de Last.fm",
-          "api-secret": "Secret de l'API de Last.fm"
-        },
-        "listenbrainz": {
-          "token": {
-            "label": "Entrez votre token utilisateur ListenBrainz :",
-            "title": "Token ListenBrainz"
-          }
-        }
-      }
-    },
-    "shortcuts": {
-      "description": "Permet de définir des raccourcis clavier globaux pour la lecture (lecture/pause/suivant/précédent) + désactiver l'OSD multimédia en remplaçant les touches multimédias + activer Ctrl/CMD + F pour rechercher + activer la prise en charge Linux MPRIS pour les touches multimédias + raccourcis clavier personnalisés pour les utilisateurs avancés.",
-      "menu": {
-        "override-media-keys": "Remplacer les touches multimédias",
-        "set-keybinds": "Définir les contrôles globaux des morceaux"
-      },
-      "name": "Raccourcis (& MPRIS)",
-      "prompt": {
-        "keybind": {
-          "keybind-options": {
-            "next": "Suivant",
-            "play-pause": "Lecture / Pause",
-            "previous": "Précédent"
-          },
-          "label": "Choisissez les raccourcis clavier globaux pour le contrôle des morceaux :",
-          "title": "Raccourcis clavier globaux"
         }
       }
     },

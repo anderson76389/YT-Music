@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events';
 
 import { expect, test } from '@playwright/test';
 
-import { injectCSS } from '@/plugins/utils/main/css';
+import { injectCSS } from '../css';
 
 function fakeWebContents() {
   const events = new EventEmitter();

@@ -42,7 +42,7 @@ L'objectif est de retrouver l'expérience du service musical dans une véritable
 
 Ce dépôt héberge les **fichiers sources** de cette édition. Il ne représente pas un client officiel de Google ou de YouTube et ne fournit pas de catalogue musical indépendant : la lecture et certaines fonctionnalités dépendent du service YouTube Music.
 
-> **Téléchargement Windows :** les versions portables x64 sont compilées et publiées automatiquement dans **[GitHub Releases](https://github.com/anderson76389/YT-Music/releases/latest)** après succès de la compilation, de TypeScript et des tests. Ce sont des versions communautaires non officielles : le fonctionnement réel de chaque plugin nécessite encore des essais dans l'application.
+> **Téléchargement Windows :** chaque compilation validée publie désormais **deux exécutables x64** dans [GitHub Releases](https://github.com/anderson76389/YT-Music/releases/latest) : un **installateur Windows Setup** (recommandé, raccourcis stables) et une version **portable** sans installation. Ce sont des versions communautaires non officielles ; les tests automatisés ne remplacent pas des essais en conditions réelles.
 
 ## 🔒 Projet indépendant de Pear Desktop
 
@@ -50,7 +50,7 @@ Ce dépôt **n'est pas un fork GitHub** de Pear Desktop. Son code source, ses co
 
 - **Identité propre :** application `YT Music`, identifiant `com.github.anderson76389.yt-music`.
 - **Mises à jour :** aucune vérification vers le GitHub de Pear Desktop. Les mises à jour YT Music utiliseront uniquement [tes Releases](https://github.com/anderson76389/YT-Music/releases) ; elles sont désactivées par défaut jusqu'à ta première publication.
-- **Compilation portable :** [construire une version Windows x64 via GitHub Actions](.github/workflows/build-portable-windows.yml). Le bouton **Run workflow** génère un artefact téléchargeable depuis l'exécution lorsqu'elle réussit.
+- **Distribution Windows :** [GitHub Actions](.github/workflows/build-portable-windows.yml) construit le Setup et le portable x64 puis les ajoute ensemble dans la même Release après validation.
 - **Crédits et licence :** le fichier [`license`](license) contient la licence MIT d'origine et son attribution. Le respect des licences reste nécessaire même si leurs dépôts disparaissent.
 
 **Limites de cette indépendance :** YouTube Music est un service externe ; son site, ses API, l'authentification, les packages npm et les intégrations tierces ne sont pas hébergés dans ce dépôt. Leur disponibilité n'est pas garantie si leurs fournisseurs changent les règles ou interrompent les services.
@@ -93,15 +93,20 @@ Vous pouvez notamment adapter l'expérience selon vos préférences : améliorer
 
 ## 💻 Installation
 
-### Option 1 — Télécharger YT Music Portable (Windows 64 bits)
+### Option 1 — Installer YT Music ou utiliser la version portable (Windows 64 bits)
 
-**➡️ [Dernière version Windows (GitHub Releases)](https://github.com/anderson76389/YT-Music/releases/latest)**
+| Version | Fichier | Pour qui ? |
+|---|---|---|
+| **Windows Setup — recommandée** | [📥 Télécharger l'installateur](https://github.com/anderson76389/YT-Music/releases/latest/download/YT-Music-Setup-Windows-x64.exe) | Application installée dans un dossier durable, raccourci Bureau, entrée dans le menu Démarrer, désinstallation depuis Windows. |
+| **Windows Portable** | [📥 Télécharger le portable](https://github.com/anderson76389/YT-Music/releases/latest/download/YT-Music-Portable-Windows-x64.exe) | Un unique programme à lancer sans installation, depuis un dossier que tu choisis. Aucun raccourci n'est ajouté ou modifié automatiquement. |
 
-Ouvre la dernière Release puis télécharge le fichier **`YT-Music-Portable-Windows-x64.exe`**, dans la section *Assets*. Il s'agit d'un programme portable : tu peux lancer le fichier directement.
+**Conseil :** choisis l'installateur si tu épingles YT Music dans la barre des tâches. Il te permettra de conserver un raccourci stable quand une nouvelle version paraît. Pendant l'installation, tu peux choisir le dossier de destination et les raccourcis Windows sont créés par l'installateur, pas par l'application.
 
-Chaque compilation réussie depuis `main` crée une nouvelle Release. Les anciennes versions restent dans [l'historique des Releases](https://github.com/anderson76389/YT-Music/releases), même après l'expiration des artefacts de GitHub Actions.
+Si tu avais épinglé **un ancien exécutable portable**, désépingle cet ancien raccourci, installe la nouvelle version, lance **YT Music** depuis le menu Démarrer et épingle **cette version installée** une seule fois. La migration ne corrige pas automatiquement les anciens raccourcis qui pointent déjà vers un fichier déplacé.
 
-Les versions sont créées par le workflow [`build-portable-windows.yml`](.github/workflows/build-portable-windows.yml). Les tests sont automatisés, mais ne valident pas le comportement publicitaire en conditions réelles.
+Tu peux conserver les deux fichiers pour choisir ton mode d'utilisation, mais évite de lancer simultanément les deux versions, car elles partagent une identité de programme et peuvent partager des données utilisateur.
+
+Chaque compilation réussie crée une nouvelle [Release GitHub](https://github.com/anderson76389/YT-Music/releases/latest) avec **les deux variantes**. Le workflow [`build-portable-windows.yml`](.github/workflows/build-portable-windows.yml) vérifie que les deux exécutables sont bien présents avant leur publication.
 
 ### Option 2 — Lancer depuis le code source
 

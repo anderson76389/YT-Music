@@ -18,6 +18,7 @@ import { APPLICATION_NAME, setLanguage, t } from '@/i18n';
 import * as config from './config';
 import { getAllMenuTemplate, loadAllMenuPlugins } from './loader/menu';
 import { restart } from './providers/app-controls';
+import { createPluginMenuAccess } from './providers/plugin-menu-access';
 import { startingPages } from './providers/extracted-data';
 import promptOptions from './providers/prompt-options';
 
@@ -147,17 +148,23 @@ export const mainMenuTemplate = async (
       }),
   );
 
+  // Les 42 extensions et leurs sous-menus restent identiques aux deux
+  // emplacements : barre supérieure et Paramètres → Plugins.
+  const pluginAccess = createPluginMenuAccess(
+    pluginMenus,
+    t('main.menu.plugins.label'),
+  );
+
   const langResources = await languageResources();
   const availableLanguages = Object.keys(langResources);
 
   return [
-    {
-      label: t('main.menu.plugins.label'),
-      submenu: pluginMenus,
-    },
+    pluginAccess.toolbar,
     {
       label: t('main.menu.options.label'),
       submenu: [
+        pluginAccess.settings,
+        { type: 'separator' },
         {
           label: t('main.menu.options.submenu.auto-update'),
           type: 'checkbox',

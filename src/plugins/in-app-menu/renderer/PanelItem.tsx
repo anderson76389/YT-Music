@@ -151,6 +151,7 @@ const getParents = (element: Element | null): (HTMLElement | null)[] => {
 
 type BasePanelItemProps = {
   name: string;
+  disabled?: boolean;
   label?: string;
   chip?: string;
   toolTip?: string;
@@ -278,7 +279,11 @@ export const PanelItem = (props: PanelItemProps) => {
   };
 
   const handleClick = async () => {
-    await window.ipcRenderer.invoke('peard:menu-event', props.commandId);
+    if (props.disabled || props.type === 'submenu' || props.commandId === undefined) {
+      return;
+    }
+    const succeeded = await window.ipcRenderer.invoke('peard:menu-event', props.commandId);
+    if (!succeeded) return;
     if (props.type === 'radio') {
       props.onChange?.(!props.checked);
     } else if (props.type === 'checkbox') {
@@ -292,6 +297,8 @@ export const PanelItem = (props: PanelItemProps) => {
     <li
       class={itemStyle()}
       data-selected={open()}
+      aria-disabled={props.disabled}
+      style={props.disabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
       onClick={handleClick}
       onMouseEnter={handleHover}
       ref={setAnchor}

@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   portable-windows:
-    name: Build + tests + GitHub Release
+    name: Build portable + installateur + GitHub Release
     if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
     timeout-minutes: 55
@@ -71,23 +71,39 @@ jobs:
       - name: Compiler le code Electron
         run: pnpm build
 
-      - name: Construire le portable Windows x64
-        run: pnpm exec electron-builder --win portable:x64 --publish never
+      - name: Construire le portable et l'installateur Windows x64
+        run: pnpm exec electron-builder --win nsis:x64 portable:x64 --publish never
 
-      - name: Normaliser le nom de l'executable
+      - name: Verifier les deux executables et leurs signatures de taille
         shell: pwsh
         run: |
-          $files = @(Get-ChildItem -Path pack -Filter '*.exe' -File)
-          if ($files.Count -ne 1) {
-            throw "Un seul .exe attendu dans pack, trouve : $($files.Count)"
+          $expected = @(
+            'YT-Music-Portable-Windows-x64.exe',
+            'YT-Music-Setup-Windows-x64.exe'
+          )
+          $found = @(Get-ChildItem pack -Filter '*.exe' -File)
+          if ($found.Count -ne 2) {
+            throw "Deux .exe attendus, trouve : $($found.Name -join ', ')"
           }
-          Rename-Item -LiteralPath $files[0].FullName -NewName "YT-Music-Portable-Windows-x64.exe"
+          foreach ($name in $expected) {
+            $file = Join-Path pack $name
+            if (-not (Test-Path -LiteralPath $file)) {
+              throw "Fichier absent : $name"
+            }
+            if ((Get-Item -LiteralPath $file).Length -lt 10000000) {
+              throw "Executable trop petit : $name"
+            }
+            Get-FileHash -LiteralPath $file -Algorithm SHA256 |
+              Format-List
+          }
 
-      - name: Conserver un artefact temporaire de secours
+      - name: Conserver les deux executables comme artefacts de secours
         uses: actions/upload-artifact@v4
         with:
-          name: YT-Music-Portable-Windows-x64
-          path: pack/YT-Music-Portable-Windows-x64.exe
+          name: YT-Music-Windows-x64-Portable-et-Installateur
+          path: |
+            pack/YT-Music-Portable-Windows-x64.exe
+            pack/YT-Music-Setup-Windows-x64.exe
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
@@ -99,13 +115,17 @@ jobs:
         run: |
           $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
           $tag = "v$version-build.${{ github.run_number }}.${{ github.run_attempt }}"
-          $title = "YT Music $version - Windows portable (build ${{ github.run_number }})"
+          $title = "YT Music $version - Windows portable + installateur (build ${{ github.run_number }})"
           $notes = @"
           ### YT Music — Windows x64
 
-          **Version portable non officielle.** Téléchargez `YT-Music-Portable-Windows-x64.exe` dans les assets de cette release.
+          Deux versions Windows 64 bits, issues du même code source :
 
-          - Programme compilé exclusivement depuis ce dépôt GitHub.
+          - **YT-Music-Setup-Windows-x64.exe** : installation complète avec raccourcis Bureau et menu Démarrer, choix du dossier et désinstallation Windows.
+          - **YT-Music-Portable-Windows-x64.exe** : utilisation sans installation, sans création ni modification automatique des raccourcis Windows.
+
+          Pour garder un raccourci fixe dans Windows, choisissez **Setup**.
+          Programme non officiel compilé exclusivement depuis ce dépôt GitHub.
           - L'analyse statique, la vérification TypeScript et les tests automatisés ont réussi avant publication.
           - Inclut les correctifs de menus et les modules de plugins présents dans ce commit.
           - La compilation ne garantit pas que les publicités et chaque plugin fonctionnent en conditions réelles.
@@ -113,7 +133,7 @@ jobs:
           Commit : ${{ github.sha }}
           "@
           $notes | Set-Content -Path release-notes.md -Encoding utf8
-          gh release create "$tag" "pack/YT-Music-Portable-Windows-x64.exe" --repo "$env:GITHUB_REPOSITORY" --target "$env:GITHUB_SHA" --title "$title" --notes-file release-notes.md --latest
+          gh release create "$tag" "pack/YT-Music-Portable-Windows-x64.exe" "pack/YT-Music-Setup-Windows-x64.exe" --repo "$env:GITHUB_REPOSITORY" --target "$env:GITHUB_SHA" --title "$title" --notes-file release-notes.md --latest
 
       - name: Afficher le lien permanent des versions
         shell: pwsh
@@ -121,3 +141,5 @@ jobs:
           "## YT Music Windows — telechargement" >> $env:GITHUB_STEP_SUMMARY
           "[Toutes les versions](https://github.com/$env:GITHUB_REPOSITORY/releases)" >> $env:GITHUB_STEP_SUMMARY
           "[Derniere version](https://github.com/$env:GITHUB_REPOSITORY/releases/latest)" >> $env:GITHUB_STEP_SUMMARY
+          "[Installateur](https://github.com/$env:GITHUB_REPOSITORY/releases/latest/download/YT-Music-Setup-Windows-x64.exe)" >> $env:GITHUB_STEP_SUMMARY
+          "[Portable](https://github.com/$env:GITHUB_REPOSITORY/releases/latest/download/YT-Music-Portable-Windows-x64.exe)" >> $env:GITHUB_STEP_SUMMARY

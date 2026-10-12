@@ -16,7 +16,24 @@ const defaultConfig: AmbientModePluginConfig = {
   fullscreen: false,
 };
 
-export default createPlugin({
+type AmbientRendererState = {
+  settings: AmbientModePluginConfig;
+  host: HTMLElement | null;
+  backdrop: HTMLDivElement | null;
+  art: HTMLImageElement | null;
+  canvas: HTMLCanvasElement | null;
+  source: string;
+  responseArt: string;
+  ticker: ReturnType<typeof setInterval> | null;
+  videoTicker: ReturnType<typeof setInterval> | null;
+  dataListener: EventListener | null;
+  refresh(): void;
+  applySettings(): void;
+  drawVideoFrame(): void;
+  startVideoTicker(): void;
+};
+
+export default createPlugin<unknown, unknown, AmbientRendererState>({
   name: () => t('plugins.ambient-mode.name'),
   description: () => t('plugins.ambient-mode.description'),
   restartNeeded: false,
@@ -39,7 +56,7 @@ export default createPlugin({
     start({ getConfig }) {
       // Ne jamais attendre un élément vidéo spécifique : sur le nouveau
       // lecteur YT Music, #song-video peut ne pas exister du tout.
-      void getConfig().then((config) => {
+      void Promise.resolve(getConfig()).then((config) => {
         this.settings = config;
         this.refresh();
         this.startVideoTicker();

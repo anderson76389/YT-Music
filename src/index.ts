@@ -31,7 +31,7 @@ import { allPlugins, mainPlugins } from 'virtual:plugins';
 
 import { APP_ID, RELEASES_FEED, RELEASES_URL } from '@/app-identity';
 import * as config from '@/config';
-import { APPLICATION_NAME, loadI18n, setLanguage, t } from '@/i18n';
+import { loadI18n, setLanguage, t } from '@/i18n';
 import {
   forceLoadMainPlugin,
   forceUnloadMainPlugin,

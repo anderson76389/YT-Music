@@ -2,7 +2,7 @@
   "name": "yt-music",
   "desktopName": "com.github.anderson76389.yt-music",
   "productName": "YT Music",
-  "version": "3.12.0",
+  "version": "3.12.1",
   "description": "YT Music — client de bureau indépendant et personnalisable pour YouTube Music",
   "main": "./dist/main/index.js",
   "type": "module",

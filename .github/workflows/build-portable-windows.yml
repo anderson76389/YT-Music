@@ -1,0 +1,50 @@
+name: Construire YT Music Portable Windows
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-windows:
+    runs-on: windows-latest
+    timeout-minutes: 50
+    steps:
+      - name: Recuperer les sources independantes
+        uses: actions/checkout@v4
+
+      - name: Installer pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '11'
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Installer les dependances
+        run: pnpm install --frozen-lockfile
+
+      - name: Verifier les types
+        run: pnpm typecheck
+
+      - name: Tester les plugins et les commandes
+        run: pnpm test
+
+      - name: Compiler le code
+        run: pnpm build
+
+      - name: Construire le portable 64 bits
+        run: pnpm exec electron-builder --win portable:x64 --publish never
+
+      - name: Publier l'executable en tant qu'artifact telechargeable
+        uses: actions/upload-artifact@v4
+        with:
+          name: YT-Music-Portable-Windows-x64
+          path: pack/*.exe
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

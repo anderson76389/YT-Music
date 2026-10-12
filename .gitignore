@@ -1,0 +1,15 @@
+# Dépendances réinstallables
+node_modules/
+
+# Artefacts générés par electron-vite et electron-builder
+dist/
+pack/
+.vite-inspect/
+out/
+
+# Fichiers locaux et temporaires
+*.log
+.DS_Store
+Thumbs.db
+.env.local
+.env.*.local

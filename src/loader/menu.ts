@@ -68,6 +68,12 @@ export const forceLoadMenuPlugin = async (id: string, win: BrowserWindow) => {
 };
 
 export const loadAllMenuPlugins = async (win: BrowserWindow) => {
+  // Éviter les sous-menus périmés lorsque l'on désactive ou reconfigure
+  // un plugin entre deux constructions du menu principal.
+  for (const id of Object.keys(menuTemplateMap)) {
+    delete menuTemplateMap[id];
+  }
+
   const pluginConfigs = config.plugins.getPlugins();
 
   for (const [pluginId, pluginDef] of Object.entries(await allPlugins())) {

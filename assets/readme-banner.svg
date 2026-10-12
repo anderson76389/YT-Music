@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1280 380" width="1280" height="380" role="img" aria-labelledby="title desc">
+  <title id="title">YT Music — Pear Desktop</title>
+  <desc id="desc">Bannière sombre et violette présentant l'édition personnelle de Pear Desktop, avec une onde musicale lumineuse.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1022"/>
+      <stop offset="56%" stop-color="#181537"/>
+      <stop offset="100%" stop-color="#29123d"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff659f"/>
+      <stop offset="50%" stop-color="#b58dff"/>
+      <stop offset="100%" stop-color="#59d7ee"/>
+    </linearGradient>
+    <radialGradient id="halo"><stop offset="0%" stop-color="#8456ee" stop-opacity=".35"/><stop offset="100%" stop-color="#8456ee" stop-opacity="0"/></radialGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="25"/></filter>
+    <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <clipPath id="cut"><rect width="1280" height="380" rx="24"/></clipPath>
+  </defs>
+  <g clip-path="url(#cut)">
+    <rect width="1280" height="380" fill="url(#bg)"/>
+    <circle cx="1010" cy="183" r="350" fill="url(#halo)"/>
+    <path d="M0 340 C270 295 365 400 594 312 S970 230 1280 307" stroke="#d271ed" stroke-width="1.5" opacity=".18" fill="none"/>
+    <path d="M0 310 C230 250 370 380 610 260 S1020 248 1280 205" stroke="#66d9ef" stroke-width="1.5" opacity=".17" fill="none"/>
+    <g opacity=".15" fill="#d4c4ff">
+      <circle cx="610" cy="48" r="2"/><circle cx="668" cy="85" r="1.4"/><circle cx="1159" cy="72" r="2"/><circle cx="1057" cy="325" r="1.8"/><circle cx="888" cy="54" r="1.3"/>
+    </g>
+    <rect x="43" y="46" width="180" height="30" rx="15" fill="#ffffff" fill-opacity=".08" stroke="#ffffff" stroke-opacity=".15"/>
+    <text x="133" y="66" text-anchor="middle" fill="#dfcfff" font-family="Arial,Helvetica,sans-serif" font-size="12" letter-spacing="2" font-weight="700">PEAR DESKTOP</text>
+    <text x="48" y="168" fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-size="73" font-weight="800" letter-spacing="-2">YT Music</text>
+    <rect x="49" y="194" width="166" height="5" rx="2.5" fill="url(#accent)"/>
+    <text x="48" y="242" fill="#e5dff2" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="600">Votre musique, à votre façon.</text>
+    <text x="49" y="279" fill="#abb0cb" font-family="Arial,Helvetica,sans-serif" font-size="16">Client de bureau personnalisable, basé sur Pear Desktop.</text>
+    <g filter="url(#glow)"><rect x="620" y="180" width="9" height="26" rx="4.5" fill="#fb5a9e" opacity="0.28"/>
+    <rect x="640" y="172" width="9" height="42" rx="4.5" fill="#5bd5ee" opacity="0.38"/>
+    <rect x="660" y="158" width="9" height="70" rx="4.5" fill="#5bd5ee" opacity="0.48"/>
+    <rect x="680" y="143" width="9" height="100" rx="4.5" fill="#a58bff" opacity="0.58"/>
+    <rect x="700" y="161" width="9" height="64" rx="4.5" fill="#5bd5ee" opacity="0.68"/>
+    <rect x="720" y="129" width="9" height="128" rx="4.5" fill="#fb5a9e" opacity="0.78"/>
+    <rect x="740" y="117" width="9" height="152" rx="4.5" fill="#a58bff" opacity="0.28"/>
+    <rect x="760" y="140.5" width="9" height="105" rx="4.5" fill="#5bd5ee" opacity="0.38"/>
+    <rect x="780" y="156" width="9" height="74" rx="4.5" fill="#5bd5ee" opacity="0.48"/>
+    <rect x="800" y="106" width="9" height="174" rx="4.5" fill="#a58bff" opacity="0.58"/>
+    <rect x="820" y="121" width="9" height="144" rx="4.5" fill="#fb5a9e" opacity="0.68"/>
+    <rect x="840" y="149" width="9" height="88" rx="4.5" fill="#5bd5ee" opacity="0.78"/>
+    <rect x="860" y="166" width="9" height="54" rx="4.5" fill="#a58bff" opacity="0.28"/>
+    <rect x="880" y="125" width="9" height="136" rx="4.5" fill="#5bd5ee" opacity="0.38"/>
+    <rect x="900" y="101" width="9" height="184" rx="4.5" fill="#5bd5ee" opacity="0.48"/>
+    <rect x="920" y="128.5" width="9" height="129" rx="4.5" fill="#fb5a9e" opacity="0.58"/>
+    <rect x="940" y="148" width="9" height="90" rx="4.5" fill="#5bd5ee" opacity="0.68"/>
+    <rect x="960" y="108.5" width="9" height="169" rx="4.5" fill="#5bd5ee" opacity="0.78"/>
+    <rect x="980" y="92" width="9" height="202" rx="4.5" fill="#a58bff" opacity="0.28"/>
+    <rect x="1000" y="118" width="9" height="150" rx="4.5" fill="#5bd5ee" opacity="0.38"/>
+    <rect x="1020" y="138" width="9" height="110" rx="4.5" fill="#fb5a9e" opacity="0.48"/>
+    <rect x="1040" y="155.5" width="9" height="75" rx="4.5" fill="#a58bff" opacity="0.58"/>
+    <rect x="1060" y="126.5" width="9" height="133" rx="4.5" fill="#5bd5ee" opacity="0.68"/>
+    <rect x="1080" y="113" width="9" height="160" rx="4.5" fill="#5bd5ee" opacity="0.78"/>
+    <rect x="1100" y="133.5" width="9" height="119" rx="4.5" fill="#a58bff" opacity="0.28"/>
+    <rect x="1120" y="159.5" width="9" height="67" rx="4.5" fill="#fb5a9e" opacity="0.38"/>
+    <rect x="1140" y="146.5" width="9" height="93" rx="4.5" fill="#5bd5ee" opacity="0.48"/>
+    <rect x="1160" y="118.5" width="9" height="149" rx="4.5" fill="#a58bff" opacity="0.58"/>
+    <rect x="1180" y="137.5" width="9" height="111" rx="4.5" fill="#5bd5ee" opacity="0.68"/></g>
+    <circle cx="954" cy="190" r="96" fill="#121329" fill-opacity=".78" stroke="url(#accent)" stroke-width="3" opacity=".96"/>
+    <circle cx="954" cy="190" r="77" fill="#332450" fill-opacity=".66" stroke="#c6aaff" stroke-opacity=".22"/>
+    <path d="M931 146 Q931 138 940 143 L1001 179 Q1018 189 1000 199 L940 236 Q931 242 931 230 Z" fill="url(#accent)"/>
+    <rect x="0" y="373" width="1280" height="7" fill="url(#accent)"/>
+  </g>
+</svg>

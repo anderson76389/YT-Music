@@ -1,48 +1,66 @@
-#song-video canvas.html5-blur-canvas,
-#song-image .html5-blur-image {
-  filter: blur(var(--blur, 100px));
-  opacity: var(--opacity, 1);
-  width: var(--width, 100%);
-  height: var(--height, 100%);
-
-  pointer-events: none;
+/* Ambiance visuelle autour du lecteur : compatible avec les nouvelles
+   structures de YouTube Music et indépendante de #song-video. */
+#player-page.ytmd-ambient-host {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden;
 }
 
-#song-video canvas.html5-blur-canvas:not(.fullscreen),
-#song-image .html5-blur-image {
+#player-page.ytmd-ambient-host > :not(.ytmd-ambient-backdrop) {
+  position: relative;
+  z-index: 1;
+}
+
+#player-page .ytmd-ambient-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--ytmd-ambient-opacity, 1);
+  transition: opacity var(--ytmd-ambient-transition, 1500ms) ease;
+}
+
+#player-page .ytmd-ambient-backdrop.ytmd-ambient-fullscreen {
+  position: fixed;
+  inset: 0;
+}
+
+#player-page .ytmd-ambient-art,
+#player-page .ytmd-ambient-video {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
+  width: max(110%, var(--ytmd-ambient-size, 100%));
+  height: max(110%, var(--ytmd-ambient-size, 100%));
+  max-width: none;
+  object-fit: cover;
+  transform: translate(-50%, -50%) scale(1.12);
+  filter: blur(var(--ytmd-ambient-blur, 100px));
+  opacity: 0.82;
+  pointer-events: none;
 }
 
-#song-video canvas.html5-blur-canvas.fullscreen {
-  position: fixed;
-  left: 0;
-  top: 0;
-
-  width: 100%;
-  height: 100%;
+#player-page .ytmd-ambient-video {
+  opacity: 0;
+  transition: opacity var(--ytmd-ambient-transition, 1500ms) ease;
 }
 
-#song-video .html5-video-container {
-  height: 100%;
+#player-page .ytmd-ambient-video.ytmd-ambient-has-frame {
+  opacity: 0.88;
 }
 
-#player:not([video-mode]):not(.video-mode):not(
-    [player-ui-state='MINIPLAYER']
-  ):not([is-mweb-modernization-enabled]) {
-  width: 100%;
-  margin: 0 auto !important;
-  overflow: visible;
+#player-page .ytmd-ambient-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.3);
 }
 
-/* Fix ambient mode overlapping other elements #2520 */
-.song-button.ytmusic-av-toggle,
-.video-button.ytmusic-av-toggle {
-  z-index: 1;
-  background-color: transparent;
-}
-#side-panel.side-panel.ytmusic-player-page {
-  z-index: 0;
+/* Les boutons du lecteur et la file d'attente restent au-dessus de
+   l'ambiance, utilisables et sans superposition de commandes. */
+#player-page .ytmusic-av-toggle,
+#player-page #side-panel {
+  position: relative;
+  z-index: 2;
 }

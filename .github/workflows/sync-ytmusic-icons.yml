@@ -38,7 +38,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/icon.png assets/tray.png assets/generated/icons/png/ assets/generated/icons/win/icon.ico
+          git add assets/icon.png assets/tray.png assets/github-social-preview.png assets/generated/icons/png/ assets/generated/icons/win/icon.ico
           if git diff --cached --quiet; then
             echo "Toutes les icones sont deja identiques."
           else
@@ -53,6 +53,7 @@ jobs:
           path: |
             assets/icon.png
             assets/tray.png
+            assets/github-social-preview.png
             assets/generated/icons/png/
             assets/generated/icons/win/icon.ico
           retention-days: 30

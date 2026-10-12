@@ -47,7 +47,10 @@ export const setWindowTransparency = (
   );
 };
 
-export const backend = createBackend({
+export const backend = createBackend<
+  { window: BrowserWindow | null },
+  TransparentPlayerConfig
+>({
   window: null as BrowserWindow | null,
   async start({ window, getConfig }: BackendContext<TransparentPlayerConfig>) {
     const config = await getConfig();

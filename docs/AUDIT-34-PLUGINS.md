@@ -29,7 +29,7 @@ Dans « État », **corrigé** signifie *code modifié et soumis aux tests* ; **
 | `crossfade` | Entrée et configuration recensées | Transitions réelles et formats de l'API externe |
 | `custom-output-device` | Corrigé : liste audio sans demande de microphone, changements d'appareil et nettoyage | Routage vers chaque périphérique Windows |
 | `disable-autoplay` | Contrôles du lecteur recensés | Événements pendant changements de morceaux |
-| `do-not-track` | Corrigé : redémarrage imposé pour retirer les hooks du preload | Filtres et effets sur le site Google |
+| `do-not-track` | Corrigé : redémarrage imposé et remplacement d'une ancienne URL de listes fictive par les filtres Ghostery précompilés | Disponibilité réseau et effets sur le site Google |
 | `downloader` | Imports et paramètres compilables | Téléchargements réels et outils/versions externes |
 | `equalizer` | Corrigé : graphe audio, changements de preset/piste et nettoyage | Son mesuré et compatibilité avec compresseur |
 | `exponential-volume` | Relecture du prototype HTMLMediaElement et redémarrage nécessaire | Comportement du volume selon plateformes |
@@ -40,7 +40,7 @@ Dans « État », **corrigé** signifie *code modifié et soumis aux tests* ; **
 | `picture-in-picture` | Contrôles de fenêtre et préférences recensés | PiP Windows et basculements répétitifs |
 | `playback-speed` | Contrôles du lecteur recensés | Vitesses réelles selon pistes et versions Google |
 | `precise-volume` | HUD et raccourcis recensés | Raccourcis globaux, conflits logiciels |
-| `quality-changer` | API de qualités et bouton recensés | Qualités réellement offertes par les vidéos |
+| `quality-changer` | Corrigé : choix absent, nettoyage du bouton et suppression du handler IPC à la désactivation | Qualités réellement offertes par les vidéos |
 | `skip-disliked-songs` | Corrigé et testé par code : boutons reconstruits, saut unique par morceau | Comportement sur playlists et boutons réels |
 | `skip-silences` | Corrigé : arrêt de la boucle et de l'analyseur audio, fréquence bornée | Seuil, qualité sonore et silences de vraies pistes |
 | `sponsorblock` | Tri des segments testé dans les tests existants | Disponibilité de sponsor.ajay.app et segments |
@@ -50,8 +50,8 @@ Dans « État », **corrigé** signifie *code modifié et soumis aux tests* ; **
 | `transparent-player` | Fenêtre Electron et CSS adaptés ; diagnostic disponible | Toujours signalé en panne sur le PC utilisateur ; redémarrage + diagnostic |
 | `tuna-obs` | API locale et émission HTTP recensées | OBS/Tuna doit répondre sur `127.0.0.1:1608` |
 | `unobtrusive-player` | Écouteurs de clic et changement vidéo recensés | Sélecteurs du lecteur actuel |
-| `video-toggle` | Menu et composant de bascule recensés | Changements de mode audio/vidéo en lecture |
-| `visualizer` | Plugins Web Audio et trois moteurs recensés | GPU, capture vidéo et rendu en temps réel |
+| `video-toggle` | Corrigé : plus d'accès forcé à la vidéo ou la pochette absente du DOM | Changements de mode audio/vidéo en lecture |
+| `visualizer` | Corrigé : nettoyage du canvas, du ResizeObserver et des connexions audio à la désactivation | GPU, capture vidéo et rendu en temps réel |
 
 ## Diagnostic sur l'application
 

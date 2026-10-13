@@ -14,7 +14,7 @@ const itemStyle = cacheNoArgs(
   () => css`
     position: relative;
 
-    -webkit-app-region: none;
+    -webkit-app-region: no-drag;
     min-height: 32px;
     height: 32px;
 

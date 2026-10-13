@@ -99,7 +99,3 @@ ytmusic-player[player-ui-state='FULLSCREEN'] {
 ytmusic-guide-renderer {
   padding-top: 24px !important;
 }
-
-ytmusic-settings-button {
-  display: none !important;
-}

@@ -21,6 +21,10 @@ export async function showVisualDiagnostics(win: BrowserWindow) {
         pageFound: !!page,
         ambientHost: !!ambientHost,
         ambientBackdrop: !!backdrop,
+        ambientBlendMode: backdrop ? getComputedStyle(backdrop).mixBlendMode : 'absent',
+        ambientOpacity: backdrop ? getComputedStyle(backdrop).opacity : 'absent',
+        ambientZIndex: backdrop ? getComputedStyle(backdrop).zIndex : 'absent',
+        ambientWidth: backdrop ? Math.round(backdrop.getBoundingClientRect().width) : 0,
         ambientArtwork: document.querySelector('.ytmd-ambient-art')?.getAttribute('src') ?? '',
         ambientCss: !!document.querySelector('style[data-ytmd-plugin="ambient-mode"]'),
         transparentCss: !!document.querySelector('style[data-ytmd-plugin="transparent-player"]'),
@@ -35,6 +39,10 @@ export async function showVisualDiagnostics(win: BrowserWindow) {
     pageFound: boolean;
     ambientHost: boolean;
     ambientBackdrop: boolean;
+    ambientBlendMode: string;
+    ambientOpacity: string;
+    ambientZIndex: string;
+    ambientWidth: number;
     ambientArtwork: string;
     ambientCss: boolean;
     transparentCss: boolean;
@@ -49,6 +57,7 @@ export async function showVisualDiagnostics(win: BrowserWindow) {
     `Mode ambiant activé : ${ambient ? 'oui' : 'non'}`,
     `Page du lecteur trouvée : ${state.pageFound ? 'oui' : 'non'}`,
     `Fond ambiant monté : ${state.ambientBackdrop ? 'oui' : 'non'}`,
+    `Fond ambiant rendu : z-index ${state.ambientZIndex}, opacité ${state.ambientOpacity}, fusion ${state.ambientBlendMode}, largeur ${state.ambientWidth}px`,
     `Styles ambiants chargés : ${state.ambientCss ? 'oui' : 'non'}`,
     `Pochette du fond trouvée : ${state.ambientArtwork ? 'oui' : 'non'}`,
     `Mode transparent activé : ${transparent ? 'oui' : 'non'}`,

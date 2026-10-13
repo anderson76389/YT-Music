@@ -15,12 +15,10 @@ import type { BrowserWindow } from 'electron';
 export const setWindowTransparency = (
   window: BrowserWindow,
   material: MaterialType,
-  opacity: number,
+  _opacity: number,
 ) => {
-  const transparency = Math.max(0.1, Math.min(1, opacity));
-  // L'opacité est gérée par les couleurs RGBA du rendu HTML. Même à 100 %,
-  // l'arrière-plan de la fenêtre ne doit pas redevenir noir opaque.
-  void transparency;
+  // L'opacité est pilotée par le CSS HTML. Même à 100 %, le fond natif
+  // reste transparent pour ne pas masquer les couleurs du lecteur.
 
   // Le matériau OS est facultatif (Mica nécessite une version Windows
   // compatible). La fenêtre Electron est déjà créée avec transparent: true

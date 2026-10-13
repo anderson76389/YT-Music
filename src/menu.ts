@@ -18,6 +18,7 @@ import { APPLICATION_NAME, setLanguage, t } from '@/i18n';
 import * as config from './config';
 import { getAllMenuTemplate, loadAllMenuPlugins } from './loader/menu';
 import { restart } from './providers/app-controls';
+import { createPluginMenuEntries } from './providers/plugin-menu-access';
 import { startingPages } from './providers/extracted-data';
 import promptOptions from './providers/prompt-options';
 
@@ -98,18 +99,12 @@ export const mainMenuTemplate = async (
           false,
         );
 
-        const options = pluginTemplates[id];
-        if (!enabled || !options?.length) {
-          return [toggle];
-        }
-
-        return [
+        return createPluginMenuEntries(
           toggle,
-          {
-            label: `${label} — Réglages`,
-            submenu: options,
-          } satisfies Electron.MenuItemConstructorOptions,
-        ];
+          pluginTemplates[id],
+          enabled,
+          label,
+        );
       }),
     )
   ).flat();

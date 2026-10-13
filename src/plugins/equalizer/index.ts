@@ -17,7 +17,69 @@ export type EqualizerPluginConfig = {
   presets: { [preset in Preset]: boolean };
 };
 
-let appliedFilters: BiquadFilterNode[] = [];
+type AudioBinding = {
+  source: MediaElementAudioSourceNode;
+  context: AudioContext;
+  nodes: BiquadFilterNode[];
+  disconnectedDirect: boolean;
+};
+
+/** Une seule chaîne de filtres, nettoyée lors d'un changement de piste ou preset. */
+export function disconnectEqualizer(binding: AudioBinding | null): void {
+  if (!binding) return;
+  for (const node of binding.nodes) {
+    try { binding.source.disconnect(node); } catch {}
+    try { node.disconnect(); } catch {}
+  }
+  if (binding.disconnectedDirect) {
+    try { binding.source.connect(binding.context.destination); } catch {}
+  }
+}
+
+function createEqualizerBinding(
+  source: MediaElementAudioSourceNode,
+  context: AudioContext,
+  config: EqualizerPluginConfig,
+): AudioBinding {
+  const specs = [
+    ...(config.filters ?? []),
+    ...defaultPresets
+      .filter((preset) => config.presets?.[preset])
+      .map((preset) => presetConfigs[preset]),
+  ];
+  const nodes = specs.map((filter) => {
+    const node = context.createBiquadFilter();
+    node.type = filter.type;
+    node.frequency.value = filter.frequency;
+    node.Q.value = filter.Q;
+    node.gain.value = filter.gain;
+    return node;
+  });
+
+  if (!nodes.length) return { source, context, nodes, disconnectedDirect: false };
+
+  let disconnectedDirect = false;
+  try {
+    source.disconnect(context.destination);
+    disconnectedDirect = true;
+  } catch {
+    // Un autre plugin contrôle parfois déjà le routage de cette sortie.
+  }
+
+  try {
+    source.connect(nodes[0]);
+    for (let i = 1; i < nodes.length; i++) {
+      nodes[i - 1].connect(nodes[i]);
+    }
+    nodes[nodes.length - 1].connect(context.destination);
+  } catch (error) {
+    disconnectEqualizer({ source, context, nodes, disconnectedDirect });
+    console.warn('[YT Music] Égaliseur : routage audio indisponible', error);
+    return { source, context, nodes: [], disconnectedDirect: false };
+  }
+
+  return { source, context, nodes, disconnectedDirect };
+}
 
 export default createPlugin({
   name: () => t('plugins.equalizer.name'),
@@ -53,36 +115,41 @@ export default createPlugin({
     ];
   },
   renderer: {
+    settings: null as EqualizerPluginConfig | null,
+    binding: null as AudioBinding | null,
+    onAudioReady: null as EventListener | null,
     async start({ getConfig }) {
-      const config = await getConfig();
-
-      document.addEventListener(
-        'peard:audio-can-play',
-        ({ detail: { audioSource, audioContext } }) => {
-          const filtersToApply = config.filters.concat(
-            defaultPresets
-              .filter((preset) => config.presets[preset])
-              .map((preset) => presetConfigs[preset]),
-          );
-          filtersToApply.forEach((filter) => {
-            const biquadFilter = audioContext.createBiquadFilter();
-            biquadFilter.type = filter.type;
-            biquadFilter.frequency.value = filter.frequency; // filter frequency in Hz
-            biquadFilter.Q.value = filter.Q;
-            biquadFilter.gain.value = filter.gain; // filter gain in dB
-
-            audioSource.connect(biquadFilter);
-            biquadFilter.connect(audioContext.destination);
-
-            appliedFilters.push(biquadFilter);
-          });
-        },
-        { once: true, passive: true },
-      );
+      this.settings = await getConfig();
+      if (this.onAudioReady) document.removeEventListener('peard:audio-can-play', this.onAudioReady);
+      this.onAudioReady = ((event: Event) => {
+        const detail = (event as CustomEvent<{
+          audioSource: MediaElementAudioSourceNode;
+          audioContext: AudioContext;
+        }>).detail;
+        if (!detail?.audioSource || !detail.audioContext) return;
+        disconnectEqualizer(this.binding);
+        this.binding = createEqualizerBinding(
+          detail.audioSource,
+          detail.audioContext,
+          this.settings!,
+        );
+      }) as EventListener;
+      document.addEventListener('peard:audio-can-play', this.onAudioReady);
+    },
+    onConfigChange(config: EqualizerPluginConfig) {
+      this.settings = config;
+      const old = this.binding;
+      disconnectEqualizer(old);
+      this.binding = old
+        ? createEqualizerBinding(old.source, old.context, config)
+        : null;
     },
     stop() {
-      appliedFilters.forEach((filter) => filter.disconnect());
-      appliedFilters = [];
+      if (this.onAudioReady) document.removeEventListener('peard:audio-can-play', this.onAudioReady);
+      this.onAudioReady = null;
+      disconnectEqualizer(this.binding);
+      this.binding = null;
+      this.settings = null;
     },
   },
 });

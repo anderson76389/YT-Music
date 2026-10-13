@@ -100,3 +100,38 @@ body.transparent-player ytmusic-player-bar {
     8 8 12 / clamp(0.12, var(--ytmd-transparent-player-opacity, 0.5), 1)
   ) !important;
 }
+
+/* YouTube Music réinjecte un fond noir dans le gestionnaire de pages,
+   le lecteur et le menu latéral. Ces surfaces doivent être explicitement
+   transparentes pour voir le bureau derrière la fenêtre Electron. */
+html:has(body.transparent-player) {
+  background: transparent !important;
+}
+body.transparent-player #page-manager,
+body.transparent-player #content-wrapper,
+body.transparent-player #content,
+body.transparent-player #main-panel,
+body.transparent-player #player-container,
+body.transparent-player #player-container-outer,
+body.transparent-player #player-page,
+body.transparent-player #player,
+body.transparent-player #player-bar,
+body.transparent-player #nav-bar,
+body.transparent-player #guide,
+body.transparent-player #side-panel,
+body.transparent-player ytmusic-player-page,
+body.transparent-player ytmusic-app-layout,
+body.transparent-player ytmusic-app,
+body.transparent-player ytmusic-browse-response,
+body.transparent-player ytmusic-section-list-renderer {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+body.transparent-player #nav-bar,
+body.transparent-player #guide,
+body.transparent-player #player-bar,
+body.transparent-player #side-panel {
+  background-color: rgb(9 9 13 / var(--ytmd-transparent-player-opacity, 0.5)) !important;
+}

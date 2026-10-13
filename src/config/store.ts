@@ -176,18 +176,28 @@ const migrations = {
   },
 };
 
-// Les versions installée et portable doivent pouvoir démarrer indépendamment.
-// Sans ce profil distinct, Chromium et le verrou d'instance unique de Windows
-// utilisent le même dossier : lancer la portable ferme aussitôt le second
-// processus pendant que la version Setup est ouverte.
-// Le dossier AppData reste stable si le .exe portable est déplacé ou mis à jour.
-if (process.platform === 'win32' && process.env.PORTABLE_EXECUTABLE_FILE) {
-  const portableProfile = path.join(app.getPath('appData'), 'YT Music Portable');
+// Le portable dispose d'un profil indépendant et stable dans AppData.
+// Ce module est aussi importé par le preload, où electron.app est undefined.
+// On calcule donc le chemin sans utiliser l'API Electron dans ce processus,
+// puis on transmet le même cwd à electron-store dans les deux processus.
+const roamingPath = process.env.APPDATA ??
+  (process.env.USERPROFILE
+    ? path.join(process.env.USERPROFILE, 'AppData', 'Roaming')
+    : undefined);
+const portableProfile =
+  process.platform === 'win32' && process.env.PORTABLE_EXECUTABLE_FILE && roamingPath
+    ? path.join(roamingPath, 'YT Music Portable')
+    : undefined;
+
+if (portableProfile) {
   mkdirSync(portableProfile, { recursive: true });
-  app.setPath('userData', portableProfile);
+  if (process.type === 'browser') {
+    app.setPath('userData', portableProfile);
+  }
 }
 
 export const store = new Store({
+  ...(portableProfile ? { cwd: portableProfile } : {}),
   defaults: {
     ...defaults,
     // README: 'plugin' uses deepmerge to populate the default values, so it is not necessary to include it here

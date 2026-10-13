@@ -16,8 +16,9 @@ export default createPlugin({
     enabled: false,
   },
 
-  backend({ ipc, window }) {
-    ipc.handle(
+  backend: {
+    start({ ipc, window }) {
+      ipc.handle(
       'peard:quality-changer',
       async (qualityLabels: string[], currentIndex: number) =>
         await dialog.showMessageBox(window, {
@@ -39,15 +40,21 @@ export default createPlugin({
           cancelId: -1,
         }),
     );
+    },
+    stop({ ipc }) {
+      ipc.removeHandler('peard:quality-changer');
+    },
   },
 
   renderer: {
     qualitySettingsButtonContainer: document.createElement('div'),
+    disposeRender: null as (() => void) | null,
     onPlayerApiReady(api: MusicPlayer, context) {
       const chooseQuality = async (e: MouseEvent) => {
         e.stopPropagation();
 
         const qualityLevels = api.getAvailableQualityLevels();
+        if (!qualityLevels?.length) return;
 
         const currentIndex = qualityLevels.indexOf(api.getPlaybackQuality());
 
@@ -59,7 +66,7 @@ export default createPlugin({
           response: number;
         };
 
-        if (quality.response === -1) {
+        if (!quality || quality.response < 0 || quality.response >= qualityLevels.length) {
           return;
         }
 
@@ -68,7 +75,8 @@ export default createPlugin({
         api.setPlaybackQuality(newQuality);
       };
 
-      render(
+      this.disposeRender?.();
+      this.disposeRender = render(
         () => (
           <QualitySettingButton
             label={t(
@@ -89,9 +97,10 @@ export default createPlugin({
       setup();
     },
     stop() {
-      document
-        .querySelector('.top-row-buttons.ytmusic-player')
-        ?.removeChild(this.qualitySettingsButtonContainer);
+      this.disposeRender?.();
+      this.disposeRender = null;
+      this.qualitySettingsButtonContainer.remove();
+      this.qualitySettingsButtonContainer = document.createElement('div');
     },
   },
 });

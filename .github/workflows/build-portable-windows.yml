@@ -119,6 +119,11 @@ jobs:
           $report = Get-Content -LiteralPath $marker -Raw | ConvertFrom-Json
           $report | ConvertTo-Json | Write-Host
           if ($report.bridgeReady -ne $true -or $report.portable -ne $true) {
+            $trace = "$marker.trace"
+            if (Test-Path -LiteralPath $trace) {
+              Write-Host 'Trace de demarrage :'
+              Get-Content -LiteralPath $trace | Select-Object -Last 70 | Write-Host
+            }
             throw "Echec du test de lancement portable (Electron ou preload)."
           }
           Remove-Item Env:\YTMD_SMOKE_RESULT

@@ -713,9 +713,9 @@ async function createMainWindow() {
         app.exit(3);
       });
     });
-    void win.webContents.loadURL('data:text/html,' + encodeURIComponent(
-      '<!doctype html><html><head><meta charset="utf-8"></head><body><main id="smoke-test">YT Music Windows smoke test</main></body></html>',
-    ));
+    // Charger une vraie page file:// : certaines versions d'Electron
+    // n'exposent pas le preload/contextBridge aux documents data:.
+    void win.webContents.loadFile(ErrorHtmlAsset);
   } else {
     void win.webContents.loadURL(urlToLoad);
   }

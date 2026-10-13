@@ -1,134 +1,119 @@
 import type { SkipSilencesPluginConfig } from './index';
 import type { RendererContext } from '@/types/contexts';
 
-let config: SkipSilencesPluginConfig;
-
-let isSilent = false;
+let settings: SkipSilencesPluginConfig;
+let running = false;
+let timer: ReturnType<typeof setTimeout> | null = null;
+let analyser: AnalyserNode | null = null;
+let source: MediaElementAudioSourceNode | null = null;
+let media: HTMLVideoElement | null = null;
+let playOrSeekHandler: (() => void) | null = null;
 let hasAudioStarted = false;
+let silenceSamples = 0;
 
-const smoothing = 0.1;
-const threshold = -100; // DB (-100 = absolute silence, 0 = loudest)
-const interval = 2; // Ms
-const history = 10;
-const speakingHistory = Array.from({ length: history }).fill(0) as number[];
+const SILENCE_DB = -75;
+const CHECK_EVERY_MS = 45;
 
-let playOrSeekHandler: (() => void) | undefined;
+function clearMonitor() {
+  if (timer !== null) clearTimeout(timer);
+  timer = null;
+  if (media && playOrSeekHandler) {
+    media.removeEventListener('play', playOrSeekHandler);
+    media.removeEventListener('seeked', playOrSeekHandler);
+  }
+  if (source && analyser) {
+    try { source.disconnect(analyser); } catch {}
+  }
+  analyser?.disconnect();
+  analyser = null;
+  source = null;
+  media = null;
+  playOrSeekHandler = null;
+  hasAudioStarted = false;
+  silenceSamples = 0;
+}
 
-const getMaxVolume = (
-  analyser: AnalyserNode,
-  fftBins: Float32Array<ArrayBuffer>,
-) => {
-  let maxVolume = Number.NEGATIVE_INFINITY;
-  analyser.getFloatFrequencyData(fftBins);
+function maxVolume(node: AnalyserNode, frequencies: Float32Array<ArrayBuffer>) {
+  node.getFloatFrequencyData(frequencies);
+  let loudest = Number.NEGATIVE_INFINITY;
+  for (let i = 4; i < frequencies.length; i++) {
+    if (frequencies[i] > loudest) loudest = frequencies[i];
+  }
+  return loudest;
+}
 
-  for (let i = 4, ii = fftBins.length; i < ii; i++) {
-    if (fftBins[i] > maxVolume && fftBins[i] < 0) {
-      maxVolume = fftBins[i];
-    }
+function audioCanPlayListener(event: CustomEvent<Compressor>) {
+  if (!running || !event.detail?.audioContext || !event.detail.audioSource) return;
+  clearMonitor();
+
+  const { audioContext, audioSource } = event.detail;
+  const video = document.querySelector<HTMLVideoElement>('video');
+  if (!video) return;
+
+  const node = audioContext.createAnalyser();
+  node.fftSize = 512;
+  node.smoothingTimeConstant = 0.1;
+  try {
+    audioSource.connect(node);
+  } catch (error) {
+    console.warn('[YT Music] Passer les silences : analyseur inaccessible', error);
+    return;
   }
 
-  return maxVolume;
-};
-
-const audioCanPlayListener = (e: CustomEvent<Compressor>) => {
-  const video = document.querySelector('video');
-  const { audioContext } = e.detail;
-  const sourceNode = e.detail.audioSource;
-
-  // Use an audio analyser similar to Hark
-  // https://github.com/otalk/hark/blob/master/hark.bundle.js
-  const analyser = audioContext.createAnalyser();
-  analyser.fftSize = 512;
-  analyser.smoothingTimeConstant = smoothing;
-  const fftBins = new Float32Array(analyser.frequencyBinCount);
-
-  sourceNode.connect(analyser);
-
-  const looper = () => {
-    setTimeout(() => {
-      const currentVolume = getMaxVolume(analyser, fftBins);
-
-      let history = 0;
-      if (currentVolume > threshold && isSilent) {
-        // Trigger quickly, short history
-        for (
-          let i = speakingHistory.length - 3;
-          i < speakingHistory.length;
-          i++
-        ) {
-          history += speakingHistory[i];
-        }
-
-        if (history >= 2) {
-          // Not silent
-          isSilent = false;
-          hasAudioStarted = true;
-        }
-      } else if (currentVolume < threshold && !isSilent) {
-        for (const element of speakingHistory) {
-          history += element;
-        }
-
-        if (
-          history == 0 && // Silent
-          !(
-            video &&
-            (video.paused ||
-              video.seeking ||
-              video.ended ||
-              video.muted ||
-              video.volume === 0)
-          )
-        ) {
-          isSilent = true;
-          skipSilence();
-        }
-      }
-
-      speakingHistory.shift();
-      speakingHistory.push(Number(currentVolume > threshold));
-
-      looper();
-    }, interval);
-  };
-
-  looper();
-
-  const skipSilence = () => {
-    if (config.onlySkipBeginning && hasAudioStarted) {
-      return;
-    }
-
-    if (isSilent && video && !video.paused) {
-      video.currentTime += 0.2; // In s
-    }
-  };
-
+  analyser = node;
+  source = audioSource;
+  media = video;
   playOrSeekHandler = () => {
     hasAudioStarted = false;
-    skipSilence();
+    silenceSamples = 0;
   };
+  video.addEventListener('play', playOrSeekHandler);
+  video.addEventListener('seeked', playOrSeekHandler);
+  const frequencies = new Float32Array(node.frequencyBinCount);
 
-  video?.addEventListener('play', playOrSeekHandler);
-  video?.addEventListener('seeked', playOrSeekHandler);
-};
+  function sample() {
+    if (!running || analyser !== node || media !== video) return;
+    if (!video.paused && !video.seeking && !video.ended &&
+        !video.muted && video.volume > 0) {
+      const loudness = maxVolume(node, frequencies);
+      if (loudness > SILENCE_DB) {
+        hasAudioStarted = true;
+        silenceSamples = 0;
+      } else {
+        silenceSamples++;
+        if (silenceSamples >= 3 &&
+            (!settings.onlySkipBeginning || !hasAudioStarted)) {
+          const end = Number.isFinite(video.duration)
+            ? Math.max(0, video.duration - 0.2)
+            : video.currentTime + 0.15;
+          video.currentTime = Math.min(video.currentTime + 0.15, end);
+        }
+      }
+    } else {
+      silenceSamples = 0;
+    }
+    timer = setTimeout(sample, CHECK_EVERY_MS);
+  }
+  sample();
+}
 
 export const onRendererLoad = async ({
   getConfig,
 }: RendererContext<SkipSilencesPluginConfig>) => {
-  config = await getConfig();
-
+  settings = await getConfig();
+  running = true;
+  document.removeEventListener('peard:audio-can-play', audioCanPlayListener);
   document.addEventListener('peard:audio-can-play', audioCanPlayListener, {
     passive: true,
   });
 };
 
-export const onRendererUnload = () => {
-  document.removeEventListener('peard:audio-can-play', audioCanPlayListener);
+export const onConfigChange = (newConfig: SkipSilencesPluginConfig) => {
+  settings = newConfig;
+};
 
-  if (playOrSeekHandler) {
-    const video = document.querySelector('video');
-    video?.removeEventListener('play', playOrSeekHandler);
-    video?.removeEventListener('seeked', playOrSeekHandler);
-  }
+export const onRendererUnload = () => {
+  running = false;
+  document.removeEventListener('peard:audio-can-play', audioCanPlayListener);
+  clearMonitor();
 };

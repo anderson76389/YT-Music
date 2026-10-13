@@ -6,6 +6,7 @@ import { LoggerPrefix, startPlugin, stopPlugin } from '@/utils';
 
 import { mountPluginStyles, unmountPluginStyles } from './plugin-styles';
 
+import type { MusicPlayer } from '@/types/music-player';
 import type { RendererContext } from '@/types/contexts';
 import type { PluginConfig, PluginDef } from '@/types/plugins';
 
@@ -13,6 +14,13 @@ const loadedPluginMap: Record<
   string,
   PluginDef<unknown, unknown, unknown>
 > = {};
+const loadingPluginMap = new Map<string, Promise<void>>();
+let readyPlayerApi: MusicPlayer | null = null;
+
+/** Les plugins chargés lentement recevront aussi l'API du lecteur. */
+export const setRendererPlayerApi = (api: MusicPlayer) => {
+  readyPlayerApi = api;
+};
 
 export const createContext = <Config extends PluginConfig>(
   id: string,
@@ -67,52 +75,93 @@ export const forceUnloadRendererPlugin = async (id: string) => {
   }
 };
 
-export const forceLoadRendererPlugin = async (id: string) => {
-  if (loadedPluginMap[id]) return;
+export const forceLoadRendererPlugin = (id: string): Promise<void> => {
+  if (loadedPluginMap[id]) return Promise.resolve();
+  const pending = loadingPluginMap.get(id);
+  if (pending) return pending;
 
-  const plugin = (await rendererPlugins())[id];
-  if (!plugin) return;
+  const task = (async () => {
+    const plugin = (await rendererPlugins())[id];
+    if (!plugin) return;
+    const started = await startPlugin(id, plugin, {
+      ctx: 'renderer',
+      context: createContext(id),
+    });
+    if (started === false) {
+      console.error(LoggerPrefix, 'Plugin renderer non démarré :', id);
+      return;
+    }
 
-  const started = await startPlugin(id, plugin, {
-    ctx: 'renderer',
-    context: createContext(id),
-  });
+    // Si l'utilisateur a désactivé l'extension pendant un démarrage
+    // asynchrone, ne pas laisser son CSS ou son timer réapparaître.
+    const stillEnabled = await window.mainConfig.plugins.isEnabled(id);
+    if (!stillEnabled) {
+      await stopPlugin(id, plugin, {
+        ctx: 'renderer',
+        context: createContext(id),
+      });
+      return;
+    }
 
-  // Ne jamais marquer un plugin comme chargé si sa fonction start()
-  // a échoué, même si des stylesheets sont déclarées.
-  if (started === false) {
-    console.error(
+    loadedPluginMap[id] = plugin;
+    if (plugin.stylesheets?.length) {
+      mountPluginStyles(document, id, plugin.stylesheets);
+    }
+    if (readyPlayerApi && typeof plugin.renderer !== 'function') {
+      try {
+        await plugin.renderer?.onPlayerApiReady?.call(
+          plugin.renderer,
+          readyPlayerApi,
+          createContext(id),
+        );
+      } catch (error) {
+        console.error('[YT Music] API du lecteur indisponible pour', id, error);
+      }
+    }
+    console.log(
       LoggerPrefix,
-      t('common.console.plugins.initialize-failed', { pluginName: id }),
+      t('common.console.plugins.loaded', { pluginName: id }),
     );
-    return;
-  }
+  })().finally(() => loadingPluginMap.delete(id));
 
-  loadedPluginMap[id] = plugin;
-  if (plugin.stylesheets?.length) {
-    mountPluginStyles(document, id, plugin.stylesheets);
-  }
-
-  console.log(
-    LoggerPrefix,
-    t('common.console.plugins.loaded', { pluginName: id }),
-  );
+  loadingPluginMap.set(id, task);
+  return task;
 };
 
 export const loadAllRendererPlugins = async () => {
   const pluginConfigs = window.mainConfig.plugins.getPlugins();
+  const tasks: Promise<void>[] = [];
 
+  // Un plugin lent ne doit plus empêcher les autres de démarrer.
   for (const [pluginId, pluginDef] of Object.entries(await rendererPlugins())) {
-    const config = deepmerge(pluginDef.config, pluginConfigs[pluginId] ?? {});
-
-    if (config.enabled) {
-      await forceLoadRendererPlugin(pluginId);
-    } else {
-      if (loadedPluginMap[pluginId]) {
-        await forceUnloadRendererPlugin(pluginId);
-      }
-    }
+    const config = deepmerge(
+      pluginDef.config ?? { enabled: false },
+      pluginConfigs[pluginId] ?? {},
+    );
+    tasks.push(
+      (config.enabled
+        ? forceLoadRendererPlugin(pluginId)
+        : loadedPluginMap[pluginId]
+          ? forceUnloadRendererPlugin(pluginId)
+          : Promise.resolve()
+      ).catch((error: unknown) => {
+        console.error('[YT Music] Erreur de chargement du plugin', pluginId, error);
+      }),
+    );
   }
+
+  // Après 8 secondes, la lecture peut démarrer même si une extension attend
+  // un élément de page qui n'apparaîtra jamais. Les plugins retardataires
+  // reçoivent l'API du lecteur dès qu'ils terminent.
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<void>((resolve) => {
+    timeout = setTimeout(() => {
+      console.warn('[YT Music] Extensions encore en cours de chargement');
+      resolve();
+    }, 8000);
+  });
+  await Promise.race([Promise.allSettled(tasks).then(() => {}), deadline]);
+  if (timeout) clearTimeout(timeout);
 };
 
 export const unloadAllRendererPlugins = async () => {

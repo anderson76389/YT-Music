@@ -184,33 +184,58 @@ const initHook = async (win: BrowserWindow) => {
     config.setPartial(`plugins.${name}`, obj, allPluginStubs[name].config),
   );
 
-  // Injecter les CSS des plugins avec Electron (cssOrigin: user), pas
-  // exclusivement via <style> dans le DOM YouTube Music. Les CSP et les
-  // rechargements du site peuvent empêcher/effacer les balises inline.
-  // Le registre injectCSS réapplique automatiquement les styles après reload.
+  // Source de vérité : le fichier de configuration, pas le DOM.
+  // L'injection Electron est faite même si le plugin renderer n'a pas démarré.
+  // Cela garantit que les thèmes ne dépendent pas d'un hook du lecteur.
   type RemovePluginCss = () => Promise<void>;
   const pluginCss = new Map<string, RemovePluginCss>();
+  const cssSequence = new Map<string, number>();
+  const setVisualCss = async (id: string, enabled: boolean) => {
+    const seq = (cssSequence.get(id) ?? 0) + 1;
+    cssSequence.set(id, seq);
+    const existing = pluginCss.get(id);
+    if (!enabled) {
+      pluginCss.delete(id);
+      if (existing) await existing();
+      return true;
+    }
+    if (existing) return true;
+    const style = allPluginStubs[id]?.stylesheets?.join('\n') ?? '';
+    if (!style || win.webContents.isDestroyed()) return false;
+    try {
+      const remove = await injectCSS(win.webContents, style);
+      if (seq !== cssSequence.get(id) ||
+          !await config.plugins.isEnabled(id)) {
+        await remove();
+        return false;
+      }
+      pluginCss.set(id, remove);
+      return true;
+    } catch (error) {
+      console.error('[YT Music] Échec du CSS de', id, error);
+      return false;
+    }
+  };
+
   ipcMain.handle('ytmd:plugin-css:enable', async (event, id: string) => {
     if (event.sender !== win.webContents || !allPluginStubs[id]) return false;
-    if (!await config.plugins.isEnabled(id)) return false;
-    if (pluginCss.has(id)) return true;
-    const styles = allPluginStubs[id].stylesheets;
-    if (!styles?.length) return true;
-    const cleanup = await injectCSS(win.webContents, styles.join('\n'));
-    pluginCss.set(id, cleanup);
-    return true;
+    return setVisualCss(id, await config.plugins.isEnabled(id));
   });
   ipcMain.handle('ytmd:plugin-css:disable', async (event, id: string) => {
     if (event.sender !== win.webContents || !allPluginStubs[id]) return false;
-    const cleanup = pluginCss.get(id);
-    pluginCss.delete(id);
-    if (cleanup) await cleanup();
-    return true;
+    return setVisualCss(id, false);
   });
-  win.once('closed', () => {
-    for (const cleanup of pluginCss.values()) {
-      void cleanup();
+
+  // Au premier chargement, injecter immédiatement les thèmes déjà cochés.
+  for (const id of Object.keys(allPluginStubs)) {
+    if (allPluginStubs[id]?.stylesheets?.length &&
+        await config.plugins.isEnabled(id)) {
+      void setVisualCss(id, true);
     }
+  }
+
+  win.once('closed', () => {
+    for (const cleanup of pluginCss.values()) void cleanup();
     pluginCss.clear();
     ipcMain.removeHandler('ytmd:plugin-css:enable');
     ipcMain.removeHandler('ytmd:plugin-css:disable');
@@ -237,6 +262,9 @@ const initHook = async (win: BrowserWindow) => {
         ) as PluginConfig;
 
         if (config.enabled !== oldConfig?.enabled) {
+          if (allPluginStubs[id]?.stylesheets?.length) {
+            void setVisualCss(id, config.enabled);
+          }
           if (config.enabled) {
             win.webContents.send('plugin:enable', id);
             ipcMain.emit('plugin:enable', id);

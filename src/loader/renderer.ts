@@ -54,7 +54,7 @@ export const forceUnloadRendererPlugin = async (id: string) => {
   unmountPluginStyles(document, id);
   delete loadedPluginMap[id];
 
-  if (hasStopped || (hasStopped === null && plugin?.renderer)) {
+  if (hasStopped || !plugin.renderer || hasStopped === null) {
     console.log(
       LoggerPrefix,
       t('common.console.plugins.unloaded', { pluginName: id }),

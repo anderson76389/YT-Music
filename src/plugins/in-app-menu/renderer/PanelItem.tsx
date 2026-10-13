@@ -346,7 +346,18 @@ export const PanelItem = (props: PanelItemProps) => {
           </svg>
         </Match>
       </Switch>
-      <span class={itemLabelStyle()}>{props.name}</span>
+      <span class={itemLabelStyle()}>
+        {props.name}
+        <Show when={(props.type === 'checkbox' || props.type === 'radio') && props.checked}>
+          <span
+            aria-label="Activé"
+            title="Activé"
+            style={{ color: '#66e6a0', 'font-weight': 'bold', 'margin-left': '9px' }}
+          >
+            ✓
+          </span>
+        </Show>
+      </span>
       <Show fallback={<div />} when={props.chip}>
         <span class={itemChipStyle()}>{props.chip}</span>
       </Show>

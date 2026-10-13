@@ -4,6 +4,7 @@ import { createPlugin } from '@/utils';
 import { menu } from './menu';
 import style from './style.css?inline';
 import { type AmbientModePluginConfig } from './types';
+import { canDrawAmbientVideo } from './video-state';
 
 const defaultConfig: AmbientModePluginConfig = {
   enabled: false,
@@ -27,6 +28,7 @@ type AmbientRendererState = {
   responseArt: string;
   ticker: ReturnType<typeof setInterval> | null;
   videoTicker: ReturnType<typeof setInterval> | null;
+  videoTickerFps: number;
   dataListener: EventListener | null;
   refresh(): void;
   applySettings(): void;
@@ -53,6 +55,7 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
     responseArt: '',
     ticker: null as ReturnType<typeof setInterval> | null,
     videoTicker: null as ReturnType<typeof setInterval> | null,
+    videoTickerFps: 0,
     dataListener: null as EventListener | null,
 
     start({ getConfig }) {
@@ -66,7 +69,6 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
         if (!this.active) return;
         this.settings = config;
         this.refresh();
-        this.startVideoTicker();
       }).catch((error: unknown) => {
         console.warn('[YT Music] Mode ambiant : configuration inaccessible', error);
       });
@@ -96,7 +98,12 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
       const host = document.querySelector<HTMLElement>(
         'ytmusic-player-page, #player-page, ytmusic-player-bar',
       );
-      if (!host) return;
+      if (!host) {
+        if (this.videoTicker) clearInterval(this.videoTicker);
+        this.videoTicker = null;
+        this.videoTickerFps = 0;
+        return;
+      }
 
       if (host !== this.host) {
         this.backdrop?.remove();
@@ -132,6 +139,7 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
         this.source = src;
         if (this.art) this.art.src = src;
       }
+      this.startVideoTicker();
     },
 
     applySettings() {
@@ -158,11 +166,7 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
       const videoShown = !songVideo || getComputedStyle(songVideo).display !== 'none';
 
       if (
-        !video ||
-        !videoShown ||
-        video.paused ||
-        !video.videoWidth ||
-        !video.videoHeight
+        !canDrawAmbientVideo(video, videoShown)
       ) {
         canvas.classList.remove('ytmd-ambient-has-frame');
         return;
@@ -187,15 +191,34 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
     },
 
     startVideoTicker() {
-      if (this.videoTicker) clearInterval(this.videoTicker);
+      // En lecture audio seule ou lorsque la vidéo est masquée, le fond de
+      // pochette reste actif mais aucun canvas n'est recalculé à 30 FPS.
+      const video = document.querySelector<HTMLVideoElement>(
+        '#movie_player video, video.html5-main-video, .html5-video-container video',
+      );
+      const songVideo = document.querySelector<HTMLElement>('#song-video');
+      const videoShown = !songVideo || getComputedStyle(songVideo).display !== 'none';
+      const running = this.active && this.backdrop && canDrawAmbientVideo(video, videoShown);
+
+      if (!running) {
+        if (this.videoTicker) clearInterval(this.videoTicker);
+        this.videoTicker = null;
+        this.videoTickerFps = 0;
+        this.canvas?.classList.remove('ytmd-ambient-has-frame');
+        return;
+      }
+
       const fps = Math.max(1, Math.min(30, this.settings.buffer));
+      if (this.videoTicker && this.videoTickerFps === fps) return;
+      if (this.videoTicker) clearInterval(this.videoTicker);
+      this.videoTickerFps = fps;
+      this.drawVideoFrame();
       this.videoTicker = setInterval(() => this.drawVideoFrame(), 1000 / fps);
     },
 
     onConfigChange(newConfig) {
       this.settings = newConfig;
       this.applySettings();
-      this.startVideoTicker();
       this.refresh();
     },
 
@@ -205,6 +228,7 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
       if (this.videoTicker) clearInterval(this.videoTicker);
       this.ticker = null;
       this.videoTicker = null;
+      this.videoTickerFps = 0;
       if (this.dataListener) {
         document.removeEventListener('videodatachange', this.dataListener);
         this.dataListener = null;

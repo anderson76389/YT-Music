@@ -46,3 +46,32 @@ export function dismissIdlePrompt(doc: Document): boolean {
 
   return true;
 }
+
+
+/**
+ * Les publicités sont déjà détectées sur la classe du lecteur et les événements
+ * vidéo. Le MutationObserver global sert seulement à retrouver un lecteur/une
+ * vidéo remplacés ou une boîte anti-inactivité ajoutée dans la page.
+ */
+const RELEVANT_NODES = 'video, #movie_player, ytmusic-you-there-renderer';
+
+function isRelevantAntiPauseNode(node: Node): boolean {
+  if (node.nodeType !== 1) return false;
+  const element = node as Element;
+  return element.matches(RELEVANT_NODES) ||
+    element.querySelector(RELEVANT_NODES) !== null;
+}
+
+export function hasRelevantAntiPauseMutation(
+  changes: readonly MutationRecord[],
+): boolean {
+  for (const change of changes) {
+    for (const node of change.addedNodes) {
+      if (isRelevantAntiPauseNode(node)) return true;
+    }
+    for (const node of change.removedNodes) {
+      if (isRelevantAntiPauseNode(node)) return true;
+    }
+  }
+  return false;
+}

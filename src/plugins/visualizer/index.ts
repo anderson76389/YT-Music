@@ -242,7 +242,6 @@ export default createPlugin({
       };
       resizeVisualizer();
 
-      this.props.observer?.disconnect();
       this.props.observer = new ResizeObserver(resizeVisualizer);
       this.props.observer.observe(visualizerContainer);
     },

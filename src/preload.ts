@@ -88,22 +88,20 @@ const [path, script] = ipcRenderer.sendSync('get-renderer-script') as [
   string | null,
   string,
 ];
-let blocked = true;
+// Ne jamais bloquer le thread du preload avec une attente synchrone :
+ // la réponse de l'injection JavaScript arrive elle-même de manière asynchrone.
+ // Une boucle while empêchait son callback de s'exécuter et pouvait figer
+ // le démarrage (notamment après extraction du portable).
 if (path) {
-  webFrame.executeJavaScriptInIsolatedWorld(
+  void webFrame.executeJavaScriptInIsolatedWorld(
     0,
-    [
-      {
-        code: script,
-        url: path,
-      },
-    ],
+    [{ code: script, url: path }],
     true,
-    () => (blocked = false),
-  );
+  ).catch((error: unknown) => {
+    console.error('[YT Music] Injection du renderer impossible', error);
+  });
 } else {
-  webFrame.executeJavaScript(script, true, () => (blocked = false));
+  void webFrame.executeJavaScript(script, true).catch((error: unknown) => {
+    console.error('[YT Music] Injection du renderer impossible', error);
+  });
 }
-
-// HACK: Wait for the script to be executed
-while (blocked);

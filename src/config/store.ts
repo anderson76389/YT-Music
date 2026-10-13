@@ -1,3 +1,8 @@
+import { mkdirSync } from 'node:fs';
+import path from 'node:path';
+
+import { app } from 'electron';
+
 import { blockers } from '@/plugins/do-not-track/types';
 import { DefaultPresetList, type Preset } from '@/plugins/downloader/types';
 
@@ -170,6 +175,17 @@ const migrations = {
     store.set('plugins', plugins);
   },
 };
+
+// Les versions installée et portable doivent pouvoir démarrer indépendamment.
+// Sans ce profil distinct, Chromium et le verrou d'instance unique de Windows
+// utilisent le même dossier : lancer la portable ferme aussitôt le second
+// processus pendant que la version Setup est ouverte.
+// Le dossier AppData reste stable si le .exe portable est déplacé ou mis à jour.
+if (process.platform === 'win32' && process.env.PORTABLE_EXECUTABLE_FILE) {
+  const portableProfile = path.join(app.getPath('appData'), 'YT Music Portable');
+  mkdirSync(portableProfile, { recursive: true });
+  app.setPath('userData', portableProfile);
+}
 
 export const store = new Store({
   defaults: {

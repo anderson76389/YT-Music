@@ -61,6 +61,36 @@ unhandled({
 
 // Prevent window being garbage collected
 let mainWindow: Electron.BrowserWindow | null;
+let queuedSecondInstance: string[] | null = null;
+
+const focusOrRouteSecondInstance = (commandLine: string[]) => {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    queuedSecondInstance = commandLine;
+    return;
+  }
+  const uri = `${APP_PROTOCOL}://`;
+  const protocolArgv = commandLine.find((arg) => arg.startsWith(uri));
+  if (protocolArgv) {
+    const lastIndex = protocolArgv.endsWith('/') ? -1 : undefined;
+    const command = protocolArgv.slice(uri.length, lastIndex);
+    try {
+      const split = decodeURIComponent(command).split(' ');
+      handleProtocol(split.shift()!, ...split);
+    } catch (error) {
+      console.error('[YT Music] URL de seconde instance invalide', error);
+    }
+    return;
+  }
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  if (!mainWindow.isVisible()) mainWindow.show();
+  mainWindow.focus();
+};
+
+// Écouter AVANT les opérations asynchrones de démarrage : sinon le clic
+// sur une seconde instance peut être perdu sans afficher la première.
+app.on('second-instance', (_, commandLine) => {
+  focusOrRouteSecondInstance(commandLine);
+});
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -633,7 +663,33 @@ async function createMainWindow() {
     }
   });
 
-  win.webContents.loadURL(urlToLoad);
+  const smokeMarker = process.env.YTMD_SMOKE_RESULT;
+  if (smokeMarker) {
+    // Exécuté par GitHub Actions avec le vrai .exe Windows, sans compte
+    // Google ni accès au service distant. Confirme le démarrage d'Electron,
+    // du preload, du navigateur et la disponibilité du bridge.
+    win.webContents.once('did-finish-load', () => {
+      void win.webContents.executeJavaScript(
+        'Boolean(window.mainConfig?.plugins && window.ipcRenderer?.invoke)',
+        true,
+      ).then((bridgeReady: boolean) => {
+        fs.writeFileSync(smokeMarker, JSON.stringify({
+          bridgeReady,
+          portable: Boolean(process.env.PORTABLE_EXECUTABLE_FILE),
+          windowCreated: true,
+        }));
+        app.exit(bridgeReady ? 0 : 2);
+      }).catch((error: unknown) => {
+        fs.writeFileSync(smokeMarker, JSON.stringify({ bridgeReady: false, error: String(error) }));
+        app.exit(3);
+      });
+    });
+    void win.webContents.loadURL('data:text/html,' + encodeURIComponent(
+      '<!doctype html><html><head><meta charset="utf-8"></head><body><main id="smoke-test">YT Music Windows smoke test</main></body></html>',
+    ));
+  } else {
+    void win.webContents.loadURL(urlToLoad);
+  }
 
   return win;
 }
@@ -842,39 +898,11 @@ app.whenReady().then(async () => {
 
   setupProtocolHandler(mainWindow);
 
-  app.on('second-instance', (_, commandLine) => {
-    const uri = `${APP_PROTOCOL}://`;
-    const protocolArgv = commandLine.find((arg) => arg.startsWith(uri));
-    if (protocolArgv) {
-      const lastIndex = protocolArgv.endsWith('/') ? -1 : undefined;
-      const command = protocolArgv.slice(uri.length, lastIndex);
-      if (is.dev()) {
-        console.debug(
-          LoggerPrefix,
-          t('main.console.second-instance.receive-command', { command }),
-        );
-      }
-
-      const splited = decodeURIComponent(command).split(' ');
-
-      handleProtocol(splited.shift()!, ...splited);
-      return;
-    }
-
-    if (!mainWindow) {
-      return;
-    }
-
-    if (mainWindow.isMinimized()) {
-      mainWindow.restore();
-    }
-
-    if (!mainWindow.isVisible()) {
-      mainWindow.show();
-    }
-
-    mainWindow.focus();
-  });
+  if (queuedSecondInstance) {
+    const pending = queuedSecondInstance;
+    queuedSecondInstance = null;
+    focusOrRouteSecondInstance(pending);
+  }
 
   // Autostart at login
   app.setLoginItemSettings({

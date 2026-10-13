@@ -89,6 +89,30 @@ jobs:
         run: |
           pnpm exec electron-builder --win nsis:x64 portable:x64 --publish never "-c.extraMetadata.version=$env:YT_RELEASE_VERSION"
 
+      - name: Lancer le vrai portable Windows avant publication
+        shell: pwsh
+        timeout-minutes: 4
+        run: |
+          $marker = Join-Path $env:RUNNER_TEMP 'ytmusic-portable-smoke.json'
+          Remove-Item -LiteralPath $marker -ErrorAction SilentlyContinue
+          $env:YTMD_SMOKE_RESULT = $marker
+          $portable = (Resolve-Path 'pack/YT-Music-Portable-Windows-x64.exe').Path
+          $started = Start-Process -FilePath $portable -PassThru
+          $limit = (Get-Date).AddSeconds(100)
+          while ((Get-Date) -lt $limit -and -not (Test-Path -LiteralPath $marker)) {
+            Start-Sleep -Milliseconds 750
+          }
+          if (-not (Test-Path -LiteralPath $marker)) {
+            throw "Portable non demarre : aucun resultat du vrai exe en 100 secondes. Processus initial : $($started.Id)"
+          }
+          $report = Get-Content -LiteralPath $marker -Raw | ConvertFrom-Json
+          $report | ConvertTo-Json | Write-Host
+          if ($report.bridgeReady -ne $true -or $report.portable -ne $true) {
+            throw "Echec du test de lancement portable (Electron ou preload)."
+          }
+          Remove-Item Env:\YTMD_SMOKE_RESULT
+          Write-Host 'Portable : lancement reel, fenetre creee, preload et bridge OK.'
+
       - name: Generer le manifeste de mise a jour SHA512
         shell: pwsh
         run: |

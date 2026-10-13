@@ -47,8 +47,9 @@ function audioCanPlayListener(event: CustomEvent<Compressor>) {
   clearMonitor();
 
   const { audioContext, audioSource } = event.detail;
-  const video = document.querySelector<HTMLVideoElement>('video');
-  if (!video) return;
+  const selectedVideo = document.querySelector<HTMLVideoElement>('video');
+  if (!selectedVideo) return;
+  const video: HTMLVideoElement = selectedVideo;
 
   const node = audioContext.createAnalyser();
   node.fftSize = 512;

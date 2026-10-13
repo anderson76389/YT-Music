@@ -18,6 +18,9 @@ export const setWindowTransparency = (
   opacity: number,
 ) => {
   const transparency = Math.max(0.1, Math.min(1, opacity));
+  // L'opacité est gérée par les couleurs RGBA du rendu HTML. Même à 100 %,
+  // l'arrière-plan de la fenêtre ne doit pas redevenir noir opaque.
+  void transparency;
 
   // Le matériau OS est facultatif (Mica nécessite une version Windows
   // compatible). La fenêtre Electron est déjà créée avec transparent: true
@@ -42,9 +45,7 @@ export const setWindowTransparency = (
 
   // L'opacité visuelle est pilotée par le CSS du contenu. Ne jamais redonner
   // un fond opaque à la BrowserWindow : cela annulait toute transparence.
-  window.setBackgroundColor(
-    transparency === 1 ? '#000000' : '#00000000',
-  );
+  window.setBackgroundColor('#00000000');
 };
 
 export const backend = createBackend<
@@ -62,7 +63,13 @@ export const backend = createBackend<
     setWindowTransparency(this.window, newConfig.type, newConfig.opacity);
   },
   stop({ window }) {
-    setWindowTransparency(window, MaterialType.NONE, 1);
+    try {
+      if (is.windows()) window.setBackgroundMaterial('none');
+      if (is.macOS()) window.setVibrancy(null);
+    } catch {
+      // Les matériaux de la plateforme peuvent être indisponibles.
+    }
+    window.setBackgroundColor('#000000');
     this.window = null;
   },
 });

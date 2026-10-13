@@ -1,11 +1,7 @@
 import { t } from '@/i18n';
 import { createPlugin } from '@/utils';
 
-export function isDislikedButton(button: Element | null): boolean {
-  return button?.getAttribute('like-status') === 'DISLIKE' ||
-    button?.getAttribute('aria-pressed') === 'true' &&
-    button?.getAttribute('id') === 'button-shape-dislike';
-}
+import { isDislikedButton } from './logic';
 
 /**
  * Le bouton J'aime et le lecteur sont reconstruits lors des navigations

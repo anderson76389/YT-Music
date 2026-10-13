@@ -3,73 +3,66 @@ import path from 'node:path';
 
 import { ElectronBlocker } from '@ghostery/adblocker-electron';
 import { app, net } from 'electron';
-import * as z from 'zod';
 
 let blocker: ElectronBlocker | undefined;
 
-const TbSourcesSchema = z.object({
-  tb: z.array(z.string()),
-});
+const EASYLIST = 'https://easylist.to/easylist/easylist.txt';
+const EASYPRIVACY = 'https://easylist.to/easylist/easyprivacy.txt';
 
 export const loadTrackerBlockerEngine = async (
   session?: Electron.Session,
-  cache: boolean = true,
+  cache = true,
   additionalBlockLists: string[] = [],
   disableDefaultLists: boolean | unknown[] = false,
 ) => {
-  // Only use cache if no additional blocklists are passed
+  const disableDefaults =
+    Array.isArray(disableDefaultLists)
+      ? disableDefaultLists.length > 0
+      : disableDefaultLists;
+  const extra = additionalBlockLists.filter((url) =>
+    /^https:\/\//i.test(url),
+  );
   const cacheDirectory = path.join(app.getPath('userData'), 'tb_cache');
-  if (!fs.existsSync(cacheDirectory)) {
-    fs.mkdirSync(cacheDirectory);
-  }
+  fs.mkdirSync(cacheDirectory, { recursive: true });
   const cachingOptions =
-    cache && additionalBlockLists.length === 0
+    cache && !extra.length && !disableDefaults
       ? {
           path: path.join(cacheDirectory, 'tb-engine.bin'),
           read: promises.readFile,
           write: promises.writeFile,
         }
       : undefined;
-  const tbSources = TbSourcesSchema.safeParse(
-    await (
-      await net.fetch(
-        'https://raw.githubusercontent.com/organization/tb-list/refs/heads/main/tb.json',
-      )
-    ).json(),
-  );
-  const lists = [
-    ...((disableDefaultLists && !Array.isArray(disableDefaultLists)) ||
-    (Array.isArray(disableDefaultLists) && disableDefaultLists.length > 0)
-      ? []
-      : tbSources.success
-        ? tbSources.data.tb
-        : []),
-    ...additionalBlockLists,
-  ];
 
+  const fetchList = (url: string) => net.fetch(url);
   try {
-    blocker = await ElectronBlocker.fromLists(
-      (url: string) => net.fetch(url),
-      lists,
-      {
-        enableCompression: true,
-        // When generating the engine for caching, do not load network filters
-        // So that enhancing the session works as expected
-        // Allowing to define multiple webRequest listeners
-        loadNetworkFilters: session !== undefined,
-      },
-      cachingOptions,
-    );
-    if (session) {
-      blocker.enableBlockingInSession(session);
+    // L'ancien code utilisait un domaine d'exemple « organization/tb-list ».
+    // Il pouvait échouer avant même d'installer le bloqueur de traqueurs.
+    const next =
+      !disableDefaults && extra.length === 0
+        ? await ElectronBlocker.fromPrebuiltAdsAndTracking(
+            fetchList,
+            cachingOptions,
+          )
+        : await ElectronBlocker.fromLists(
+            fetchList,
+            [
+              ...(!disableDefaults ? [EASYLIST, EASYPRIVACY] : []),
+              ...extra,
+            ],
+          );
+
+    if (blocker && session && blocker.isBlockingEnabled(session)) {
+      blocker.disableBlockingInSession(session);
     }
+    blocker = next;
+    if (session) blocker.enableBlockingInSession(session);
   } catch (error) {
-    console.error('Error loading blocker engine', error);
+    console.warn('[YT Music] Listes anti-traqueurs indisponibles', error);
   }
 };
 
 export const unloadTrackerBlockerEngine = (session: Electron.Session) => {
-  if (blocker) {
+  if (blocker?.isBlockingEnabled(session)) {
     blocker.disableBlockingInSession(session);
   }
 };

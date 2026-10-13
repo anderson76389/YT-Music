@@ -83,6 +83,14 @@ Les mentions « Beta/Bêta » ont été retirées des intitulés des plugins con
 
 Le gestionnaire de thèmes CSS a été corrigé pour réappliquer les styles après navigation et pour prendre en compte l’import et le retrait des fichiers CSS sans redémarrage. Le mode transparent nécessite toujours un redémarrage après activation afin de créer une fenêtre Electron transparente.
 
+### Activer les plugins visuels
+
+Depuis la barre supérieure, ouvre **Plugins** (à côté de **Paramètres**). Pour activer **Mode ambiant** ou **Mode transparent**, clique sur leur **case à cocher** : la coche indique qu'ils sont activés. Quand un plugin propose des options, celles-ci sont accessibles juste en dessous via **« Mode ambiant — Réglages »** ou **« Mode transparent — Réglages »**.
+
+- **Mode ambiant :** applique le fond flouté sur la page de lecture d'un morceau. La pochette ou la vidéo sert de source si elle est disponible.
+- **Mode transparent :** exige un **redémarrage complet** de YT Music après activation ou désactivation, car Windows doit créer une fenêtre de type transparent avant le chargement de l'interface. L'opacité se règle ensuite dans le sous-menu du plugin.
+- **Ne cherche plus les plugins dans Paramètres :** les raccourcis supplémentaires ont été retirés pour conserver un seul endroit cohérent.
+
 ## 🧩 Une application modulaire
 
 Les fonctionnalités avancées sont organisées autour des plugins présents dans [`src/plugins/`](src/plugins/).

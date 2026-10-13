@@ -44,7 +44,8 @@ export interface TrackerBlockerConfig {
 export default createPlugin({
   name: () => t('plugins.do-not-track.name'),
   description: () => t('plugins.do-not-track.description'),
-  restartNeeded: false,
+  // Les hooks JSON.parse du preload ne peuvent pas être retirés à chaud.
+  restartNeeded: true,
   config: {
     enabled: false,
     cache: true,

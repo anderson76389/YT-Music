@@ -79,3 +79,31 @@
   background-color: transparent !important;
   background-image: none !important;
 }
+
+/* Le lecteur YouTube Music peut avoir plusieurs conteneurs opaques sous
+   #player-page. Sinon l'arrière-plan est monté mais entièrement caché. */
+.ytmd-ambient-host #player,
+.ytmd-ambient-host #main-panel,
+.ytmd-ambient-host #content,
+.ytmd-ambient-host #player-container,
+.ytmd-ambient-host #song-video,
+.ytmd-ambient-host #song-image,
+.ytmd-ambient-host #player-bar,
+.ytmd-ambient-host #side-panel,
+.ytmd-ambient-host ytmusic-player,
+.ytmd-ambient-host ytmusic-player-page {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.ytmd-ambient-host > .ytmd-ambient-backdrop {
+  z-index: 0 !important;
+}
+
+.ytmd-ambient-host .ytmd-ambient-backdrop .ytmd-ambient-art {
+  opacity: 0.96;
+}
+
+.ytmd-ambient-host .ytmd-ambient-backdrop::after {
+  background: rgb(0 0 0 / 0.15);
+}

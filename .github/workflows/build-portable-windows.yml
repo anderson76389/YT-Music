@@ -56,6 +56,9 @@ jobs:
           python -m pip install --disable-pip-version-check pillow==11.3.0
           python tools/generate_ytmusic_icons.py
 
+      - name: Auditer la présence des 34 plugins et les 8 suppressions
+        run: node tools/audit-plugin-sources.mjs
+
       - name: Installer les dependances verrouillees
         run: pnpm install --frozen-lockfile
 

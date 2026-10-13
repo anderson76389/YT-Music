@@ -216,10 +216,12 @@ export default createPlugin({
             showVideo ? 'OMV_PREFERRED' : 'ATV_PREFERRED',
           );
 
-          document.querySelector<HTMLElement>(
-            '#song-video.ytmusic-player',
-          )!.style.display = showVideo ? 'block' : 'none';
-          document.querySelector<HTMLElement>('#song-image')!.style.display =
+          const songVideo = document.querySelector<HTMLElement>(
+            '#song-video.ytmusic-player, #song-video',
+          );
+          if (songVideo) songVideo.style.display = showVideo ? 'block' : 'none';
+          const songImage = document.querySelector<HTMLElement>('#song-image');
+          if (songImage) songImage.style.display =
             showVideo ? 'none' : 'block';
 
           if (showVideo && video && !video.style.top) {

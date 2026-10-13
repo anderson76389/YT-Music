@@ -4,10 +4,11 @@ import { rendererPlugins } from 'virtual:plugins';
 import { t } from '@/i18n';
 import { LoggerPrefix, startPlugin, stopPlugin } from '@/utils';
 
+import { mountPluginStyles, unmountPluginStyles } from './plugin-styles';
+
 import type { RendererContext } from '@/types/contexts';
 import type { PluginConfig, PluginDef } from '@/types/plugins';
 
-const unregisterStyleMap: Record<string, (() => void)[]> = {};
 const loadedPluginMap: Record<
   string,
   PluginDef<unknown, unknown, unknown>
@@ -40,21 +41,19 @@ export const createContext = <Config extends PluginConfig>(
 });
 
 export const forceUnloadRendererPlugin = async (id: string) => {
-  unregisterStyleMap[id]?.forEach((unregister) => unregister());
-
-  delete unregisterStyleMap[id];
-  delete loadedPluginMap[id];
-
-  const plugin = (await rendererPlugins())[id];
+  const plugin = loadedPluginMap[id] ?? (await rendererPlugins())[id];
   if (!plugin) return;
 
   const hasStopped = await stopPlugin(id, plugin, {
     ctx: 'renderer',
     context: createContext(id),
   });
-  if (plugin?.stylesheets) {
-    document.querySelector(`style#plugin-${id}`)?.remove();
-  }
+
+  // Ancien code : les adoptedStyleSheets n'étaient JAMAIS supprimés.
+  // Les thèmes restaient actifs, même quand leur plugin était décoché.
+  unmountPluginStyles(document, id);
+  delete loadedPluginMap[id];
+
   if (hasStopped || (hasStopped === null && plugin?.renderer)) {
     console.log(
       LoggerPrefix,
@@ -69,47 +68,35 @@ export const forceUnloadRendererPlugin = async (id: string) => {
 };
 
 export const forceLoadRendererPlugin = async (id: string) => {
+  if (loadedPluginMap[id]) return;
+
   const plugin = (await rendererPlugins())[id];
   if (!plugin) return;
 
-  const hasEvaled = await startPlugin(id, plugin, {
+  const started = await startPlugin(id, plugin, {
     ctx: 'renderer',
     context: createContext(id),
   });
 
-  if (
-    hasEvaled ||
-    plugin?.stylesheets ||
-    (hasEvaled === null &&
-      typeof plugin?.renderer !== 'function' &&
-      plugin?.renderer)
-  ) {
-    loadedPluginMap[id] = plugin;
-
-    if (plugin?.stylesheets) {
-      const styleSheetList = plugin.stylesheets.map((style) => {
-        const styleSheet = new CSSStyleSheet();
-        styleSheet.replaceSync(style);
-
-        return styleSheet;
-      });
-
-      document.adoptedStyleSheets = [
-        ...document.adoptedStyleSheets,
-        ...styleSheetList,
-      ];
-    }
-
-    console.log(
-      LoggerPrefix,
-      t('common.console.plugins.loaded', { pluginName: id }),
-    );
-  } else {
-    console.log(
+  // Ne jamais marquer un plugin comme chargé si sa fonction start()
+  // a échoué, même si des stylesheets sont déclarées.
+  if (started === false) {
+    console.error(
       LoggerPrefix,
       t('common.console.plugins.initialize-failed', { pluginName: id }),
     );
+    return;
   }
+
+  loadedPluginMap[id] = plugin;
+  if (plugin.stylesheets?.length) {
+    mountPluginStyles(document, id, plugin.stylesheets);
+  }
+
+  console.log(
+    LoggerPrefix,
+    t('common.console.plugins.loaded', { pluginName: id }),
+  );
 };
 
 export const loadAllRendererPlugins = async () => {

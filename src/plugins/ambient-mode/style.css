@@ -1,17 +1,17 @@
 /* Ambiance visuelle autour du lecteur : compatible avec les nouvelles
    structures de YouTube Music et indépendante de #song-video. */
-#player-page.ytmd-ambient-host {
+.ytmd-ambient-host {
   position: relative !important;
   isolation: isolate;
   overflow: hidden;
 }
 
-#player-page.ytmd-ambient-host > :not(.ytmd-ambient-backdrop) {
+.ytmd-ambient-host > :not(.ytmd-ambient-backdrop) {
   position: relative;
   z-index: 1;
 }
 
-#player-page .ytmd-ambient-backdrop {
+.ytmd-ambient-host .ytmd-ambient-backdrop {
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -21,13 +21,13 @@
   transition: opacity var(--ytmd-ambient-transition, 1500ms) ease;
 }
 
-#player-page .ytmd-ambient-backdrop.ytmd-ambient-fullscreen {
+.ytmd-ambient-host .ytmd-ambient-backdrop.ytmd-ambient-fullscreen {
   position: fixed;
   inset: 0;
 }
 
-#player-page .ytmd-ambient-art,
-#player-page .ytmd-ambient-video {
+.ytmd-ambient-host .ytmd-ambient-art,
+.ytmd-ambient-host .ytmd-ambient-video {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -41,16 +41,16 @@
   pointer-events: none;
 }
 
-#player-page .ytmd-ambient-video {
+.ytmd-ambient-host .ytmd-ambient-video {
   opacity: 0;
   transition: opacity var(--ytmd-ambient-transition, 1500ms) ease;
 }
 
-#player-page .ytmd-ambient-video.ytmd-ambient-has-frame {
+.ytmd-ambient-host .ytmd-ambient-video.ytmd-ambient-has-frame {
   opacity: 0.88;
 }
 
-#player-page .ytmd-ambient-backdrop::after {
+.ytmd-ambient-host .ytmd-ambient-backdrop::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -59,8 +59,23 @@
 
 /* Les boutons du lecteur et la file d'attente restent au-dessus de
    l'ambiance, utilisables et sans superposition de commandes. */
-#player-page .ytmusic-av-toggle,
-#player-page #side-panel {
+.ytmd-ambient-host .ytmusic-av-toggle,
+.ytmd-ambient-host #side-panel {
   position: relative;
   z-index: 2;
+}
+
+/* Même sans pochette disponible, le changement d'état est visible.
+   Ne pas masquer les contrôles du lecteur sous le fond. */
+.ytmd-ambient-host .ytmd-ambient-backdrop {
+  background:
+    radial-gradient(ellipse at 30% 35%, rgb(66 36 118 / 0.55), transparent 65%),
+    radial-gradient(ellipse at 70% 75%, rgb(13 75 108 / 0.35), transparent 66%);
+}
+
+.ytmd-ambient-host #main-panel,
+.ytmd-ambient-host #player,
+.ytmd-ambient-host #player-page {
+  background-color: transparent !important;
+  background-image: none !important;
 }

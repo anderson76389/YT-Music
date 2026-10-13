@@ -19,6 +19,7 @@ import * as config from './config';
 import { getAllMenuTemplate, loadAllMenuPlugins } from './loader/menu';
 import { restart } from './providers/app-controls';
 import { checkAndInstallUpdate } from './providers/app-update';
+import { showVisualDiagnostics } from './providers/visual-diagnostics';
 import { createPluginMenuEntries } from './providers/plugin-menu-access';
 import { startingPages } from './providers/extracted-data';
 import promptOptions from './providers/prompt-options';
@@ -116,7 +117,16 @@ export const mainMenuTemplate = async (
   return [
     {
       label: t('main.menu.plugins.label'),
-      submenu: pluginMenus,
+      submenu: [
+        {
+          label: 'Diagnostiquer les modes ambiant / transparent',
+          click() {
+            void showVisualDiagnostics(win);
+          },
+        },
+        { type: 'separator' },
+        ...pluginMenus,
+      ],
     },
     {
       label: t('main.menu.options.label'),

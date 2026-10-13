@@ -95,8 +95,14 @@ export const pluginVirtualModuleGenerator = (
       for (const { name } of plugins) {
         const checkMode = mode === 'main' ? 'backend' : mode;
         // HACK: To avoid situation like importing renderer plugins in main
+        // Les plugins uniquement CSS (stylesheets) n'ont pas de fonction
+        // renderer, mais doivent être importés et activés par le chargeur.
+        const criterion =
+          mode === 'renderer'
+            ? "(plg['renderer'] || (plg['stylesheets']?.length ?? 0))"
+            : `plg['${checkMode}']`;
         writer.writeLine(
-          `    ${kebabToCamel(name)}Plugin().then((plg) => plg['${checkMode}'] ? ["${name}", plg] : null),`,
+          `    ${kebabToCamel(name)}Plugin().then((plg) => ${criterion} ? ["${name}", plg] : null),`,
         );
       }
       writer.writeLine('  ]);');

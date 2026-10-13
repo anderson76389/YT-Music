@@ -14,7 +14,6 @@ import {
   screen,
   globalShortcut,
   session,
-  shell,
   dialog,
   ipcMain,
   protocol,

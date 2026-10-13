@@ -18,6 +18,7 @@ const defaultConfig: AmbientModePluginConfig = {
 
 type AmbientRendererState = {
   settings: AmbientModePluginConfig;
+  active: boolean;
   host: HTMLElement | null;
   backdrop: HTMLDivElement | null;
   art: HTMLImageElement | null;
@@ -43,6 +44,7 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
 
   renderer: {
     settings: defaultConfig,
+    active: false,
     host: null as HTMLElement | null,
     backdrop: null as HTMLDivElement | null,
     art: null as HTMLImageElement | null,
@@ -54,15 +56,20 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
     dataListener: null as EventListener | null,
 
     start({ getConfig }) {
-      // Ne jamais attendre un élément vidéo spécifique : sur le nouveau
-      // lecteur YT Music, #song-video peut ne pas exister du tout.
+      this.active = true;
+
+      // On démarre immédiatement le fond, sans attendre une balise vidéo.
+      // Les réglages enregistrés sont appliqués dès leur récupération.
+      this.refresh();
+      this.ticker = setInterval(() => this.refresh(), 900);
       void Promise.resolve(getConfig()).then((config) => {
+        if (!this.active) return;
         this.settings = config;
         this.refresh();
         this.startVideoTicker();
+      }).catch((error: unknown) => {
+        console.warn('[YT Music] Mode ambiant : configuration inaccessible', error);
       });
-      this.ticker = setInterval(() => this.refresh(), 900);
-      this.refresh();
     },
 
     onPlayerApiReady(playerApi) {
@@ -82,7 +89,13 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
     },
 
     refresh() {
-      const host = document.querySelector<HTMLElement>('#player-page');
+      if (!this.active) return;
+      // Selon la génération du lecteur, l'hôte peut être la page, ou le
+      // composant custom element. Un échec du premier sélecteur ne doit pas
+      // rendre le plugin silencieusement inopérant.
+      const host = document.querySelector<HTMLElement>(
+        '#player-page, ytmusic-player-page',
+      );
       if (!host) return;
 
       if (host !== this.host) {
@@ -187,6 +200,7 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
     },
 
     stop() {
+      this.active = false;
       if (this.ticker) clearInterval(this.ticker);
       if (this.videoTicker) clearInterval(this.videoTicker);
       this.ticker = null;

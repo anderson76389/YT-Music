@@ -184,6 +184,38 @@ const initHook = async (win: BrowserWindow) => {
     config.setPartial(`plugins.${name}`, obj, allPluginStubs[name].config),
   );
 
+  // Injecter les CSS des plugins avec Electron (cssOrigin: user), pas
+  // exclusivement via <style> dans le DOM YouTube Music. Les CSP et les
+  // rechargements du site peuvent empêcher/effacer les balises inline.
+  // Le registre injectCSS réapplique automatiquement les styles après reload.
+  type RemovePluginCss = () => Promise<void>;
+  const pluginCss = new Map<string, RemovePluginCss>();
+  ipcMain.handle('ytmd:plugin-css:enable', async (event, id: string) => {
+    if (event.sender !== win.webContents || !allPluginStubs[id]) return false;
+    if (!await config.plugins.isEnabled(id)) return false;
+    if (pluginCss.has(id)) return true;
+    const styles = allPluginStubs[id].stylesheets;
+    if (!styles?.length) return true;
+    const cleanup = await injectCSS(win.webContents, styles.join('\n'));
+    pluginCss.set(id, cleanup);
+    return true;
+  });
+  ipcMain.handle('ytmd:plugin-css:disable', async (event, id: string) => {
+    if (event.sender !== win.webContents || !allPluginStubs[id]) return false;
+    const cleanup = pluginCss.get(id);
+    pluginCss.delete(id);
+    if (cleanup) await cleanup();
+    return true;
+  });
+  win.once('closed', () => {
+    for (const cleanup of pluginCss.values()) {
+      void cleanup();
+    }
+    pluginCss.clear();
+    ipcMain.removeHandler('ytmd:plugin-css:enable');
+    ipcMain.removeHandler('ytmd:plugin-css:disable');
+  });
+
   config.watch((newValue, oldValue) => {
     const newPluginConfigList = (newValue?.plugins ?? {}) as Record<
       string,

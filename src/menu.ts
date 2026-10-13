@@ -18,7 +18,6 @@ import { APPLICATION_NAME, setLanguage, t } from '@/i18n';
 import * as config from './config';
 import { getAllMenuTemplate, loadAllMenuPlugins } from './loader/menu';
 import { restart } from './providers/app-controls';
-import { createPluginMenuAccess, selectPluginMenuItems } from './providers/plugin-menu-access';
 import { startingPages } from './providers/extracted-data';
 import promptOptions from './providers/prompt-options';
 
@@ -71,105 +70,61 @@ export const mainMenuTemplate = async (
 
   const allPluginsStubs = await allPlugins();
 
-  const menuResult = await Promise.all(
-    Object.entries(getAllMenuTemplate()).map(async ([id, template]) => {
-      const plugin = allPluginsStubs[id];
-      const pluginLabel = plugin?.name?.() ?? id;
-      const pluginDescription = plugin?.description?.() ?? undefined;
-      const isNew = plugin?.addedVersion
-        ? satisfies(packageJson.version, plugin.addedVersion)
-        : false;
+  // Un clic sur le nom du plugin doit TOUJOURS l'activer/désactiver.
+  // Auparavant, les plugins munis d'un sous-menu (Ambiant/Transparent)
+  // transformaient le nom en simple ouverture de sous-menu : le clic
+  // ne changeait donc rien. Les réglages sont maintenant séparés.
+  const availablePlugins = Object.keys(allPluginsStubs).sort((a, b) => {
+    const aLabel = allPluginsStubs[a]?.name?.() ?? a;
+    const bLabel = allPluginsStubs[b]?.name?.() ?? b;
+    return aLabel.localeCompare(bLabel);
+  });
 
-      if (!(await config.plugins.isEnabled(id))) {
-        return [
-          id,
-          await pluginEnabledMenu(
-            id,
-            pluginLabel,
-            pluginDescription,
-            isNew,
-            true,
-            innerRefreshMenu,
-          ),
-        ] as const;
-      }
-
-      return [
-        id,
-        {
-          label: pluginLabel,
-          sublabel: isNew ? t('main.menu.plugins.new') : undefined,
-          toolTip: pluginDescription,
-          submenu: [
-            await pluginEnabledMenu(
-              id,
-              t('main.menu.plugins.enabled'),
-              undefined,
-              false,
-              true,
-              innerRefreshMenu,
-            ),
-            { type: 'separator' },
-            ...template,
-          ],
-        } satisfies Electron.MenuItemConstructorOptions,
-      ] as const;
-    }),
-  );
-
-  const availablePlugins = Object.keys(await allPlugins());
-  const pluginMenus = await Promise.all(
-    availablePlugins
-      .sort((a, b) => {
-        const aPluginLabel = allPluginsStubs[a]?.name?.() ?? a;
-        const bPluginLabel = allPluginsStubs[b]?.name?.() ?? b;
-
-        return aPluginLabel.localeCompare(bPluginLabel);
-      })
-      .map(async (id) => {
-        const predefinedTemplate = menuResult.find((it) => it[0] === id);
-        if (predefinedTemplate) return predefinedTemplate[1];
-
+  const pluginTemplates = getAllMenuTemplate();
+  const pluginMenus = (
+    await Promise.all(
+      availablePlugins.map(async (id) => {
         const plugin = allPluginsStubs[id];
-        const pluginLabel = plugin?.name?.() ?? id;
-        const pluginDescription = plugin?.description?.() ?? undefined;
+        const label = plugin?.name?.() ?? id;
+        const enabled = await config.plugins.isEnabled(id);
         const isNew = plugin?.addedVersion
           ? satisfies(packageJson.version, plugin.addedVersion)
           : false;
-
-        return pluginEnabledMenu(
+        const toggle = await pluginEnabledMenu(
           id,
-          pluginLabel,
-          pluginDescription,
+          label,
+          plugin?.description?.() ?? undefined,
           isNew,
-          true,
-          innerRefreshMenu,
+          false,
         );
-      }),
-  );
 
-  // Les 42 extensions et leurs sous-menus restent identiques aux deux
-  // emplacements : barre supérieure et Paramètres → Plugins.
-  const pluginAccess = createPluginMenuAccess(
-    pluginMenus,
-    t('main.menu.plugins.label'),
-  );
-  const visualPluginMenus = selectPluginMenuItems(
-    availablePlugins,
-    pluginMenus,
-    ['ambient-mode', 'transparent-player', 'album-color-theme', 'blur-nav-bar'],
-  );
+        const options = pluginTemplates[id];
+        if (!enabled || !options?.length) {
+          return [toggle];
+        }
+
+        return [
+          toggle,
+          {
+            label: `${label} — Réglages`,
+            submenu: options,
+          } satisfies Electron.MenuItemConstructorOptions,
+        ];
+      }),
+    )
+  ).flat();
 
   const langResources = await languageResources();
   const availableLanguages = Object.keys(langResources);
 
   return [
-    pluginAccess.toolbar,
+    {
+      label: t('main.menu.plugins.label'),
+      submenu: pluginMenus,
+    },
     {
       label: t('main.menu.options.label'),
       submenu: [
-        pluginAccess.settings,
-        { type: 'separator' },
         {
           label: t('main.menu.options.submenu.auto-update'),
           type: 'checkbox',
@@ -212,11 +167,6 @@ export const mainMenuTemplate = async (
         {
           label: t('main.menu.options.submenu.visual-tweaks.label'),
           submenu: [
-            {
-              label: 'Plugins visuels (ambiance, transparence, couleurs)',
-              submenu: visualPluginMenus,
-            },
-            { type: 'separator' },
             {
               label: t(
                 'main.menu.options.submenu.visual-tweaks.submenu.remove-upgrade-button',

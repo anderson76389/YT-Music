@@ -3,7 +3,6 @@ import { render } from 'solid-js/web';
 
 import { t } from '@/i18n';
 import { createPlugin } from '@/utils';
-import { waitForElement } from '@/utils/wait-for-element';
 
 import {
   DislikeButton,
@@ -20,6 +19,8 @@ export default createPlugin<
     loadObserver?: MutationObserver;
     changeObserver?: MutationObserver;
     waiting: boolean;
+    active: boolean;
+    disposeRender: (() => void) | null;
     onPageChange(): void;
     loadFullList: (event: MouseEvent) => void;
     applyToList(id: string, loader: HTMLElement): void;
@@ -36,25 +37,35 @@ export default createPlugin<
   },
   renderer: {
     waiting: false,
+    active: false,
+    disposeRender: null as (() => void) | null,
     start() {
-      // Waits for pagechange
-      this.onPageChange();
+      this.active = true;
+      this.observer?.disconnect();
+      // La page browse peut ne pas encore exister lors de l'activation.
       this.observer = new MutationObserver(() => {
-        this.onPageChange();
+        if (!document.getElementById('ytmd-album-action-buttons')) {
+          void this.onPageChange();
+        }
       });
-      this.observer.observe(document.querySelector('#browse-page')!, {
-        attributes: false,
+      this.observer.observe(document.querySelector('#browse-page') ?? document.body, {
         childList: true,
         subtree: true,
       });
+      void this.onPageChange();
     },
     async onPageChange() {
-      if (this.waiting) {
+      if (!this.active || this.waiting ||
+        document.getElementById('ytmd-album-action-buttons')) return;
+      this.waiting = true;
+      const continuations = document.querySelector<HTMLElement>('#continuations');
+      const playlist =
+        document.querySelector('ytmusic-playlist-shelf-renderer') ??
+        document.querySelector(':nth-last-child(1 of ytmusic-shelf-renderer)');
+      if (!continuations || !playlist) {
+        this.waiting = false;
         return;
-      } else {
-        this.waiting = true;
       }
-      const continuations = await waitForElement<HTMLElement>('#continuations');
       this.waiting = false;
 
       const [showUnDislike, setShowUnDislike] = createSignal(true);
@@ -75,7 +86,8 @@ export default createPlugin<
       buttonContainer.style.display = 'flex';
       buttonContainer.style.flexDirection = 'row';
 
-      render(
+      this.disposeRender?.();
+      this.disposeRender = render(
         () => (
           <>
             <Show when={showUnDislike()}>
@@ -108,13 +120,7 @@ export default createPlugin<
       );
 
       //Finds the playlist
-      const playlist =
-        document.querySelector('ytmusic-playlist-shelf-renderer') ??
-        document.querySelector(':nth-last-child(1 of ytmusic-shelf-renderer)');
 
-      if (!playlist) {
-        return;
-      }
 
       // Adds an observer for every button, so it gets updated when one is clicked
       this.changeObserver?.disconnect();
@@ -260,8 +266,13 @@ export default createPlugin<
       playlistButtons?.forEach((elem) => elem.click());
     },
     stop() {
+      this.active = false;
       this.observer?.disconnect();
       this.changeObserver?.disconnect();
+      this.loadObserver?.disconnect();
+      this.disposeRender?.();
+      this.disposeRender = null;
+      document.getElementById('ytmd-album-action-buttons')?.remove();
       for (const button of document.querySelectorAll('.like-menu')) {
         button.remove();
       }

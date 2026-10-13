@@ -18,6 +18,7 @@ import { APPLICATION_NAME, setLanguage, t } from '@/i18n';
 import * as config from './config';
 import { getAllMenuTemplate, loadAllMenuPlugins } from './loader/menu';
 import { restart } from './providers/app-controls';
+import { checkAndInstallUpdate } from './providers/app-update';
 import { createPluginMenuEntries } from './providers/plugin-menu-access';
 import { startingPages } from './providers/extracted-data';
 import promptOptions from './providers/prompt-options';
@@ -120,6 +121,12 @@ export const mainMenuTemplate = async (
     {
       label: t('main.menu.options.label'),
       submenu: [
+        {
+          label: 'Rechercher et installer une mise à jour',
+          click() {
+            void checkAndInstallUpdate(win);
+          },
+        },
         {
           label: t('main.menu.options.submenu.auto-update'),
           type: 'checkbox',

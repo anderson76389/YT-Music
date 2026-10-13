@@ -14,7 +14,6 @@ import {
   forceLoadRendererPlugin,
   forceUnloadRendererPlugin,
   getAllLoadedRendererPlugins,
-  getLoadedRendererPlugin,
   loadAllRendererPlugins,
   setRendererPlayerApi,
 } from './loader/renderer';

@@ -16,6 +16,7 @@ import {
   getAllLoadedRendererPlugins,
   getLoadedRendererPlugin,
   loadAllRendererPlugins,
+  setRendererPlayerApi,
 } from './loader/renderer';
 import { startingPages } from './providers/extracted-data';
 import { setupSongInfo } from './providers/song-info-front';
@@ -326,6 +327,7 @@ async function onApiLoaded() {
       );
     }
   }
+  setRendererPlayerApi(api!);
 
   if (firstDataLoaded) {
     document.dispatchEvent(
@@ -458,17 +460,9 @@ const main = async () => {
     await forceUnloadRendererPlugin(id);
   });
   window.ipcRenderer.on('plugin:enable', async (_event, id: string) => {
+    // Le chargeur appelle onPlayerApiReady une seule fois si l'API est prête.
+    // Ne pas l'appeler une seconde fois ici (écouteurs/timers dupliqués).
     await forceLoadRendererPlugin(id);
-    if (api) {
-      const plugin = getLoadedRendererPlugin(id);
-      if (plugin && typeof plugin.renderer !== 'function') {
-        await plugin.renderer?.onPlayerApiReady?.call(
-          plugin.renderer,
-          api,
-          createContext(id),
-        );
-      }
-    }
   });
 
   window.ipcRenderer.on(

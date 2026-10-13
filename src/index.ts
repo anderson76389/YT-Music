@@ -23,13 +23,12 @@ import {
 import electronDebug from 'electron-debug';
 import is from 'electron-is';
 import unhandled from 'electron-unhandled';
-import electronUpdater from 'electron-updater';
 import { deepEqual } from 'fast-equals';
 import { parse } from 'node-html-parser';
 import { languageResources } from 'virtual:i18n';
 import { allPlugins, mainPlugins } from 'virtual:plugins';
 
-import { APP_ID, RELEASES_FEED, RELEASES_URL } from '@/app-identity';
+import { APP_ID } from '@/app-identity';
 import * as config from '@/config';
 import { loadI18n, setLanguage, t } from '@/i18n';
 import {
@@ -42,6 +41,7 @@ import { refreshMenu, setApplicationMenu } from '@/menu';
 import musicPlayerCss from '@/music-player.css?inline';
 import { injectCSS, injectCSSAsFile } from '@/plugins/utils/main';
 import { restart, setupAppControls } from '@/providers/app-controls';
+import { scheduleUpdateCheck } from '@/providers/app-update';
 import {
   APP_PROTOCOL,
   handleProtocol,
@@ -62,7 +62,6 @@ unhandled({
 
 // Prevent window being garbage collected
 let mainWindow: Electron.BrowserWindow | null;
-electronUpdater.autoUpdater.autoDownload = false;
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -803,61 +802,9 @@ app.whenReady().then(async () => {
     openAtLogin: config.get('options.startAtLogin'),
   });
 
-  if (!is.dev() && config.get('options.autoUpdates')) {
-    // Ne plus jamais interroger les mises à jour de Pear Desktop.
-    // Les nouvelles versions proviennent exclusivement des Releases du dépôt
-    // personnel, lorsqu'une release a été publiée.
-    electronUpdater.autoUpdater.setFeedURL(RELEASES_FEED);
-    const updateTimeout = setTimeout(() => {
-      void electronUpdater.autoUpdater.checkForUpdatesAndNotify().catch((error: unknown) => {
-        console.warn('[YT Music] Aucune mise à jour disponible ou dépôt inaccessible', error);
-      });
-      clearTimeout(updateTimeout);
-    }, 2000);
-    electronUpdater.autoUpdater.on('update-available', () => {
-      const downloadLink = RELEASES_URL;
-      const dialogOptions: Electron.MessageBoxOptions = {
-        type: 'info',
-        buttons: [
-          t('main.dialog.update-available.buttons.ok'),
-          t('main.dialog.update-available.buttons.download'),
-          t('main.dialog.update-available.buttons.disable'),
-        ],
-        title: t('main.dialog.update-available.title'),
-        message: t('main.dialog.update-available.message'),
-        detail: t('main.dialog.update-available.detail', { downloadLink }),
-        defaultId: 1,
-        cancelId: 0,
-      };
-
-      let dialogPromise: Promise<Electron.MessageBoxReturnValue>;
-      if (mainWindow) {
-        dialogPromise = dialog.showMessageBox(mainWindow, dialogOptions);
-      } else {
-        dialogPromise = dialog.showMessageBox(dialogOptions);
-      }
-
-      dialogPromise.then((dialogOutput) => {
-        switch (dialogOutput.response) {
-          // Download
-          case 1: {
-            shell.openExternal(downloadLink);
-            break;
-          }
-
-          // Disable updates
-          case 2: {
-            config.set('options.autoUpdates', false);
-            break;
-          }
-
-          case 0: {
-            break;
-          }
-        }
-      });
-    });
-  }
+  // Vérification contre le manifeste SHA512 de notre propre GitHub.
+  // Elle ne télécharge et n'installe rien sans accord explicite.
+  scheduleUpdateCheck(mainWindow!, config.get('options.autoUpdates'));
 
   if (config.get('options.hideMenu') && !config.get('options.hideMenuWarned')) {
     dialog.showMessageBox(mainWindow, {

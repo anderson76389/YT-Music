@@ -107,3 +107,21 @@
 .ytmd-ambient-host .ytmd-ambient-backdrop::after {
   background: rgb(0 0 0 / 0.15);
 }
+
+
+/* Un grand nombre de pages récentes dessinent un panneau entièrement opaque.
+   Un fond placé derrière ces panneaux ne peut pas être visible, même si le
+   plugin fonctionne. La superposition screen donne un halo réellement visible
+   tout en préservant les clics et la lisibilité du lecteur. */
+.ytmd-ambient-host {
+  isolation: isolate;
+}
+.ytmd-ambient-host > .ytmd-ambient-backdrop {
+  z-index: 3 !important;
+  mix-blend-mode: screen;
+  opacity: calc(var(--ytmd-ambient-opacity, 1) * 0.46);
+  pointer-events: none !important;
+}
+.ytmd-ambient-host > :not(.ytmd-ambient-backdrop) {
+  z-index: 1;
+}

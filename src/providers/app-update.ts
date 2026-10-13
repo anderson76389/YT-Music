@@ -154,13 +154,28 @@ export async function checkAndInstallUpdate(
   }
 }
 
-/** Démarre une vérification facultative sans installation silencieuse. */
+/** Une vérification programmée maximum par fenêtre, annulée si l'option change. */
+const pendingChecks = new WeakMap<BrowserWindow, ReturnType<typeof setTimeout>>();
+const closeListeners = new WeakSet<BrowserWindow>();
+
 export function scheduleUpdateCheck(win: BrowserWindow, enabled: boolean) {
-  if (!enabled || isPortableWindows() || !app.isPackaged) return;
+  const previous = pendingChecks.get(win);
+  if (previous) clearTimeout(previous);
+  pendingChecks.delete(win);
+  if (!enabled || isPortableWindows() || !app.isPackaged || win.isDestroyed()) return;
   const id = setTimeout(() => {
+    pendingChecks.delete(win);
     if (!win.isDestroyed()) {
       void checkAndInstallUpdate(win, { silent: true });
     }
   }, 15000);
-  win.once('closed', () => clearTimeout(id));
+  pendingChecks.set(win, id);
+  if (!closeListeners.has(win)) {
+    closeListeners.add(win);
+    win.once('closed', () => {
+      const pending = pendingChecks.get(win);
+      if (pending) clearTimeout(pending);
+      pendingChecks.delete(win);
+    });
+  }
 }

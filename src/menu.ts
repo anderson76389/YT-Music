@@ -352,13 +352,14 @@ export const mainMenuTemplate = async (
         {
           label: t('main.menu.options.submenu.single-instance-lock'),
           type: 'checkbox',
-          checked: true,
+          checked: app.hasSingleInstanceLock(),
           click(item: MenuItem) {
             if (!item.checked && app.hasSingleInstanceLock()) {
               app.releaseSingleInstanceLock();
             } else if (item.checked && !app.hasSingleInstanceLock()) {
               app.requestSingleInstanceLock();
             }
+            void innerRefreshMenu();
           },
         },
         {

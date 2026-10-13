@@ -249,6 +249,10 @@ export const TitleBar = (props: TitleBarProps) => {
     props.ipc.on('toggle-in-app-menu', () => {
       setCollapsed(!collapsed());
     });
+    props.ipc.on('ytmd:set-menu-collapsed', (value: boolean) => {
+      setCollapsed(Boolean(value));
+      setOpenTarget(null);
+    });
 
     props.ipc.on('window-maximize', refetchMaximize);
     props.ipc.on('window-unmaximize', refetchMaximize);

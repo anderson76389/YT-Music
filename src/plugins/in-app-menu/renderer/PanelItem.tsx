@@ -187,6 +187,7 @@ export const PanelItem = (props: PanelItemProps) => {
   const [toolTip, setToolTip] = createSignal<HTMLElement | null>(null);
   const [anchor, setAnchor] = createSignal<HTMLElement | null>(null);
   const [child, setChild] = createSignal<HTMLElement | null>(null);
+  let hoverTimer: ReturnType<typeof setTimeout> | undefined;
 
   const position = useFloating(anchor, toolTip, {
     whileElementsMounted: autoUpdate,
@@ -216,7 +217,8 @@ export const PanelItem = (props: PanelItemProps) => {
     );
 
     if (props.type === 'submenu') {
-      const timer = setTimeout(() => {
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => {
         setOpen(true);
 
         let mouseX = event.clientX;
@@ -271,17 +273,24 @@ export const PanelItem = (props: PanelItemProps) => {
       event.target?.addEventListener(
         'mouseleave',
         () => {
-          clearTimeout(timer);
+          clearTimeout(hoverTimer);
         },
         { once: true },
       );
     }
   };
 
-  const handleClick = async () => {
-    if (props.disabled || props.type === 'submenu' || props.commandId === undefined) {
+  const handleClick = async (event: MouseEvent) => {
+    if (props.disabled) return;
+    // Les entrées avec une flèche doivent aussi s'ouvrir au clic :
+    // le survol seul ne fonctionne pas toujours dans une fenêtre Electron.
+    event.stopPropagation();
+    if (props.type === 'submenu') {
+      clearTimeout(hoverTimer);
+      setOpen(!open());
       return;
     }
+    if (props.commandId === undefined) return;
     const succeeded = await window.ipcRenderer.invoke('peard:menu-event', props.commandId);
     if (!succeeded) return;
     if (props.type === 'radio') {

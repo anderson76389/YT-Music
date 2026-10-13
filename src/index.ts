@@ -303,6 +303,26 @@ const initHook = async (win: BrowserWindow) => {
       syncUserThemes(win);
     }
 
+    // Les options ci-dessous étaient seulement relues au démarrage :
+    // la case changeait, mais le comportement restait inchangé.
+    const nextOptions = (newValue?.options ?? {}) as Record<string, unknown>;
+    const previousOptions = (oldValue?.options ?? {}) as Record<string, unknown>;
+    if (nextOptions.hideMenu !== previousOptions.hideMenu) {
+      const hidden = nextOptions.hideMenu === true;
+      win.setAutoHideMenuBar(hidden);
+      win.webContents.send('ytmd:set-menu-collapsed', hidden);
+    }
+    if (nextOptions.startAtLogin !== previousOptions.startAtLogin) {
+      try {
+        app.setLoginItemSettings({ openAtLogin: nextOptions.startAtLogin === true });
+      } catch (error) {
+        console.error('[YT Music] Impossible de modifier le démarrage Windows', error);
+      }
+    }
+    if (nextOptions.autoUpdates !== previousOptions.autoUpdates) {
+      scheduleUpdateCheck(win, nextOptions.autoUpdates === true);
+    }
+
     // Rafraîchir les cases et sous-menus après chaque changement effectif
     // d'options/plugins. Sans cela, les menus gardent des coches périmées.
     if (

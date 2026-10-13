@@ -116,6 +116,16 @@ Tu peux conserver les deux fichiers pour choisir ton mode d'utilisation, mais é
 
 Chaque compilation réussie crée une nouvelle [Release GitHub](https://github.com/anderson76389/YT-Music/releases/latest) avec **les deux variantes**. Le workflow [`build-portable-windows.yml`](.github/workflows/build-portable-windows.yml) vérifie que les deux exécutables sont bien présents avant leur publication.
 
+### Mise à jour depuis l'application
+
+Dans la version **Windows Setup**, ouvre **Paramètres → Rechercher et installer une mise à jour**. Le logiciel compare la version installée aux Releases de ton propre GitHub, puis te propose de **télécharger et appliquer la mise à jour sans relancer un assistant d'installation manuellement**. L'installation s'effectue au même emplacement et conserve les paramètres et les raccourcis. Le téléchargement est vérifié avec le fichier `latest.yml` et son empreinte SHA-512.
+
+La case **Mise à jour automatique** sert à proposer une nouvelle version au démarrage. Elle ne met jamais à jour silencieusement sans ton accord.
+
+**Important :** si tu utilises une ancienne Build 51/62 ou une version portable, il faut installer une fois la nouvelle version Setup pour activer ce mécanisme. La version portable est conservée, mais son propre exécutable ne peut pas être remplacé pendant qu'il est ouvert : son bouton de mise à jour ouvre les Releases.
+
+Si tu constates qu'un mode visuel ne réagit pas, utilise **Plugins → Diagnostiquer les modes ambiant / transparent**, puis copie le résultat. Ce diagnostic distingue une option décochée, un élément de page absent et un CSS non chargé ; il facilite une correction sur l'interface réellement affichée par YouTube Music.
+
 ### Option 2 — Lancer depuis le code source
 
 **Prérequis :**

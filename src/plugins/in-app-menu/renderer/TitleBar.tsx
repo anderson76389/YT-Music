@@ -217,52 +217,15 @@ export const TitleBar = (props: TitleBarProps) => {
     await props.ipc.invoke('window-close');
   };
 
-  const refreshMenuItem = async (originalMenu: Menu, commandId: number) => {
-    const menuItem = (await window.ipcRenderer.invoke(
-      'get-menu-by-id',
-      commandId,
-    )) as MenuItem | null;
-
-    const newMenu = structuredClone(originalMenu);
-    const stack = [...(newMenu?.items ?? [])];
-    let now: MenuItem | undefined = stack.pop();
-    while (now) {
-      const index =
-        now?.submenu?.items?.findIndex((it) => it.commandId === commandId) ??
-        -1;
-
-      if (index >= 0) {
-        if (menuItem) now?.submenu?.items?.splice(index, 1, menuItem);
-        else now?.submenu?.items?.splice(index, 1);
-      }
-      if (now?.submenu) {
-        stack.push(...now.submenu.items);
-      }
-
-      now = stack.pop();
-    }
-
-    return newMenu;
-  };
-
   const handleItemClick = async (
-    commandId: number,
-    radioGroup?: MenuItem[],
+    _commandId: number,
+    _radioGroup?: MenuItem[],
   ) => {
-    const menuData = menu();
-    if (!menuData) return;
-
-    if (Array.isArray(radioGroup)) {
-      let newMenu = menuData;
-      for (const item of radioGroup) {
-        newMenu = await refreshMenuItem(newMenu, item.commandId);
-      }
-
-      setMenu(newMenu);
-      return;
-    }
-
-    setMenu(await refreshMenuItem(menuData, commandId));
+    // Le processus principal a déjà reconstruit le menu Electron à partir
+    // du fichier de configuration. Relire TOUT le menu, pas un ancien ID de
+    // commande : les identifiants changent lorsque des sous-menus sont ajoutés.
+    await refetch();
+    setMenu(data() ?? null);
   };
 
   const listener = (e: MouseEvent) => {

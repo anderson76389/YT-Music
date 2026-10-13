@@ -60,6 +60,11 @@ export const forceUnloadRendererPlugin = async (id: string) => {
   // Ancien code : les adoptedStyleSheets n'étaient JAMAIS supprimés.
   // Les thèmes restaient actifs, même quand leur plugin était décoché.
   unmountPluginStyles(document, id);
+  try {
+    await window.ipcRenderer.invoke('ytmd:plugin-css:disable', id);
+  } catch (error) {
+    console.warn('[YT Music] Impossible de retirer le CSS Electron de', id, error);
+  }
   delete loadedPluginMap[id];
 
   if (hasStopped || !plugin.renderer || hasStopped === null) {
@@ -103,10 +108,24 @@ export const forceLoadRendererPlugin = (id: string): Promise<void> => {
       return;
     }
 
-    loadedPluginMap[id] = plugin;
     if (plugin.stylesheets?.length) {
+      // Les deux méthodes sont complémentaires : Electron applique les CSS
+      // indépendamment de la politique CSP du site; les balises DOM servent
+      // au diagnostic. Un échec de l'une ne doit pas masquer l'autre.
       mountPluginStyles(document, id, plugin.stylesheets);
+      try {
+        const applied = await window.ipcRenderer.invoke(
+          'ytmd:plugin-css:enable',
+          id,
+        );
+        if (!applied) {
+          console.warn('[YT Music] Injection CSS Electron refusée pour', id);
+        }
+      } catch (error) {
+        console.error('[YT Music] Injection CSS Electron impossible', id, error);
+      }
     }
+    loadedPluginMap[id] = plugin;
     if (readyPlayerApi && typeof plugin.renderer !== 'function') {
       try {
         await plugin.renderer?.onPlayerApiReady?.call(

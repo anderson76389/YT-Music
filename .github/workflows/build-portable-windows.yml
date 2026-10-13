@@ -103,6 +103,17 @@ jobs:
             Start-Sleep -Milliseconds 750
           }
           if (-not (Test-Path -LiteralPath $marker)) {
+            $trace = "$marker.trace"
+            if (Test-Path -LiteralPath $trace) {
+              Write-Host 'Dernieres etapes du demarrage Electron :'
+              Get-Content -LiteralPath $trace | Select-Object -Last 50 | Write-Host
+            } else {
+              Write-Warning 'Aucune trace du processus Electron principal.'
+            }
+            Get-CimInstance Win32_Process |
+              Where-Object { $_.Name -like '*YT*Music*' -or $_.Name -like '*yt-music*' } |
+              Select-Object Name, ProcessId, ParentProcessId, CommandLine |
+              Format-List | Out-String | Write-Host
             throw "Portable non demarre : aucun resultat du vrai exe en 100 secondes. Processus initial : $($started.Id)"
           }
           $report = Get-Content -LiteralPath $marker -Raw | ConvertFrom-Json

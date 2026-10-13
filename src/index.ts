@@ -53,6 +53,18 @@ import { isTesting } from '@/utils/testing';
 
 import type { PluginConfig } from '@/types/plugins';
 
+// During Windows release verification, retain a detailed boot trace.
+const smokeOutputPath = process.env.YTMD_SMOKE_RESULT;
+const traceStartup = (stage: string, detail = '') => {
+  if (!smokeOutputPath) return;
+  try {
+    fs.appendFileSync(smokeOutputPath + '.trace', `${new Date().toISOString()} ${stage} ${detail}\n`);
+  } catch (error) {
+    console.error('[YT Music] Smoke trace unavailable', error);
+  }
+};
+traceStartup('module-loaded', process.execPath);
+
 // Catch errors and log them
 unhandled({
   logger: console.error,
@@ -459,6 +471,7 @@ function initTheme(win: BrowserWindow) {
 }
 
 async function createMainWindow() {
+  traceStartup('create-window-start');
   const windowSize = config.get('window-size');
   const windowMaximized = config.get('window-maximized');
   const windowPosition: Electron.Point = config.get('window-position');
@@ -517,8 +530,21 @@ async function createMainWindow() {
   };
 
   const win = new BrowserWindow(electronWindowSettings);
+  traceStartup('window-created', String(win.id));
+  if (smokeOutputPath) {
+    win.webContents.on('did-start-loading', () => traceStartup('did-start-loading'));
+    win.webContents.on('dom-ready', () => traceStartup('dom-ready'));
+    win.webContents.on('did-finish-load', () => traceStartup('did-finish-load'));
+    win.webContents.on('did-fail-load', (_event, code, desc) =>
+      traceStartup('did-fail-load', String(code) + ' ' + desc));
+    win.webContents.on('preload-error', (_event, filepath, error) =>
+      traceStartup('preload-error', filepath + ' ' + String(error)));
+    win.webContents.on('render-process-gone', (_event, details) =>
+      traceStartup('render-process-gone', JSON.stringify(details)));
+  }
 
   await initHook(win);
+  traceStartup('hook-ready');
   initTheme(win);
 
   // Installer le multiplexeur webRequest AVANT les plugins réseau.
@@ -526,6 +552,7 @@ async function createMainWindow() {
   removeContentSecurityPolicy();
 
   await loadAllMainPlugins(win);
+  traceStartup('main-plugins-loaded');
 
   if (windowPosition) {
     const { x: windowX, y: windowY } = windowPosition;
@@ -665,6 +692,7 @@ async function createMainWindow() {
 
   const smokeMarker = process.env.YTMD_SMOKE_RESULT;
   if (smokeMarker) {
+    traceStartup('smoke-loading-local-page');
     // Exécuté par GitHub Actions avec le vrai .exe Windows, sans compte
     // Google ni accès au service distant. Confirme le démarrage d'Electron,
     // du preload, du navigateur et la disponibilité du bridge.
@@ -673,6 +701,7 @@ async function createMainWindow() {
         'Boolean(window.mainConfig?.plugins && window.ipcRenderer?.invoke)',
         true,
       ).then((bridgeReady: boolean) => {
+        traceStartup('bridge-result', String(bridgeReady));
         fs.writeFileSync(smokeMarker, JSON.stringify({
           bridgeReady,
           portable: Boolean(process.env.PORTABLE_EXECUTABLE_FILE),
@@ -808,6 +837,7 @@ const getDefaultLocale = async (locale: string) =>
   Object.keys(await languageResources()).includes(locale) ? locale : null;
 
 app.whenReady().then(async () => {
+  traceStartup('app-when-ready');
   if (!config.get('options.language')) {
     const locale = await getDefaultLocale(app.getLocale());
     if (locale) {
@@ -892,7 +922,9 @@ app.whenReady().then(async () => {
   });
 
   mainWindow = await createMainWindow();
+  traceStartup('main-window-factory-finished');
   await setApplicationMenu(mainWindow);
+  traceStartup('application-menu-ready');
   await refreshMenu(mainWindow);
   setUpTray(app, mainWindow);
 

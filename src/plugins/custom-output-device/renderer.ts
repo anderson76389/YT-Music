@@ -4,73 +4,90 @@ import type { CustomOutputPluginConfig } from './index';
 import type { RendererContext } from '@/types/contexts';
 import type { MusicPlayer } from '@/types/music-player';
 
+type OutputContext = AudioContext & {
+  setSinkId?: (sinkId: string) => Promise<void>;
+};
+
 const updateDeviceList = async (
   context: RendererContext<CustomOutputPluginConfig>,
 ) => {
-  const newDevices: Record<string, string> = {};
-  const devices = await navigator.mediaDevices
-    .enumerateDevices()
-    .then((devices) =>
-      devices.filter((device) => device.kind === 'audiooutput'),
-    );
+  if (!navigator.mediaDevices?.enumerateDevices) return;
+  let devices: MediaDeviceInfo[];
+  try {
+    devices = await navigator.mediaDevices.enumerateDevices();
+  } catch (error) {
+    console.warn('[YT Music] Impossible de lister les sorties audio', error);
+    return;
+  }
+  const newDevices: Record<string, string> = {
+    default: 'Périphérique par défaut',
+  };
   for (const device of devices) {
-    newDevices[device.deviceId] = device.label;
+    if (device.kind !== 'audiooutput') continue;
+    newDevices[device.deviceId] = device.label || device.deviceId;
   }
   const options = await context.getConfig();
-  options.devices = newDevices;
-  context.setConfig(options);
+  if (JSON.stringify(options.devices ?? {}) === JSON.stringify(newDevices)) {
+    return;
+  }
+  await context.setConfig({ devices: newDevices });
 };
 
 const updateSinkId = async (
-  audioContext?: AudioContext & {
-    setSinkId?: (sinkId: string) => Promise<void>;
-  },
+  audioContext?: OutputContext,
   sinkId?: string,
 ) => {
-  if (!audioContext || !sinkId) return;
-  if (!('setSinkId' in audioContext)) return;
-
-  if (typeof audioContext.setSinkId === 'function') {
+  if (!audioContext || !sinkId || !audioContext.setSinkId) return;
+  try {
     await audioContext.setSinkId(sinkId);
+  } catch (error) {
+    console.warn('[YT Music] Périphérique de sortie indisponible', error);
   }
 };
 
 export const renderer = createRenderer<
   {
     options?: CustomOutputPluginConfig;
-    audioContext?: AudioContext;
+    audioContext?: OutputContext;
+    deviceChangeHandler: (() => void) | null;
     audioCanPlayHandler: (event: CustomEvent<Compressor>) => Promise<void>;
   },
   CustomOutputPluginConfig
 >({
+  deviceChangeHandler: null,
+
   async audioCanPlayHandler({ detail: { audioContext } }) {
     this.audioContext = audioContext;
-    await updateSinkId(audioContext, this.options!.output);
+    await updateSinkId(audioContext, this.options?.output);
   },
 
   async onPlayerApiReady(_: MusicPlayer, context) {
     this.options = await context.getConfig();
-    await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    navigator.mediaDevices.ondevicechange = async () =>
-      await updateDeviceList(context);
 
-    document.addEventListener(
-      'peard:audio-can-play',
-      this.audioCanPlayHandler,
-      {
-        once: true,
-        passive: true,
-      },
-    );
+    // Énumérer les sorties ne nécessite pas de demander l'accès au micro.
+    // Conserver le lecteur fonctionnel si l'API du navigateur refuse.
+    if (navigator.mediaDevices) {
+      this.deviceChangeHandler = () => {
+        void updateDeviceList(context);
+      };
+      navigator.mediaDevices.addEventListener(
+        'devicechange',
+        this.deviceChangeHandler,
+      );
+    }
+
+    document.removeEventListener('peard:audio-can-play', this.audioCanPlayHandler);
+    document.addEventListener('peard:audio-can-play', this.audioCanPlayHandler);
     await updateDeviceList(context);
   },
 
   stop() {
-    document.removeEventListener(
-      'peard:audio-can-play',
-      this.audioCanPlayHandler,
-    );
-    navigator.mediaDevices.ondevicechange = null;
+    document.removeEventListener('peard:audio-can-play', this.audioCanPlayHandler);
+    if (this.deviceChangeHandler) {
+      navigator.mediaDevices?.removeEventListener('devicechange', this.deviceChangeHandler);
+      this.deviceChangeHandler = null;
+    }
+    this.audioContext = undefined;
   },
 
   async onConfigChange(config) {

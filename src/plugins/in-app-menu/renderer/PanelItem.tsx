@@ -352,7 +352,7 @@ export const PanelItem = (props: PanelItemProps) => {
           <span
             aria-label="Activé"
             title="Activé"
-            style={{ color: '#66e6a0', 'font-weight': 'bold', 'margin-left': '9px' }}
+            style={{ color: '#ffffff', 'font-weight': 'bold', 'margin-left': '9px' }}
           >
             ✓
           </span>

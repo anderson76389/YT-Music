@@ -8,6 +8,8 @@ import {
 } from 'electron';
 import { register } from 'electron-localshortcut';
 
+import { setApplicationMenu } from '@/menu';
+
 import { dispatchMenuEvent } from './menu-dispatch';
 
 import type { InAppMenuConfig } from './constants';
@@ -53,15 +55,24 @@ export const onMainLoad = ({
     return target;
   };
 
-  ipcMain.handle('peard:menu-event', (event, commandId: number) => {
+  ipcMain.handle('peard:menu-event', async (event, commandId: number) => {
     if (!Number.isSafeInteger(commandId)) return false;
-
-    return dispatchMenuEvent(
+    const senderWindow = BrowserWindow.fromWebContents(event.sender);
+    const triggered = dispatchMenuEvent(
       getMenuItemById(commandId),
-      BrowserWindow.fromWebContents(event.sender),
+      senderWindow,
       event.sender,
       app,
     );
+    if (!triggered) return false;
+
+    // IMPORTANT : reconstruire la source de vérité depuis les préférences
+    // APRÈS le clic, avant de renvoyer l'état au menu personnalisé.
+    // Sinon la barre SolidJS affiche des coches périmées ou absentes.
+    if (senderWindow && !senderWindow.isDestroyed()) {
+      await setApplicationMenu(senderWindow);
+    }
+    return true;
   });
 
   handle('get-menu-by-id', (commandId: number) => {

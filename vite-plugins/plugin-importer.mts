@@ -102,7 +102,7 @@ export const pluginVirtualModuleGenerator = (
             ? "(plg['renderer'] || (plg['stylesheets']?.length ?? 0))"
             : `plg['${checkMode}']`;
         writer.writeLine(
-          `    ${kebabToCamel(name)}Plugin().then((plg) => ${criterion} ? ["${name}", plg] : null),`,
+          `    ${kebabToCamel(name)}Plugin().then((plg) => ${criterion} ? ["${name}", plg] : null).catch((error) => { console.error("[YT Music] Plugin ${name} indisponible dans ${mode}", error); return null; }),`,
         );
       }
       writer.writeLine('  ]);');
@@ -124,7 +124,7 @@ export const pluginVirtualModuleGenerator = (
       writer.writeLine('  const stubEntries = await Promise.all([');
       for (const { name } of plugins) {
         writer.writeLine(
-          `    ${kebabToCamel(name)}PluginStub().then((stub) => ["${name}", stub]),`,
+          `    ${kebabToCamel(name)}PluginStub().then((stub) => ["${name}", stub]).catch((error) => { console.error("[YT Music] Plugin ${name} : métadonnées indisponibles", error); return null; }),`,
         );
       }
       writer.writeLine('  ]);');

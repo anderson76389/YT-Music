@@ -94,7 +94,7 @@ export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModeP
       // composant custom element. Un échec du premier sélecteur ne doit pas
       // rendre le plugin silencieusement inopérant.
       const host = document.querySelector<HTMLElement>(
-        '#player-page, ytmusic-player-page',
+        'ytmusic-player-page, #player-page, ytmusic-player-bar',
       );
       if (!host) return;
 

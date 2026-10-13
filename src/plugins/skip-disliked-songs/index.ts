@@ -12,7 +12,17 @@ export function isDislikedButton(button: Element | null): boolean {
  * internes. Un observateur fixé sur le tout premier bouton cesse alors de
  * fonctionner : on surveille le lecteur courant et on rattache l'observateur.
  */
-export default createPlugin({
+type SkipDislikedRenderer = {
+  active: boolean;
+  observed: HTMLElement | null;
+  observer: MutationObserver | null;
+  interval: ReturnType<typeof setInterval> | null;
+  lastSkippedVideo: string;
+  findButton(): HTMLElement | null;
+  check(): void;
+  attach(): void;
+};
+export default createPlugin<unknown, unknown, SkipDislikedRenderer>({
   name: () => t('plugins.skip-disliked-songs.name'),
   description: () => t('plugins.skip-disliked-songs.description'),
   restartNeeded: false,

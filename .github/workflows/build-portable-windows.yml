@@ -71,8 +71,29 @@ jobs:
       - name: Compiler le code Electron
         run: pnpm build
 
+      - name: Attribuer une version unique a ce build
+        shell: pwsh
+        run: |
+          $base = Get-Content package.json -Raw | ConvertFrom-Json
+          $major, $minor, $patch = $base.version.Split('.')
+          $nextPatch = [int]$patch + [int]$env:GITHUB_RUN_NUMBER
+          $version = "$major.$minor.$nextPatch"
+          "YT_RELEASE_VERSION=$version" >> $env:GITHUB_ENV
+          Write-Host "Version app : $version"
+
       - name: Construire le portable et l'installateur Windows x64
-        run: pnpm exec electron-builder --win nsis:x64 portable:x64 --publish never
+        shell: pwsh
+        run: |
+          pnpm exec electron-builder --win nsis:x64 portable:x64 --publish never "-c.extraMetadata.version=$env:YT_RELEASE_VERSION"
+
+      - name: Generer le manifeste de mise a jour SHA512
+        shell: pwsh
+        run: |
+          python tools/generate-update-manifest.py
+          if (-not (Test-Path -LiteralPath 'pack/latest.yml')) {
+            throw 'Le manifeste latest.yml est introuvable'
+          }
+          Get-Content pack/latest.yml
 
       - name: Verifier les deux executables et leurs signatures de taille
         shell: pwsh
@@ -104,6 +125,7 @@ jobs:
           path: |
             pack/YT-Music-Portable-Windows-x64.exe
             pack/YT-Music-Setup-Windows-x64.exe
+            pack/latest.yml
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
@@ -113,8 +135,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          $tag = "v$version-build.${{ github.run_number }}.${{ github.run_attempt }}"
+          $version = "$env:YT_RELEASE_VERSION"
+          $tag = "v$version"
           $title = "YT Music $version - Windows portable + installateur (build ${{ github.run_number }})"
           $notes = @"
           ### YT Music — Windows x64
@@ -133,7 +155,7 @@ jobs:
           Commit : ${{ github.sha }}
           "@
           $notes | Set-Content -Path release-notes.md -Encoding utf8
-          gh release create "$tag" "pack/YT-Music-Portable-Windows-x64.exe" "pack/YT-Music-Setup-Windows-x64.exe" --repo "$env:GITHUB_REPOSITORY" --target "$env:GITHUB_SHA" --title "$title" --notes-file release-notes.md --latest
+          gh release create "$tag" "pack/YT-Music-Portable-Windows-x64.exe" "pack/YT-Music-Setup-Windows-x64.exe" "pack/latest.yml" --repo "$env:GITHUB_REPOSITORY" --target "$env:GITHUB_SHA" --title "$title" --notes-file release-notes.md --latest
 
       - name: Afficher le lien permanent des versions
         shell: pwsh

@@ -62,6 +62,9 @@ type RenderProps = {
   audioContext: AudioContext | null;
   audioSource: MediaElementAudioSourceNode | null;
   observer: ResizeObserver | null;
+  gainNode: GainNode | null;
+  audioListener: EventListener | null;
+  active: boolean;
 };
 
 export default createPlugin({
@@ -159,7 +162,14 @@ export default createPlugin({
       audioContext: null,
       audioSource: null,
       observer: null,
+      gainNode: null,
+      audioListener: null,
+      active: false,
     } as RenderProps,
+
+    start() {
+      this.props.active = true;
+    },
 
     createVisualizer(
       this: { props: RenderProps },
@@ -167,14 +177,22 @@ export default createPlugin({
     ) {
       this.props.visualizerInstance?.destroy();
       this.props.visualizerInstance = null;
+      this.props.observer?.disconnect();
+      this.props.observer = null;
+      if (this.props.gainNode) {
+        try { this.props.audioSource?.disconnect(this.props.gainNode); } catch {}
+        try { this.props.gainNode.disconnect(); } catch {}
+        this.props.gainNode = null;
+      }
 
-      if (!this.props.audioContext || !this.props.audioSource) return;
+      if (!this.props.active || !this.props.audioContext || !this.props.audioSource) return;
       if (!config.enabled) return;
 
       const video = document.querySelector<
-        HTMLVideoElement & { captureStream(): MediaStream }
+        HTMLVideoElement & { captureStream?: () => MediaStream }
       >('video');
-      if (!video) {
+      if (!video || typeof video.captureStream !== 'function') {
+        console.warn('[YT Music] Visualiseur : captureStream indisponible');
         return;
       }
 
@@ -194,6 +212,7 @@ export default createPlugin({
       const gainNode = this.props.audioContext.createGain();
       gainNode.gain.value = 1.25;
       this.props.audioSource.connect(gainNode);
+      this.props.gainNode = gainNode;
 
       let visualizerType: {
         new (...args: ConstructorParameters<typeof vudio>): Visualizer;
@@ -229,19 +248,44 @@ export default createPlugin({
     },
 
     onConfigChange(newConfig) {
-      this.createVisualizer(newConfig);
+      if (this.props.active) this.createVisualizer(newConfig);
     },
 
     onPlayerApiReady(_, { getConfig }) {
-      document.addEventListener(
-        'peard:audio-can-play',
-        async (e) => {
-          this.props.audioContext = e.detail.audioContext;
-          this.props.audioSource = e.detail.audioSource;
-          this.createVisualizer(await getConfig());
-        },
-        { passive: true },
-      );
+      if (this.props.audioListener) {
+        document.removeEventListener('peard:audio-can-play', this.props.audioListener);
+      }
+      const listener: EventListener = async (event) => {
+        if (!this.props.active) return;
+        const data = (event as CustomEvent<Compressor>).detail;
+        if (!data?.audioContext || !data.audioSource) return;
+        this.props.audioContext = data.audioContext;
+        this.props.audioSource = data.audioSource;
+        const config = await getConfig();
+        if (this.props.active) this.createVisualizer(config);
+      };
+      this.props.audioListener = listener;
+      document.addEventListener('peard:audio-can-play', listener, { passive: true });
+    },
+
+    stop() {
+      this.props.active = false;
+      if (this.props.audioListener) {
+        document.removeEventListener('peard:audio-can-play', this.props.audioListener);
+        this.props.audioListener = null;
+      }
+      this.props.visualizerInstance?.destroy();
+      this.props.visualizerInstance = null;
+      this.props.observer?.disconnect();
+      this.props.observer = null;
+      if (this.props.gainNode) {
+        try { this.props.audioSource?.disconnect(this.props.gainNode); } catch {}
+        try { this.props.gainNode.disconnect(); } catch {}
+        this.props.gainNode = null;
+      }
+      document.querySelector('#visualizer')?.remove();
+      this.props.audioContext = null;
+      this.props.audioSource = null;
     },
   },
 });

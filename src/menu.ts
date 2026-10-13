@@ -28,9 +28,6 @@ import packageJson from '../package.json';
 
 export type MenuTemplate = Electron.MenuItemConstructorOptions[];
 
-// True only if in-app-menu was loaded on launch
-const inAppMenuActive = await config.plugins.isEnabled('in-app-menu');
-
 const pluginEnabledMenu = async (
   plugin: string,
   label = '',
@@ -59,7 +56,7 @@ const pluginEnabledMenu = async (
 
 export const refreshMenu = async (win: BrowserWindow) => {
   await setApplicationMenu(win);
-  if (inAppMenuActive) {
+  if (await config.plugins.isEnabled('in-app-menu')) {
     win.webContents.send('refresh-in-app-menu');
   }
 };

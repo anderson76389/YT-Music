@@ -79,8 +79,13 @@ export default createPlugin({
     ytmusicAppLayout: null as HTMLElement | null,
     color: null as ColorInstance | null,
     darkColor: null as ColorInstance | null,
+    active: false,
+    onVideoDataChange: null as EventListener | null,
+    originalVariables: new Map<string, { value: string; priority: string }>(),
 
     start() {
+      this.active = true;
+      this.originalVariables = new Map();
       this.playerPage = document.querySelector<HTMLElement>('#player-page');
       this.navBarBackground = document.querySelector<HTMLElement>(
         '#nav-bar-background',
@@ -102,8 +107,13 @@ export default createPlugin({
 
       const fastAverageColor = new FastAverageColor();
 
-      document.addEventListener('videodatachange', async (event) => {
-        if (event.detail.name !== 'dataloaded') return;
+      if (this.onVideoDataChange) {
+        document.removeEventListener('videodatachange', this.onVideoDataChange);
+      }
+      const listener: EventListener = async (event) => {
+        if (!this.active) return;
+        const videoEvent = event as CustomEvent<{ name: string }>;
+        if (videoEvent.detail?.name !== 'dataloaded') return;
 
         const playerResponse = playerApi.getPlayerResponse();
         const thumbnail =
@@ -116,6 +126,7 @@ export default createPlugin({
             console.error(err);
             return null;
           });
+        if (!this.active) return;
 
         if (albumColor) {
           const target = Color(albumColor.hex);
@@ -151,7 +162,26 @@ export default createPlugin({
           }
         }
         (this as Renderer).updateColor(alpha ?? 1);
-      });
+      };
+      this.onVideoDataChange = listener;
+      document.addEventListener('videodatachange', listener);
+    },
+    stop() {
+      this.active = false;
+      if (this.onVideoDataChange) {
+        document.removeEventListener('videodatachange', this.onVideoDataChange);
+        this.onVideoDataChange = null;
+      }
+      const css = document.documentElement.style;
+      for (const [key, original] of this.originalVariables) {
+        if (original.value) {
+          css.setProperty(key, original.value, original.priority);
+        } else {
+          css.removeProperty(key);
+        }
+      }
+      this.originalVariables.clear();
+      document.body.classList.remove('seekbar-theme');
     },
     onConfigChange(config) {
       document.documentElement.style.setProperty(
@@ -239,7 +269,14 @@ export default createPlugin({
         const key = colorKeyMap[variable] ?? COLOR_KEY;
         const ratio = ratioMap[variable] ?? undefined;
 
-        document.documentElement.style.setProperty(
+        const style = document.documentElement.style;
+        if (!this.originalVariables.has(variable)) {
+          this.originalVariables.set(variable, {
+            value: style.getPropertyValue(variable),
+            priority: style.getPropertyPriority(variable),
+          });
+        }
+        style.setProperty(
           variable,
           getMixedColor(color, key, alpha, ratio),
           'important',

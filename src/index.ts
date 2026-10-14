@@ -311,28 +311,31 @@ const initHook = async (win: BrowserWindow) => {
       const isEqual = deepEqual(oldPluginConfigList[id], newPluginConfig);
 
       if (!isEqual) {
-        const oldConfig = oldPluginConfigList[id] as PluginConfig;
-        const config = deepmerge(
-          allPluginStubs[id].config ?? { enabled: false },
-          newPluginConfig ?? {},
-        ) as PluginConfig;
+        const def = allPluginStubs[id];
+        // An old configuration can still contain extensions removed from the
+        // application. One unknown id must not break all plugin changes.
+        if (!def) return;
+        const defaults = def.config ?? { enabled: false };
+        const oldConfig = deepmerge(defaults, oldPluginConfigList[id] ?? {}) as PluginConfig;
+        const config = deepmerge(defaults, newPluginConfig ?? {}) as PluginConfig;
 
-        if (config.enabled !== oldConfig?.enabled) {
-          if (allPluginStubs[id]?.stylesheets?.length) {
-            void setVisualCss(id, config.enabled);
-          }
-          if (config.enabled) {
-            win.webContents.send('plugin:enable', id);
-            ipcMain.emit('plugin:enable', id);
-            forceLoadMainPlugin(id, win);
+        if (config.enabled !== oldConfig.enabled) {
+          if (def.restartNeeded) {
+            // Plugins installing native hooks, WebAudio nodes or shortcuts
+            // cannot all be safely unloaded without a restart. Do not fake
+            // a live activation while those hooks belong to the old state.
+            void showNeedToRestartDialog(id);
           } else {
-            win.webContents.send('plugin:unload', id);
-            ipcMain.emit('plugin:unload', id);
-            forceUnloadMainPlugin(id, win);
-          }
-
-          if (allPluginStubs[id]?.restartNeeded) {
-            showNeedToRestartDialog(id);
+            if (def.stylesheets?.length) void setVisualCss(id, config.enabled);
+            if (config.enabled) {
+              win.webContents.send('plugin:enable', id);
+              ipcMain.emit('plugin:enable', id);
+              void forceLoadMainPlugin(id, win).catch(console.error);
+            } else {
+              win.webContents.send('plugin:unload', id);
+              ipcMain.emit('plugin:unload', id);
+              void forceUnloadMainPlugin(id, win).catch(console.error);
+            }
           }
         }
 

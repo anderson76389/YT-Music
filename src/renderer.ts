@@ -419,9 +419,10 @@ const updateSettingsAppearance = () => {
 const main = async () => {
   window.ipcRenderer.on('ytmd:appearance-settings-changed', updateSettingsAppearance);
   updateSettingsAppearance();
-  await loadAllRendererPlugins();
-  isPluginLoaded = true;
 
+  // Subscribe before awaiting any slow plugin. Otherwise commands emitted
+  // while an extension initializes are lost, leaving it apparently enabled
+  // in the menu but missing in the renderer.
   window.ipcRenderer.on('plugin:unload', async (_event, id: string) => {
     await forceUnloadRendererPlugin(id);
   });
@@ -440,6 +441,9 @@ const main = async () => {
       }
     },
   );
+
+  await loadAllRendererPlugins();
+  isPluginLoaded = true;
 
   // Wait for complete load of the api
   await listenForApiLoad();

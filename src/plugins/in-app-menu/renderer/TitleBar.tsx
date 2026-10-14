@@ -1,4 +1,4 @@
-import { type Menu, type MenuItem } from 'electron';
+import type { MenuItem } from 'electron';
 import {
   createEffect,
   createResource,
@@ -22,6 +22,7 @@ import { PanelItem } from './PanelItem';
 import { WindowController } from './WindowController';
 
 import type { InAppMenuConfig } from '../constants';
+import type { MenuSnapshot, MenuSnapshotItem } from '../menu-snapshot';
 import type { RendererContext } from '@/types/contexts';
 
 const titleStyle = cacheNoArgs(
@@ -106,9 +107,9 @@ const animationStyle = cacheNoArgs(() => ({
 }));
 
 export type PanelRendererProps = {
-  items: Electron.Menu['items'];
-  level?: number[];
-  onClick?: (commandId: number, radioGroup?: MenuItem[]) => void;
+  items: MenuSnapshotItem[];
+  level?: string[];
+  onClick?: (menuPath: string, radioGroup?: MenuSnapshotItem[]) => void;
 };
 const PanelRenderer = (props: PanelRendererProps) => {
   const radioGroup = () => props.items.filter((it) => it.type === 'radio');
@@ -122,9 +123,10 @@ const PanelRenderer = (props: PanelRendererProps) => {
               <PanelItem
                 chip={subItem().sublabel}
                 commandId={subItem().commandId}
+                menuPath={subItem().ytmdPath}
                 disabled={!subItem().enabled}
                 name={subItem().label}
-                onClick={() => props.onClick?.(subItem().commandId)}
+                onClick={() => props.onClick?.(subItem().ytmdPath)}
                 toolTip={subItem().toolTip}
                 type={'normal'}
               />
@@ -133,14 +135,15 @@ const PanelRenderer = (props: PanelRendererProps) => {
               <PanelItem
                 chip={subItem().sublabel}
                 commandId={subItem().commandId}
-                level={[...(props.level ?? []), subItem().commandId]}
+                menuPath={subItem().ytmdPath}
+                level={[...(props.level ?? []), subItem().ytmdPath]}
                 name={subItem().label}
                 toolTip={subItem().toolTip}
                 type={'submenu'}
               >
                 <PanelRenderer
                   items={subItem().submenu?.items ?? []}
-                  level={[...(props.level ?? []), subItem().commandId]}
+                  level={[...(props.level ?? []), subItem().ytmdPath]}
                   onClick={props.onClick}
                 />
               </PanelItem>
@@ -150,9 +153,10 @@ const PanelRenderer = (props: PanelRendererProps) => {
                 checked={subItem().checked}
                 chip={subItem().sublabel}
                 commandId={subItem().commandId}
+                menuPath={subItem().ytmdPath}
                 disabled={!subItem().enabled}
                 name={subItem().label}
-                onChange={() => props.onClick?.(subItem().commandId)}
+                onChange={() => props.onClick?.(subItem().ytmdPath)}
                 toolTip={subItem().toolTip}
                 type={'checkbox'}
               />
@@ -162,10 +166,11 @@ const PanelRenderer = (props: PanelRendererProps) => {
                 checked={subItem().checked}
                 chip={subItem().sublabel}
                 commandId={subItem().commandId}
+                menuPath={subItem().ytmdPath}
                 disabled={!subItem().enabled}
                 name={subItem().label}
                 onChange={() =>
-                  props.onClick?.(subItem().commandId, radioGroup())
+                  props.onClick?.(subItem().ytmdPath, radioGroup())
                 }
                 toolTip={subItem().toolTip}
                 type={'radio'}
@@ -191,11 +196,11 @@ export const TitleBar = (props: TitleBarProps) => {
   const [collapsed, setCollapsed] = createSignal(props.initialCollapsed);
   const [ignoreTransition, setIgnoreTransition] = createSignal(false);
   const [openTarget, setOpenTarget] = createSignal<HTMLElement | null>(null);
-  const [menu, setMenu] = createSignal<Menu | null>(null);
+  const [menu, setMenu] = createSignal<MenuSnapshot | null>(null);
   const [mouseY, setMouseY] = createSignal(0);
 
   const [data, { refetch }] = createResource(
-    async () => (await props.ipc.invoke('get-menu')) as Promise<Menu | null>,
+    async () => (await props.ipc.invoke('get-menu')) as MenuSnapshot | null,
   );
   const [isMaximized, { refetch: refetchMaximize }] = createResource(
     async () =>
@@ -218,8 +223,8 @@ export const TitleBar = (props: TitleBarProps) => {
   };
 
   const handleItemClick = async (
-    _commandId: number,
-    _radioGroup?: MenuItem[],
+    _menuPath: string,
+    _radioGroup?: MenuSnapshotItem[],
   ) => {
     // Le processus principal a déjà reconstruit le menu Electron à partir
     // du fichier de configuration. Relire TOUT le menu, pas un ancien ID de

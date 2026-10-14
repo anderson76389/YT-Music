@@ -11,6 +11,7 @@ import { register } from 'electron-localshortcut';
 import { setApplicationMenu } from '@/menu';
 
 import { dispatchMenuEvent } from './menu-dispatch';
+import { getMenuItemByPath, snapshotMenu } from './menu-snapshot';
 
 import type { InAppMenuConfig } from './constants';
 import type { BackendContext } from '@/types/contexts';
@@ -29,13 +30,10 @@ export const onMainLoad = ({
     });
   });
 
-  handle('get-menu', () =>
-    JSON.parse(
-      JSON.stringify(Menu.getApplicationMenu(), (key: string, value: unknown) =>
-        key !== 'commandsMap' && key !== 'menu' ? value : undefined,
-      ),
-    ),
-  );
+  // Every option gets a stable, explicit path within this menu snapshot.
+  // Electron commandId is not guaranteed to survive JSON serialization or
+  // repeated Menu.buildFromTemplate() calls.
+  handle('get-menu', () => snapshotMenu(Menu.getApplicationMenu()));
 
   const getMenuItemById = (commandId: number): MenuItem | null => {
     const menu = Menu.getApplicationMenu();
@@ -55,11 +53,11 @@ export const onMainLoad = ({
     return target;
   };
 
-  ipcMain.handle('peard:menu-event', async (event, commandId: number) => {
-    if (!Number.isSafeInteger(commandId)) return false;
+  ipcMain.handle('peard:menu-event', async (event, menuPath: string) => {
     const senderWindow = BrowserWindow.fromWebContents(event.sender);
+    if (senderWindow !== win || !menuPath) return false;
     const triggered = await dispatchMenuEvent(
-      getMenuItemById(commandId),
+      getMenuItemByPath(Menu.getApplicationMenu(), menuPath),
       senderWindow,
       event.sender,
       app,

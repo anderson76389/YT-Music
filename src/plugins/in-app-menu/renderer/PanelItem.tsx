@@ -156,6 +156,7 @@ type BasePanelItemProps = {
   chip?: string;
   toolTip?: string;
   commandId?: number;
+  menuPath?: string;
 };
 type NormalPanelItemProps = BasePanelItemProps & {
   type: 'normal';
@@ -163,7 +164,7 @@ type NormalPanelItemProps = BasePanelItemProps & {
 };
 type SubmenuItemProps = BasePanelItemProps & {
   type: 'submenu';
-  level: number[];
+  level: string[];
   children: JSX.Element;
 };
 type RadioPanelItemProps = BasePanelItemProps & {
@@ -293,8 +294,10 @@ export const PanelItem = (props: PanelItemProps) => {
       setOpen(!open());
       return;
     }
-    if (props.commandId === undefined) return;
-    const succeeded = await window.ipcRenderer.invoke('peard:menu-event', props.commandId);
+    // Explicit path comes from get-menu and always identifies this entry,
+    // even if Electron omits commandId from the JSON menu.
+    if (!props.menuPath) return;
+    const succeeded = await window.ipcRenderer.invoke('peard:menu-event', props.menuPath);
     if (!succeeded) return;
     if (props.type === 'radio') {
       props.onChange?.(!props.checked);

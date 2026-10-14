@@ -36,6 +36,7 @@ const pluginEnabledMenu = async (
   refreshMenu?: (() => void) ,
 ): Promise<Electron.MenuItemConstructorOptions> => ({
   label: label || plugin,
+  id: `ytmd-plugin:${plugin}`,
   sublabel: isNew ? t('main.menu.plugins.new') : undefined,
   toolTip: description,
   type: 'checkbox',

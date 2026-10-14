@@ -41,16 +41,15 @@ const pluginEnabledMenu = async (
   toolTip: description,
   type: 'checkbox',
   checked: await config.plugins.isEnabled(plugin),
-  click(item: Electron.MenuItem) {
-    if (item.checked) {
-      config.plugins.enable(plugin);
-    } else {
-      config.plugins.disable(plugin);
-    }
-
-    if (hasSubmenu) {
-      refreshMenu?.();
-    }
+  async click(item: Electron.MenuItem) {
+    // The DOM menu is not a native Electron menu. An Electron checkbox can
+    // return a stale checked state after a programmatic click. Always derive
+    // the requested value from persisted main-process configuration.
+    const currentlyEnabled = await config.plugins.isEnabled(plugin);
+    const nextEnabled = !currentlyEnabled;
+    config.plugins.setMenuOptions(plugin, { enabled: nextEnabled }, []);
+    item.checked = nextEnabled;
+    if (hasSubmenu) refreshMenu?.();
   },
 });
 

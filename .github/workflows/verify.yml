@@ -2,7 +2,7 @@ name: Verification du code
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix-plugin-toggle-source-truth-20261014]
   pull_request:
   workflow_dispatch:
   schedule:

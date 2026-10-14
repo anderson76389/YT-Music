@@ -130,6 +130,10 @@ export const mainMenuTemplate = async (
           label: t('main.menu.options.submenu.auto-update'),
           type: 'checkbox',
           checked: config.get('options.autoUpdates'),
+          enabled: !(process.platform === 'win32' && !!process.env.PORTABLE_EXECUTABLE_FILE),
+          toolTip: process.platform === 'win32' && process.env.PORTABLE_EXECUTABLE_FILE
+            ? 'Le portable se met à jour depuis les Releases ; la mise à jour automatique nécessite Windows Setup.'
+            : undefined,
           click(item: MenuItem) {
             config.setMenuOption('options.autoUpdates', item.checked);
           },
@@ -310,7 +314,7 @@ export const mainMenuTemplate = async (
                           .get('options.themes')
                           ?.filter((t) => t !== theme) ?? [],
                       );
-                      innerRefreshMenu();
+                      await innerRefreshMenu();
                     }
                   },
                 })) ?? []),
@@ -321,7 +325,7 @@ export const mainMenuTemplate = async (
                   ),
                   type: 'normal',
                   async click() {
-                    const { filePaths } = await dialog.showOpenDialog({
+                    const { filePaths } = await dialog.showOpenDialog(win, {
                       filters: [{ name: 'CSS Files', extensions: ['css'] }],
                       properties: ['openFile', 'multiSelections'],
                     });
@@ -407,6 +411,7 @@ export const mainMenuTemplate = async (
               click() {
                 config.setMenuOption('options.tray', false);
                 config.setMenuOption('options.appVisible', true);
+                win.show();
               },
             },
             {
@@ -419,6 +424,7 @@ export const mainMenuTemplate = async (
               click() {
                 config.setMenuOption('options.tray', true);
                 config.setMenuOption('options.appVisible', true);
+                win.show();
               },
             },
             {
@@ -431,6 +437,11 @@ export const mainMenuTemplate = async (
               click() {
                 config.setMenuOption('options.tray', true);
                 config.setMenuOption('options.appVisible', false);
+                // Don't hide in the middle of menu dispatch. The tray icon
+                // must already exist before the window disappears.
+                setTimeout(() => {
+                  if (!win.isDestroyed()) win.hide();
+                }, 200);
               },
             },
             { type: 'separator' },
@@ -467,20 +478,18 @@ export const mainMenuTemplate = async (
               .map(
                 (lang): Electron.MenuItemConstructorOptions => ({
                   label: `${langResources[lang].translation.language?.name ?? 'Unknown'} (${langResources[lang].translation.language?.['local-name'] ?? 'Unknown'})`,
-                  type: 'checkbox',
+                  type: 'radio',
                   checked: (config.get('options.language') ?? 'en') === lang,
-                  click() {
+                  async click() {
+                    if (config.get('options.language') === lang) return;
                     config.setMenuOption('options.language', lang);
-                    refreshMenu(win);
-                    setLanguage(lang);
-                    dialog.showMessageBox(win, {
-                      title: t(
-                        'main.menu.options.submenu.language.dialog.title',
-                      ),
-                      message: t(
-                        'main.menu.options.submenu.language.dialog.message',
-                      ),
-                    });
+                    await setLanguage(lang);
+                    await refreshMenu(win);
+                    // The website and pear-trans custom elements need to be
+                    // re-created in the selected language.
+                    setTimeout(() => {
+                      if (!win.isDestroyed()) win.webContents.reload();
+                    }, 300);
                   },
                 }),
               )
@@ -496,6 +505,7 @@ export const mainMenuTemplate = async (
                 'main.menu.options.submenu.advanced-options.submenu.set-proxy.label',
               ),
               type: 'normal',
+              toolTip: 'Le nouveau proxy sera appliqué au prochain démarrage de YT Music.',
               async click(item: MenuItem) {
                 await setProxy(item, win);
               },
@@ -506,6 +516,7 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.overrideUserAgent'),
+              toolTip: 'Nécessite un redémarrage de YT Music pour modifier les requêtes du navigateur.',
               click(item: MenuItem) {
                 config.setMenuOption('options.overrideUserAgent', item.checked);
               },
@@ -516,6 +527,7 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.disableHardwareAcceleration'),
+              toolTip: 'Nécessite un redémarrage de YT Music (Electron).',
               click(item: MenuItem) {
                 config.setMenuOption(
                   'options.disableHardwareAcceleration',

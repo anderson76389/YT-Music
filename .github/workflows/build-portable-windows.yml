@@ -127,7 +127,7 @@ jobs:
             throw "Echec du lancement portable, de l'activation d'un plugin ou des commandes Parametres."
           }
           Remove-Item Env:\YTMD_SMOKE_RESULT
-          Write-Host 'Portable : demarrage, plugin et 4 options plus selection radio dans Parametres OK.'
+          Write-Host 'Portable : demarrage, plugin, 8 options, coches rafraichies et 2 groupes radio des Parametres OK.'
 
       - name: Generer le manifeste de mise a jour SHA512
         shell: pwsh

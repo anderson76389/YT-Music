@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { getMenuItemByPath, snapshotMenu } from '../menu-snapshot';
 import { dispatchMenuEvent } from '../menu-dispatch';
 
-import type { Menu, MenuItem, BrowserWindow, App, WebContents } from 'electron';
+import type { Menu, MenuItem, App, WebContents } from 'electron';
 
 function item(values: Partial<MenuItem>): MenuItem {
   return {

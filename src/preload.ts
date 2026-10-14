@@ -50,7 +50,33 @@ ipcRenderer.on('plugin:enable', async (_, id: string) => {
   await forceLoadPreloadPlugin(id);
 });
 
-contextBridge.exposeInMainWorld('mainConfig', config);
+// Electron's preload may have a different appData path from the main process
+// when running an NSIS portable build. Reading/writing a second Conf instance
+// made menu toggles look saved while plugins still saw enabled=false.
+// All renderer-facing configuration accesses now use the main process.
+contextBridge.exposeInMainWorld('mainConfig', {
+  ...config,
+  get: (key: string) => ipcRenderer.sendSync('ytmd:config:get', key),
+  set: (key: string, value: unknown) =>
+    ipcRenderer.sendSync('ytmd:config:set', key, value),
+  setPartial: (key: string, value: object, defaults?: object) =>
+    ipcRenderer.sendSync('ytmd:config:set-partial', key, value, defaults),
+  setMenuOption: (key: string, value: unknown) =>
+    ipcRenderer.sendSync('ytmd:config:set-menu-option', key, value),
+  plugins: {
+    ...config.plugins,
+    getPlugins: () => ipcRenderer.sendSync('ytmd:plugins:get'),
+    getOptions: (name: string) =>
+      ipcRenderer.sendSync('ytmd:plugins:get-options', name),
+    setOptions: (name: string, options: object, exclude?: string[]) =>
+      ipcRenderer.sendSync('ytmd:plugins:set-options', name, options, exclude),
+    setMenuOptions: (name: string, options: object, exclude?: string[]) =>
+      ipcRenderer.sendSync('ytmd:plugins:set-menu-options', name, options, exclude),
+    enable: (name: string) => ipcRenderer.sendSync('ytmd:plugins:enable', name),
+    disable: (name: string) => ipcRenderer.sendSync('ytmd:plugins:disable', name),
+    isEnabled: (name: string) => ipcRenderer.invoke('ytmd:plugins:is-enabled', name),
+  },
+});
 contextBridge.exposeInMainWorld('electronIs', is);
 contextBridge.exposeInMainWorld('ipcRenderer', {
   on: (

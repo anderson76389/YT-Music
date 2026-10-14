@@ -225,6 +225,59 @@ ipcMain.handle('peard:get-main-plugin-names', async () =>
   Object.keys(await mainPlugins()),
 );
 
+// In the portable edition the main and preload processes can resolve
+// different electron-store locations. The main process must be the sole
+// source of truth for renderer-visible preferences and plugin toggles.
+ipcMain.on('ytmd:config:get', (event, key: string) => {
+  event.returnValue = config.get(key as Parameters<typeof config.get>[0]);
+});
+ipcMain.on('ytmd:config:set', (event, key: string, value: unknown) => {
+  config.set(key, value);
+  event.returnValue = null;
+});
+ipcMain.on('ytmd:config:set-partial', (event, key: string, value: object, defaults?: object) => {
+  config.setPartial(key, value, defaults);
+  event.returnValue = null;
+});
+ipcMain.on('ytmd:config:set-menu-option', (event, key: string, value: unknown) => {
+  config.setMenuOption(key, value);
+  event.returnValue = null;
+});
+ipcMain.on('ytmd:plugins:get', (event) => {
+  event.returnValue = config.plugins.getPlugins();
+});
+ipcMain.on('ytmd:plugins:get-options', (event, name: string) => {
+  event.returnValue = config.plugins.getOptions(name);
+});
+ipcMain.on('ytmd:plugins:set-options',
+  (event, name: string, options: Record<string, unknown>, exclude?: string[]) => {
+    if (options && typeof options === 'object') {
+      config.plugins.setOptions(name, options, exclude);
+    }
+    event.returnValue = null;
+  },
+);
+ipcMain.on('ytmd:plugins:set-menu-options',
+  (event, name: string, options: Record<string, unknown>, exclude?: string[]) => {
+    if (options && typeof options === 'object') {
+      config.plugins.setMenuOptions(name, options, exclude);
+    }
+    event.returnValue = null;
+  },
+);
+ipcMain.on('ytmd:plugins:enable', (event, name: string) => {
+  config.plugins.enable(name);
+  event.returnValue = null;
+});
+ipcMain.on('ytmd:plugins:disable', (event, name: string) => {
+  config.plugins.disable(name);
+  event.returnValue = null;
+});
+ipcMain.handle('ytmd:plugins:is-enabled', (_, name: string) =>
+  config.plugins.isEnabled(name),
+);
+
+
 const initHook = async (win: BrowserWindow) => {
   const allPluginStubs = await allPlugins();
 

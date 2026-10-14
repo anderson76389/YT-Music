@@ -1,7 +1,7 @@
 import { deepmerge } from 'deepmerge-ts';
+import { ipcRenderer } from 'electron';
 import { allPlugins, preloadPlugins } from 'virtual:plugins';
 
-import * as config from '@/config';
 import { t } from '@/i18n';
 import { LoggerPrefix, startPlugin, stopPlugin } from '@/utils';
 
@@ -14,16 +14,9 @@ const loadedPluginMap: Record<
 > = {};
 const createContext = (id: string): PreloadContext<PluginConfig> => ({
   getConfig: async () =>
-    deepmerge(
-      (await allPlugins())[id].config ?? { enabled: false },
-      config.get(`plugins.${id}`) ?? {},
-    ) as PluginConfig,
+    (await ipcRenderer.invoke('peard:get-config', id)) as PluginConfig,
   setConfig: async (newConfig) => {
-    config.setPartial(
-      `plugins.${id}`,
-      newConfig,
-      (await allPlugins())[id].config,
-    );
+    await ipcRenderer.invoke('peard:set-config', id, newConfig);
   },
 });
 
@@ -81,7 +74,7 @@ export const forceLoadPreloadPlugin = async (id: string) => {
 };
 
 export const loadAllPreloadPlugins = async () => {
-  const pluginConfigs = config.plugins.getPlugins();
+  const pluginConfigs = ipcRenderer.sendSync('ytmd:plugins:get') as Record<string, PluginConfig>;
 
   for (const [pluginId, pluginDef] of Object.entries(await preloadPlugins())) {
     const config = deepmerge(

@@ -206,9 +206,8 @@ export default createPlugin({
       };
 
       const playerPage = document.querySelector<HTMLElement>('#player-page');
-      const ytmusicAppLayout = document.querySelector<HTMLElement>('#layout');
-
       const injectBlurElement = (force?: boolean): boolean | void => {
+        const ytmusicAppLayout = document.querySelector<HTMLElement>('#layout');
         const isPageOpen = ytmusicAppLayout?.hasAttribute('player-page-open');
         if (isPageOpen) {
           const isVideo = isVideoMode();

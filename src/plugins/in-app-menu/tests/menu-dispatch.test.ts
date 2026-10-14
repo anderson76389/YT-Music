@@ -79,7 +79,7 @@ test('menu intégré : les entrées désactivées et sous-menus ne sont pas exé
   expect(f.calls).toEqual([]);
 });
 
-test('menu intégré : zoom, rechargement, plein écran, devtools et quitter fonctionnent', () => {
+test('menu intégré : zoom, rechargement, plein écran, devtools et quitter fonctionnent', async () => {
   const f = fixture();
   for (const role of ['zoomIn', 'zoomOut', 'resetZoom', 'reload', 'forceReload', 'toggleFullScreen', 'toggleDevTools', 'quit']) {
     expect(await dispatchMenuEvent(item({ role }), f.window, f.contents, f.application)).toBe(true);

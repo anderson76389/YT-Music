@@ -15,24 +15,23 @@ import type { BrowserWindow } from 'electron';
 const setWindowTransparency = (window: BrowserWindow, material: MaterialType, opacity: number) => {
   // Some Windows editions do not support Mica; it must not abort the plugin.
   try {
-  if (is.windows()) {
-    if (WINDOWS_MATERIALS.includes(material)) {
-      window.setBackgroundMaterial(
-        material as Parameters<BrowserWindow['setBackgroundMaterial']>[0],
-      );
-    } else {
-      window.setBackgroundMaterial('none');
+    if (is.windows()) {
+      if (WINDOWS_MATERIALS.includes(material)) {
+        window.setBackgroundMaterial(
+          material as Parameters<BrowserWindow['setBackgroundMaterial']>[0],
+        );
+      } else {
+        window.setBackgroundMaterial('none');
+      }
+    } else if (is.macOS()) {
+      if (MACOS_MATERIALS.includes(material)) {
+        window.setVibrancy(
+          material as Parameters<BrowserWindow['setVibrancy']>[0],
+        );
+      } else {
+        window.setVibrancy(null);
+      }
     }
-  } else if (is.macOS()) {
-    if (MACOS_MATERIALS.includes(material)) {
-      window.setVibrancy(
-        material as Parameters<BrowserWindow['setVibrancy']>[0],
-      );
-    } else {
-      window.setVibrancy(null);
-    }
-  }
-
   } catch (error) {
     console.warn('[YT Music] Matériau système non disponible', error);
   }

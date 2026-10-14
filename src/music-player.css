@@ -112,3 +112,32 @@ ytmusic-guide-entry-renderer[data-ytmd-subscribe-hidden] {
   background-color: rgb(255 255 255 / 0.13) !important;
   border-radius: 8px !important;
 }
+
+/* Windows / YouTube Music : harmoniser la séparation au-dessus du guide.
+   L'en-tête conserve sa hauteur (et donc la zone des boutons Electron) :
+   on ne déplace ni la recherche, ni les menus, ni les actions de navigation. */
+ytmusic-app-layout#layout #nav-bar-divider {
+  display: none !important;
+}
+
+ytmusic-nav-bar > .left-content,
+ytmusic-nav-bar > .center-content,
+ytmusic-nav-bar > .right-content {
+  align-self: center;
+}
+
+/* Conserver l'icône et le libellé centrés sur la même ligne, sans
+   redimensionner les entrées du menu latéral. */
+#guide ytmusic-guide-entry-renderer tp-yt-paper-item,
+#guide-wrapper ytmusic-guide-entry-renderer tp-yt-paper-item {
+  align-items: center;
+}
+
+/* Dans les pages de listes, raccourcir seulement le fond noir qui dépasse
+   au-dessus du lecteur. Ne jamais modifier les contrôles, le curseur de
+   progression, l'espace de défilement ou la page du lecteur agrandi. */
+ytmusic-app-layout#layout[player-visible]:not([player-page-open]):not([player-ui-state='PLAYER_PAGE_OPEN']):not([player-ui-state='FULLSCREEN']) #player-bar-background {
+  max-height: 76px !important;
+  bottom: 0 !important;
+  top: auto !important;
+}

@@ -730,16 +730,54 @@ async function createMainWindow() {
     // du preload, du navigateur et la disponibilité du bridge.
     win.webContents.once('did-finish-load', () => {
       void win.webContents.executeJavaScript(
-        'Boolean(window.mainConfig?.plugins && window.ipcRenderer?.invoke)',
+        `(async () => {
+          const bridgeReady = Boolean(window.mainConfig?.plugins && window.ipcRenderer?.invoke);
+          if (!bridgeReady) return { bridgeReady, menuClicksPass: false, reason: 'preload-bridge-missing' };
+          const getToggle = async () => {
+            const menu = await window.ipcRenderer.invoke('get-menu');
+            return menu?.items?.[0]?.submenu?.items?.find(
+              (entry) => entry.id === 'ytmd-plugin:blur-nav-bar',
+            );
+          };
+          let toggle;
+          for (let attempt = 0; attempt < 30; attempt++) {
+            try {
+              toggle = await getToggle();
+              if (toggle) break;
+            } catch {}
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+          if (!toggle?.ytmdPath) {
+            return { bridgeReady, menuClicksPass: false, reason: 'menu-plugin-path-missing' };
+          }
+          const before = await window.mainConfig.plugins.isEnabled('blur-nav-bar');
+          const clicked = await window.ipcRenderer.invoke('peard:menu-event', toggle.ytmdPath);
+          const after = await window.mainConfig.plugins.isEnabled('blur-nav-bar');
+          const updatedToggle = await getToggle();
+          const restored = updatedToggle?.ytmdPath
+            ? await window.ipcRenderer.invoke('peard:menu-event', updatedToggle.ytmdPath)
+            : false;
+          const final = await window.mainConfig.plugins.isEnabled('blur-nav-bar');
+          return {
+            bridgeReady,
+            menuClicksPass: clicked === true && after !== before &&
+              restored === true && final === before,
+            clicked, before, after, restored, final,
+          };
+        })()`,
         true,
-      ).then((bridgeReady: boolean) => {
-        traceStartup('bridge-result', String(bridgeReady));
+      ).then((result: {
+        bridgeReady: boolean;
+        menuClicksPass: boolean;
+        reason?: string;
+      }) => {
+        traceStartup('bridge-and-menu', JSON.stringify(result));
         fs.writeFileSync(smokeMarker, JSON.stringify({
-          bridgeReady,
+          ...result,
           portable: Boolean(process.env.PORTABLE_EXECUTABLE_FILE),
           windowCreated: true,
         }));
-        app.exit(bridgeReady ? 0 : 2);
+        app.exit(result.bridgeReady && result.menuClicksPass ? 0 : 2);
       }).catch((error: unknown) => {
         fs.writeFileSync(smokeMarker, JSON.stringify({ bridgeReady: false, error: String(error) }));
         app.exit(3);

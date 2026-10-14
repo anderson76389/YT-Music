@@ -4,7 +4,6 @@ import { createPlugin } from '@/utils';
 import { menu } from './menu';
 import style from './style.css?inline';
 import { type AmbientModePluginConfig } from './types';
-import { canDrawAmbientVideo } from './video-state';
 
 const defaultConfig: AmbientModePluginConfig = {
   enabled: false,
@@ -17,230 +16,267 @@ const defaultConfig: AmbientModePluginConfig = {
   fullscreen: false,
 };
 
-type AmbientRendererState = {
-  settings: AmbientModePluginConfig;
-  active: boolean;
-  host: HTMLElement | null;
-  backdrop: HTMLDivElement | null;
-  art: HTMLImageElement | null;
-  canvas: HTMLCanvasElement | null;
-  source: string;
-  responseArt: string;
-  ticker: ReturnType<typeof setInterval> | null;
-  videoTicker: ReturnType<typeof setInterval> | null;
-  videoTickerFps: number;
-  dataListener: EventListener | null;
-  refresh(): void;
-  applySettings(): void;
-  drawVideoFrame(): void;
-  startVideoTicker(): void;
-};
-
-export default createPlugin<unknown, unknown, AmbientRendererState, AmbientModePluginConfig>({
+export default createPlugin({
   name: () => t('plugins.ambient-mode.name'),
   description: () => t('plugins.ambient-mode.description'),
   restartNeeded: false,
   config: defaultConfig,
   stylesheets: [style],
-  menu,
+  menu: menu,
 
   renderer: {
-    settings: defaultConfig,
-    active: false,
-    host: null as HTMLElement | null,
-    backdrop: null as HTMLDivElement | null,
-    art: null as HTMLImageElement | null,
-    canvas: null as HTMLCanvasElement | null,
-    source: '',
-    responseArt: '',
-    ticker: null as ReturnType<typeof setInterval> | null,
-    videoTicker: null as ReturnType<typeof setInterval> | null,
-    videoTickerFps: 0,
-    dataListener: null as EventListener | null,
+    interpolationTime: defaultConfig.interpolationTime,
+    buffer: defaultConfig.buffer,
+    qualityRatio: defaultConfig.quality,
+    size: defaultConfig.size,
+    blur: defaultConfig.blur,
+    opacity: defaultConfig.opacity,
+    isFullscreen: defaultConfig.fullscreen,
 
-    start({ getConfig }) {
-      this.active = true;
+    unregister: null as (() => void) | null,
+    observer: null as MutationObserver | null,
+    update: null as (() => void) | null,
+    interval: null as NodeJS.Timeout | null,
+    lastMediaType: null as 'video' | 'image' | null,
+    lastVideoSource: null as string | null,
+    lastImageSource: null as string | null,
 
-      // On démarre immédiatement le fond, sans attendre une balise vidéo.
-      // Les réglages enregistrés sont appliqués dès leur récupération.
-      this.refresh();
-      this.ticker = setInterval(() => this.refresh(), 900);
-      void Promise.resolve(getConfig()).then((config) => {
-        if (!this.active) return;
-        this.settings = config;
-        this.refresh();
-      }).catch((error: unknown) => {
-        console.warn('[YT Music] Mode ambiant : configuration inaccessible', error);
-      });
-    },
+    async start({ getConfig }) {
+      const config = await getConfig();
+      this.interpolationTime = config.interpolationTime;
+      this.buffer = config.buffer;
+      this.qualityRatio = config.quality;
+      this.size = config.size;
+      this.blur = config.blur;
+      this.opacity = config.opacity;
+      this.isFullscreen = config.fullscreen;
 
-    onPlayerApiReady(playerApi) {
-      const updateArtwork = () => {
-        const images = playerApi
-          .getPlayerResponse()
-          ?.videoDetails?.thumbnail?.thumbnails;
-        const art = images?.at(-1)?.url ?? '';
-        if (art && art !== this.responseArt) {
-          this.responseArt = art;
-          this.refresh();
+      // Playback can be audio-only: never wait forever for a video element.
+      const injectBlurImage = () => {
+        const songImage = document.querySelector<HTMLElement>('#song-image');
+        const image = songImage?.querySelector<HTMLImageElement>('yt-img-shadow > img, img');
+        if (!songImage || !image) return null;
+
+        this.lastImageSource = image.src;
+
+        const blurImage = document.createElement('img');
+        blurImage.classList.add('html5-blur-image');
+        blurImage.src = image.src;
+
+        this.update = () => {
+          if (this.isFullscreen) blurImage.classList.add('fullscreen');
+          else blurImage.classList.remove('fullscreen');
+
+          blurImage.style.setProperty('--width', `${this.size}%`);
+          blurImage.style.setProperty('--height', `${this.size}%`);
+          blurImage.style.setProperty('--blur', `${this.blur}px`);
+          blurImage.style.setProperty('--opacity', `${this.opacity}`);
+        };
+        this.update();
+
+        /* injecting */
+        songImage.prepend(blurImage);
+
+        /* cleanup */
+        return () => {
+          if (blurImage.isConnected) blurImage.remove();
+        };
+      };
+
+      const injectBlurVideo = () => {
+        const songVideo = document.querySelector<HTMLElement>('#song-video');
+        const video = document.querySelector<HTMLVideoElement>(
+          '.html5-video-container > video, #movie_player video',
+        );
+        const videoWrapper = document.querySelector('#song-video > .player-wrapper');
+        if (!songVideo || !video || !videoWrapper) return null;
+
+        this.lastVideoSource = video.src;
+
+        const blurCanvas = document.createElement('canvas');
+        blurCanvas.classList.add('html5-blur-canvas');
+
+        const context = blurCanvas.getContext('2d', {
+          willReadFrequently: true,
+        });
+
+        /* effect */
+        let lastEffectWorkId: number | null = null;
+        let lastImageData: ImageData | null = null;
+
+        const onSync = () => {
+          if (typeof lastEffectWorkId === 'number')
+            cancelAnimationFrame(lastEffectWorkId);
+
+          lastEffectWorkId = requestAnimationFrame(() => {
+            if (!context) return;
+
+            const width = this.qualityRatio;
+            let height = Math.max(
+              Math.floor((blurCanvas.height / blurCanvas.width) * width),
+              1,
+            );
+            if (!Number.isFinite(height)) height = width;
+            if (!height) return;
+
+            context.globalAlpha = 1;
+            if (lastImageData) {
+              const frameOffset =
+                (1 / this.buffer) * (1000 / this.interpolationTime);
+              context.globalAlpha = 1 - (frameOffset * 2); // because of alpha value must be < 1
+              context.putImageData(lastImageData, 0, 0);
+              context.globalAlpha = frameOffset;
+            }
+            context.drawImage(video, 0, 0, width, height);
+
+            lastImageData = context.getImageData(0, 0, width, height); // current image data
+
+            lastEffectWorkId = null;
+          });
+        };
+
+        this.update = () => {
+          const rect = video.getBoundingClientRect();
+
+          const newWidth = Math.floor(video.width || rect.width);
+          const newHeight = Math.floor(video.height || rect.height);
+
+          if (newWidth === 0 || newHeight === 0) return;
+
+          blurCanvas.width = this.qualityRatio;
+          blurCanvas.height = Math.floor(
+            (newHeight / newWidth) * this.qualityRatio,
+          );
+
+          if (this.isFullscreen) blurCanvas.classList.add('fullscreen');
+          else blurCanvas.classList.remove('fullscreen');
+
+          blurCanvas.style.setProperty('--width', `${this.size}%`);
+          blurCanvas.style.setProperty('--height', `${this.size}%`);
+          blurCanvas.style.setProperty('--blur', `${this.blur}px`);
+          blurCanvas.style.setProperty('--opacity', `${this.opacity}`);
+        };
+        this.update();
+
+        /* hooking */
+        let canvasInterval: NodeJS.Timeout | null = null;
+        canvasInterval = setInterval(
+          onSync,
+          Math.max(1, Math.ceil(1000 / this.buffer)),
+        );
+
+        const onPause = () => {
+          if (canvasInterval) clearInterval(canvasInterval);
+          canvasInterval = null;
+        };
+        const onPlay = () => {
+          if (canvasInterval) clearInterval(canvasInterval);
+          canvasInterval = setInterval(
+            onSync,
+            Math.max(1, Math.ceil(1000 / this.buffer)),
+          );
+        };
+        video.addEventListener('pause', onPause);
+        video.addEventListener('play', onPlay);
+
+        /* injecting */
+        videoWrapper.prepend(blurCanvas);
+
+        /* cleanup */
+        return () => {
+          if (canvasInterval) clearInterval(canvasInterval);
+
+          video.removeEventListener('pause', onPause);
+          video.removeEventListener('play', onPlay);
+
+          if (blurCanvas.isConnected) blurCanvas.remove();
+        };
+      };
+
+      const isVideoMode = () => {
+        const songVideo = document.querySelector<HTMLDivElement>('#song-video');
+        if (!songVideo) {
+          this.lastMediaType = 'image';
+          return false;
+        }
+
+        const isVideo = getComputedStyle(songVideo).display !== 'none';
+        this.lastMediaType = isVideo ? 'video' : 'image';
+        return isVideo;
+      };
+
+      const playerPage = document.querySelector<HTMLElement>('#player-page');
+      const ytmusicAppLayout = document.querySelector<HTMLElement>('#layout');
+
+      const injectBlurElement = (force?: boolean): boolean | void => {
+        const isPageOpen = ytmusicAppLayout?.hasAttribute('player-page-open');
+        if (isPageOpen) {
+          const isVideo = isVideoMode();
+          const video = document.querySelector<HTMLVideoElement>(
+            '.html5-video-container > video, #movie_player video',
+          );
+          const image = document.querySelector<HTMLImageElement>('#song-image yt-img-shadow > img, #song-image img');
+          if (!force) {
+            if (
+              this.lastMediaType === 'video' &&
+              this.lastVideoSource === video?.src
+            )
+              return false;
+            if (
+              this.lastMediaType === 'image' &&
+              this.lastImageSource === image?.src
+            )
+              return false;
+          }
+          this.unregister?.();
+          this.unregister =
+            (isVideo ? injectBlurVideo() : injectBlurImage()) ?? null;
+        } else {
+          this.unregister?.();
+          this.unregister = null;
         }
       };
-      updateArtwork();
-      this.dataListener = updateArtwork;
-      document.addEventListener('videodatachange', updateArtwork);
+
+      /* needed for switching between different views (e.g. miniplayer) */
+      const observer = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+          if (mutation.type === 'attributes') {
+            injectBlurElement(true);
+            break;
+          }
+        }
+      });
+
+      if (playerPage) {
+        observer.observe(playerPage, { attributes: true });
+        this.observer = observer;
+      }
+      // The page may be mounted after the plugin is enabled.
+      this.interval = setInterval(injectBlurElement, 1000);
+      injectBlurElement(true);
     },
-
-    refresh() {
-      if (!this.active) return;
-      // Selon la génération du lecteur, l'hôte peut être la page, ou le
-      // composant custom element. Un échec du premier sélecteur ne doit pas
-      // rendre le plugin silencieusement inopérant.
-      const host = document.querySelector<HTMLElement>(
-        'ytmusic-player-page, #player-page, ytmusic-player-bar',
-      );
-      if (!host) {
-        if (this.videoTicker) clearInterval(this.videoTicker);
-        this.videoTicker = null;
-        this.videoTickerFps = 0;
-        return;
-      }
-
-      if (host !== this.host) {
-        this.backdrop?.remove();
-        this.host?.classList.remove('ytmd-ambient-host');
-
-        const overlay = document.createElement('div');
-        overlay.className = 'ytmd-ambient-backdrop';
-        const image = document.createElement('img');
-        image.className = 'ytmd-ambient-art';
-        image.alt = '';
-        const canvas = document.createElement('canvas');
-        canvas.className = 'ytmd-ambient-video';
-        canvas.setAttribute('aria-hidden', 'true');
-        overlay.append(image, canvas);
-        host.prepend(overlay);
-        host.classList.add('ytmd-ambient-host');
-
-        this.host = host;
-        this.backdrop = overlay;
-        this.art = image;
-        this.canvas = canvas;
-        this.source = '';
-      }
-
-      this.applySettings();
-
-      const mediaArt = navigator.mediaSession?.metadata?.artwork?.at(-1)?.src;
-      const domImage = document.querySelector<HTMLImageElement>(
-        '#song-image img, ytmusic-player-bar img, ytmusic-player img, #player img',
-      );
-      const src = this.responseArt || mediaArt || domImage?.currentSrc || domImage?.src || '';
-      if (src && src !== this.source && /^(https?:|blob:|data:image\/)/.test(src)) {
-        this.source = src;
-        if (this.art) this.art.src = src;
-      }
-      this.startVideoTicker();
-    },
-
-    applySettings() {
-      if (!this.backdrop) return;
-      const options = this.settings;
-      this.backdrop.style.setProperty('--ytmd-ambient-blur', `${options.blur}px`);
-      this.backdrop.style.setProperty('--ytmd-ambient-size', `${options.size}%`);
-      this.backdrop.style.setProperty('--ytmd-ambient-opacity', String(options.opacity));
-      this.backdrop.style.setProperty(
-        '--ytmd-ambient-transition',
-        `${options.interpolationTime}ms`,
-      );
-      this.backdrop.classList.toggle('ytmd-ambient-fullscreen', options.fullscreen);
-    },
-
-    drawVideoFrame() {
-      const canvas = this.canvas;
-      if (!canvas || !this.backdrop) return;
-
-      const video = document.querySelector<HTMLVideoElement>(
-        '#movie_player video, video.html5-main-video, .html5-video-container video',
-      );
-      const songVideo = document.querySelector<HTMLElement>('#song-video');
-      const videoShown = !songVideo || getComputedStyle(songVideo).display !== 'none';
-
-      if (
-        !canDrawAmbientVideo(video, videoShown)
-      ) {
-        canvas.classList.remove('ytmd-ambient-has-frame');
-        return;
-      }
-
-      const quality = Math.max(16, Math.min(256, this.settings.quality));
-      const height = Math.max(1, Math.round(
-        quality * video.videoHeight / video.videoWidth,
-      ));
-      if (canvas.width !== quality) canvas.width = quality;
-      if (canvas.height !== height) canvas.height = height;
-
-      const context = canvas.getContext('2d');
-      if (!context) return;
-      try {
-        context.drawImage(video, 0, 0, quality, height);
-        canvas.classList.add('ytmd-ambient-has-frame');
-      } catch {
-        // DRM ou frame non exploitable : conserver le fond de pochette.
-        canvas.classList.remove('ytmd-ambient-has-frame');
-      }
-    },
-
-    startVideoTicker() {
-      // En lecture audio seule ou lorsque la vidéo est masquée, le fond de
-      // pochette reste actif mais aucun canvas n'est recalculé à 30 FPS.
-      const video = document.querySelector<HTMLVideoElement>(
-        '#movie_player video, video.html5-main-video, .html5-video-container video',
-      );
-      const songVideo = document.querySelector<HTMLElement>('#song-video');
-      const videoShown = !songVideo || getComputedStyle(songVideo).display !== 'none';
-      const running = this.active && this.backdrop && canDrawAmbientVideo(video, videoShown);
-
-      if (!running) {
-        if (this.videoTicker) clearInterval(this.videoTicker);
-        this.videoTicker = null;
-        this.videoTickerFps = 0;
-        this.canvas?.classList.remove('ytmd-ambient-has-frame');
-        return;
-      }
-
-      const fps = Math.max(1, Math.min(30, this.settings.buffer));
-      if (this.videoTicker && this.videoTickerFps === fps) return;
-      if (this.videoTicker) clearInterval(this.videoTicker);
-      this.videoTickerFps = fps;
-      this.drawVideoFrame();
-      this.videoTicker = setInterval(() => this.drawVideoFrame(), 1000 / fps);
-    },
-
     onConfigChange(newConfig) {
-      this.settings = newConfig;
-      this.applySettings();
-      this.refresh();
-    },
+      this.interpolationTime = newConfig.interpolationTime;
+      this.buffer = newConfig.buffer;
+      this.qualityRatio = newConfig.quality;
+      this.size = newConfig.size;
+      this.blur = newConfig.blur;
+      this.opacity = newConfig.opacity;
+      this.isFullscreen = newConfig.fullscreen;
 
+      this.update?.();
+    },
     stop() {
-      this.active = false;
-      if (this.ticker) clearInterval(this.ticker);
-      if (this.videoTicker) clearInterval(this.videoTicker);
-      this.ticker = null;
-      this.videoTicker = null;
-      this.videoTickerFps = 0;
-      if (this.dataListener) {
-        document.removeEventListener('videodatachange', this.dataListener);
-        this.dataListener = null;
-      }
-      this.backdrop?.remove();
-      this.host?.classList.remove('ytmd-ambient-host');
-      this.host = null;
-      this.backdrop = null;
-      this.art = null;
-      this.canvas = null;
-      this.source = '';
-      this.responseArt = '';
+      this.update = null;
+      this.unregister?.();
+      this.unregister = null;
+      this.observer?.disconnect();
+      this.observer = null;
+      if (this.interval) clearInterval(this.interval);
+      this.interval = null;
+      this.lastMediaType = null;
+      this.lastImageSource = null;
+      this.lastVideoSource = null;
     },
   },
 });

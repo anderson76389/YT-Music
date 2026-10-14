@@ -1,6 +1,5 @@
 import { t } from '@/i18n';
 import { getAudioSession } from '@/providers/audio-session';
-import { type MusicPlayer } from '@/types/music-player';
 import { createPlugin } from '@/utils';
 
 const lazySafeTry = (...fns: (() => void)[]) => {
@@ -103,15 +102,6 @@ export default createPlugin({
   description: () => t('plugins.audio-compressor.description'),
 
   renderer: {
-    onPlayerApiReady(_playerApi) {
-      // The active player exposes the WebAudio source without reloading
-      // the current track just to initialize the compressor.
-      const session = getAudioSession();
-      if (session) {
-        audioCanPlayHandler(new CustomEvent('peard:audio-can-play', { detail: session }));
-      }
-    },
-
     start() {
       document.addEventListener('peard:audio-can-play', audioCanPlayHandler, {
         passive: true,

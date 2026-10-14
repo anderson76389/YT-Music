@@ -59,7 +59,10 @@ export async function verifyTrackerNetworkBlocking(
     const baseline = await runFetch('before');
     const deliveredBefore = received;
     trace(`baseline=${baseline} received=${deliveredBefore}`);
-    tracker = ElectronBlocker.parse('||127.0.0.1^$xmlhttprequest');
+    tracker = ElectronBlocker.parse(
+      '||127.0.0.1^$xmlhttprequest',
+      { loadCosmeticFilters: false },
+    );
     trace(`parsed-filter count=${tracker.getFilters().networkFilters.length}`);
     if (tracker.getFilters().networkFilters.length === 0) return false;
     trace('enabling-filter');
@@ -69,21 +72,18 @@ export async function verifyTrackerNetworkBlocking(
     const blockedFetchSucceeded = await runFetch('blocked');
     const deliveredWhileBlocked = received;
     trace(`blockedSuccess=${blockedFetchSucceeded} delivered=${deliveredWhileBlocked}`);
-    trace('disabling-filter');
-    tracker.disableBlockingInSession(win.webContents.session);
-    trace('filter-disabled');
-    const restored = await runFetch('after');
-    const deliveredAfter = received;
-    trace(`restored=${restored} delivered=${deliveredAfter}`);
-
+    // The plugin requires a restart to disable its hooks. Test blocking
+    // while enabled; don't imply safe hot-unloading in the current session.
     return baseline && deliveredBefore === 1 &&
-      !blockedFetchSucceeded && deliveredWhileBlocked === 1 &&
-      restored && deliveredAfter === 2;
+      !blockedFetchSucceeded && deliveredWhileBlocked === 1;
   } finally {
     if (tracker?.isBlockingEnabled(win.webContents.session)) {
-      trace('finally-disabling-filter');
-      tracker.disableBlockingInSession(win.webContents.session);
-      trace('finally-filter-disabled');
+      // Disposable Windows smoke process exits right after this test.
+      try {
+        tracker.disableBlockingInSession(win.webContents.session);
+      } catch (error) {
+        trace(`cleanup-requires-restart=${String(error)}`);
+      }
     }
     server.closeAllConnections();
     await new Promise<void>((resolve) => { server.close(() => resolve()); });

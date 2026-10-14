@@ -32,12 +32,15 @@ export const loadTrackerBlockerEngine = async (
 
   const fetchList = (url: string) => net.fetch(url);
   try {
-    // Le mode « In player » efface quelques champs JSON publicitaires :
-    // il ne filtre PAS les connexions vers les traqueurs. Cette branche
-    // installe réellement les règles réseau dans la session Electron.
-    const next = !disableDefaults && extra.length === 0
-      ? await ElectronBlocker.fromPrebuiltAdsAndTracking(fetchList, cachingOptions)
-      : await ElectronBlocker.fromLists(fetchList, urls);
+    // Seules les règles réseau sont nécessaires au filtrage du suivi.
+    // Éviter les hooks cosmétiques IPC incompatibles avec le multiplexeur
+    // webRequest utilisé par YT Music, tout en conservant EasyPrivacy/EasyList.
+    const next = await ElectronBlocker.fromLists(
+      fetchList,
+      urls,
+      { loadCosmeticFilters: false },
+      cachingOptions,
+    );
 
     if (next.getFilters().networkFilters.length === 0) {
       throw new Error('Aucune règle réseau de blocage chargée');

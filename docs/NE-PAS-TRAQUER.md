@@ -2,7 +2,7 @@
 
 Ce plugin propose **deux modes différents** :
 
-- **Bloquer les traqueurs et publicités (listes Ghostery)** : installe le moteur de filtrage `@ghostery/adblocker-electron` dans la session réseau Electron. Il charge les listes **EasyList** et **EasyPrivacy** (ou le jeu précompilé publicités + traqueurs fourni par Ghostery), ainsi que les listes HTTPS supplémentaires configurées.
+- **Bloquer les traqueurs et publicités (EasyPrivacy / EasyList)** : installe le moteur de filtrage `@ghostery/adblocker-electron` dans la session réseau Electron. Il charge les listes **EasyList** et **EasyPrivacy** (ou le jeu précompilé publicités + traqueurs fourni par Ghostery), ainsi que les listes HTTPS supplémentaires configurées.
 - **Filtrage du lecteur uniquement (ne bloque pas les traqueurs)** : modifie des objets JSON liés aux annonces YouTube Music. **Ce mode ne bloque pas les requêtes vers les serveurs de suivi.**
 
 ## Activer la protection réseau
@@ -17,7 +17,7 @@ Ce plugin propose **deux modes différents** :
 
 ## Tests et limites
 
-Le workflow Windows est configuré pour vérifier **un blocage HTTP réel en local**, sans connexion au site YouTube Music : une requête passe normalement, est bloquée par une règle Ghostery installée dans la vraie session Electron, puis repasse après désactivation de cette règle. La publication est refusée en cas d'échec.
+Le workflow Windows est configuré pour vérifier **un blocage HTTP réel en local**, sans connexion au site YouTube Music : une requête passe normalement, puis est bloquée par une règle Ghostery installée dans la vraie session Electron. Le changement de mode et la désactivation sont appliqués après redémarrage. La publication est refusée en cas d'échec.
 
 Le moteur vérifie également la présence de règles réseau, confirme l'activation dans la session Electron et consigne une erreur explicite lorsqu'il n'a pas pu charger ses listes.
 

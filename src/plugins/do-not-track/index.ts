@@ -62,7 +62,7 @@ export default createPlugin({
         label: t('plugins.do-not-track.menu.blocker'),
         submenu: Object.values(blockers).map((blocker) => ({
           label: blocker === blockers.WithBlocklists
-            ? 'Bloquer les traqueurs et publicités (listes Ghostery)'
+            ? 'Bloquer traqueurs et publicités (EasyPrivacy / EasyList)'
             : 'Filtrage du lecteur uniquement (ne bloque pas les traqueurs)',
           type: 'radio',
           checked: (config.blocker || blockers.WithBlocklists) === blocker,
@@ -96,8 +96,10 @@ export default createPlugin({
     async onConfigChange(newConfig) {
       if (!this.mainWindow) return;
       const session = this.mainWindow.webContents.session;
+      // Changing modes requires restarting the app. Leave the network
+      // listener untouched until then; the multiplexer cannot hot-unload
+      // Ghostery's null-listener teardown.
       if (!newConfig.enabled || newConfig.blocker !== blockers.WithBlocklists) {
-        if (isBlockerEnabled(session)) unloadTrackerBlockerEngine(session);
         return;
       }
       if (!isBlockerEnabled(session)) {

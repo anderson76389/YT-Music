@@ -160,7 +160,12 @@ export const Panel = (props: PanelProps) => {
             {...leftProps}
             class={panelStyle()}
             data-ytmd-sub-panel={true}
-            ref={setPanel}
+            ref={(element) => {
+              setPanel(element);
+              // Forward the nested UL reference to PanelItem so it can keep
+              // the submenu open when the pointer moves into its portal.
+              if (typeof props.ref === 'function') props.ref(element);
+            }}
             style={{
               '--offset-x': `${position.x}px`,
               '--offset-y': `${position.y}px`,

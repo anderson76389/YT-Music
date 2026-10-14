@@ -207,8 +207,11 @@ export const PanelItem = (props: PanelItemProps) => {
   });
 
   const handleHover = (event: MouseEvent) => {
+    // currentTarget is cleared after event dispatch; capture the node before
+    // the submenu timer fires, otherwise mouseleave is never registered.
+    const hoveredItem = event.currentTarget as HTMLElement;
     setToolTipOpen(true);
-    event.currentTarget?.addEventListener(
+    hoveredItem.addEventListener(
       'mouseleave',
       () => {
         setToolTipOpen(false);
@@ -229,7 +232,7 @@ export const PanelItem = (props: PanelItemProps) => {
         };
         document.addEventListener('mousemove', onMouseMove);
 
-        event.currentTarget?.addEventListener(
+        hoveredItem.addEventListener(
           'mouseleave',
           () => {
             setTimeout(() => {
@@ -270,7 +273,7 @@ export const PanelItem = (props: PanelItemProps) => {
         );
       }, 225);
 
-      event.currentTarget?.addEventListener(
+      hoveredItem.addEventListener(
         'mouseleave',
         () => {
           clearTimeout(hoverTimer);

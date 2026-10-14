@@ -58,7 +58,7 @@ export const onMainLoad = ({
   ipcMain.handle('peard:menu-event', async (event, commandId: number) => {
     if (!Number.isSafeInteger(commandId)) return false;
     const senderWindow = BrowserWindow.fromWebContents(event.sender);
-    const triggered = dispatchMenuEvent(
+    const triggered = await dispatchMenuEvent(
       getMenuItemById(commandId),
       senderWindow,
       event.sender,
@@ -71,6 +71,7 @@ export const onMainLoad = ({
     // Sinon la barre SolidJS affiche des coches périmées ou absentes.
     if (senderWindow && !senderWindow.isDestroyed()) {
       await setApplicationMenu(senderWindow);
+      senderWindow.webContents.send('refresh-in-app-menu');
     }
     return true;
   });

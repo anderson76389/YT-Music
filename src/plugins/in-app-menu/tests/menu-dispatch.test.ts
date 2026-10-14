@@ -46,7 +46,7 @@ function item(value: object): MenuItem {
   } as MenuItem;
 }
 
-test('menu intégré : activation et désactivation transmettent item.checked', () => {
+test('menu intégré : activation et désactivation transmettent item.checked', async () => {
   const f = fixture();
   const states: boolean[] = [];
   const checkbox = item({
@@ -54,12 +54,12 @@ test('menu intégré : activation et désactivation transmettent item.checked', 
     click: (it: MenuItem) => states.push(it.checked),
   });
 
-  expect(dispatchMenuEvent(checkbox, f.window, f.contents, f.application)).toBe(true);
-  expect(dispatchMenuEvent(checkbox, f.window, f.contents, f.application)).toBe(true);
+  expect(await dispatchMenuEvent(checkbox, f.window, f.contents, f.application)).toBe(true);
+  expect(await dispatchMenuEvent(checkbox, f.window, f.contents, f.application)).toBe(true);
   expect(states).toEqual([true, false]);
 });
 
-test('menu intégré : radio sélectionnée reçoit la valeur cochée', () => {
+test('menu intégré : radio sélectionnée reçoit la valeur cochée', async () => {
   const f = fixture();
   const states: boolean[] = [];
   const radio = item({
@@ -67,22 +67,22 @@ test('menu intégré : radio sélectionnée reçoit la valeur cochée', () => {
     click: (it: MenuItem) => states.push(it.checked),
   });
 
-  expect(dispatchMenuEvent(radio, f.window, f.contents, f.application)).toBe(true);
+  expect(await dispatchMenuEvent(radio, f.window, f.contents, f.application)).toBe(true);
   expect(states).toEqual([true]);
 });
 
-test('menu intégré : les entrées désactivées et sous-menus ne sont pas exécutés', () => {
+test('menu intégré : les entrées désactivées et sous-menus ne sont pas exécutés', async () => {
   const f = fixture();
-  expect(dispatchMenuEvent(item({ enabled: false, click: () => f.calls.push('bad') }), f.window, f.contents, f.application)).toBe(false);
-  expect(dispatchMenuEvent(item({ type: 'submenu', click: () => f.calls.push('bad') }), f.window, f.contents, f.application)).toBe(false);
-  expect(dispatchMenuEvent(null, f.window, f.contents, f.application)).toBe(false);
+  expect(await dispatchMenuEvent(item({ enabled: false, click: () => f.calls.push('bad') }), f.window, f.contents, f.application)).toBe(false);
+  expect(await dispatchMenuEvent(item({ type: 'submenu', click: () => f.calls.push('bad') }), f.window, f.contents, f.application)).toBe(false);
+  expect(await dispatchMenuEvent(null, f.window, f.contents, f.application)).toBe(false);
   expect(f.calls).toEqual([]);
 });
 
 test('menu intégré : zoom, rechargement, plein écran, devtools et quitter fonctionnent', () => {
   const f = fixture();
   for (const role of ['zoomIn', 'zoomOut', 'resetZoom', 'reload', 'forceReload', 'toggleFullScreen', 'toggleDevTools', 'quit']) {
-    expect(dispatchMenuEvent(item({ role }), f.window, f.contents, f.application)).toBe(true);
+    expect(await dispatchMenuEvent(item({ role }), f.window, f.contents, f.application)).toBe(true);
   }
   expect(f.calls).toEqual([
     'zoom:0.5',
@@ -94,4 +94,13 @@ test('menu intégré : zoom, rechargement, plein écran, devtools et quitter fon
     'devtools',
     'quit',
   ]);
+});
+
+
+test('le menu attend les commandes asynchrones avant son actualisation', async () => {
+  const f = fixture();
+  const events: string[] = [];
+  const option = item({ click: async () => { events.push('begin'); await Promise.resolve(); events.push('saved'); } });
+  expect(await dispatchMenuEvent(option, f.window, f.contents, f.application)).toBe(true);
+  expect(events).toEqual(['begin', 'saved']);
 });

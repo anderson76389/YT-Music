@@ -4,12 +4,12 @@ import type { App, BrowserWindow, MenuItem, WebContents } from 'electron';
  * Les menus DOM ne sont pas des menus Electron natifs : Electron ne coche pas
  * automatiquement les cases et n'exécute pas les rôles natifs à leur place.
  */
-export function dispatchMenuEvent(
+export async function dispatchMenuEvent(
   target: MenuItem | null,
   window: BrowserWindow | null,
   sender: WebContents,
   application: Pick<App, 'quit'>,
-): boolean {
+): Promise<boolean> {
   if (!target || !target.enabled || !target.visible) return false;
   if (target.type === 'submenu' || target.type === 'separator') return false;
 
@@ -30,7 +30,7 @@ export function dispatchMenuEvent(
     | undefined;
 
   if (typeof click === 'function') {
-    click(target, window, sender);
+    await Promise.resolve(click(target, window, sender));
     return true;
   }
 

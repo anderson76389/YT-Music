@@ -2,7 +2,7 @@ name: Verification du code
 
 on:
   push:
-    branches: [main, fix-general-settings-controls-20261014]
+    branches: [main]
   pull_request:
   workflow_dispatch:
   schedule:

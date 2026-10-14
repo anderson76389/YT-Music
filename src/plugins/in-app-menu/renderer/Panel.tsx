@@ -22,7 +22,8 @@ const panelStyle = cacheNoArgs(
     max-width: var(--max-width, 100%);
     max-height: var(--max-height, 100%);
 
-    z-index: 10000;
+    z-index: 10000001;
+    -webkit-app-region: no-drag;
     width: fit-content;
     height: fit-content;
 

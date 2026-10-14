@@ -208,7 +208,7 @@ export const PanelItem = (props: PanelItemProps) => {
 
   const handleHover = (event: MouseEvent) => {
     setToolTipOpen(true);
-    event.target?.addEventListener(
+    event.currentTarget?.addEventListener(
       'mouseleave',
       () => {
         setToolTipOpen(false);
@@ -229,7 +229,7 @@ export const PanelItem = (props: PanelItemProps) => {
         };
         document.addEventListener('mousemove', onMouseMove);
 
-        event.target?.addEventListener(
+        event.currentTarget?.addEventListener(
           'mouseleave',
           () => {
             setTimeout(() => {
@@ -270,7 +270,7 @@ export const PanelItem = (props: PanelItemProps) => {
         );
       }, 225);
 
-      event.target?.addEventListener(
+      event.currentTarget?.addEventListener(
         'mouseleave',
         () => {
           clearTimeout(hoverTimer);
@@ -355,18 +355,7 @@ export const PanelItem = (props: PanelItemProps) => {
           </svg>
         </Match>
       </Switch>
-      <span class={itemLabelStyle()}>
-        {props.name}
-        <Show when={(props.type === 'checkbox' || props.type === 'radio') && props.checked}>
-          <span
-            aria-label="Activé"
-            title="Activé"
-            style={{ color: '#ffffff', 'font-weight': 'bold', 'margin-left': '9px' }}
-          >
-            ✓
-          </span>
-        </Show>
-      </span>
+      <span class={itemLabelStyle()}>{props.name}</span>
       <Show fallback={<div />} when={props.chip}>
         <span class={itemChipStyle()}>{props.chip}</span>
       </Show>

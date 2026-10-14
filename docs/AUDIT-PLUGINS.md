@@ -1,99 +1,70 @@
-# Audit des 34 plugins — YT Music (mise à jour 3.12.1)
+# Audit des plugins YT Music — 14 octobre 2026
 
-**Date :** 12 octobre 2026  
-**Code audité :** [dépôt YT-Music](https://github.com/anderson76389/YT-Music)  
-**Journal des tests automatiques :** [GitHub Actions #38192084563](https://github.com/anderson76389/YT-Music/actions/runs/38192084563)
+**Périmètre :** les 33 extensions hors **Anti-Pause & Purge Totale**. Le plugin Anti-Pause et ses fichiers n'ont pas été modifiés dans cet audit.
 
-## Périmètre et résultats vérifiés
+**Niveaux de preuve :** le script `tools/audit-plugin-sources.mjs` contrôle la présence des **34 points d'entrée** (Anti-Pause compris) et des 8 suppressions précédentes. Le workflow Windows exécute aussi lint, TypeScript, tests unitaires et compilation Electron ; il démarre le vrai portable sur une page de contrôle locale, sans connexion au site de musique. Ces contrôles ne certifient pas chaque fonction ou service externe.
 
-- **34 points d’entrée de plugins** conservés après la suppression de huit plugins et de leurs ressources. Les libellés « Beta » ont été retirés en français et en anglais.
-- Sur **Windows** : installation des dépendances, lint, vérification TypeScript, seize tests Playwright (dont sept pour Anti-Pause : trois anti-inactivité et quatre saut publicitaire) et compilation Electron **réussis**.
-- **Formatage non conforme** : `pnpm format:check` signale 339 fichiers ; le workflow échoue donc au total. Le lint est toutefois passé.
-- Les **seize tests unitaires** couvrent notamment le tri de segments SponsorBlock, l'analyse des paroles LRC, les menus intégrés, une **simulation accélérée de 30 minutes** d'Anti-Pause ainsi que quatre scénarios de saut et restauration audio après une publicité fictive. Ils ne valident pas le fonctionnement réel du service YouTube Music.
-- **Aucun test fonctionnel de bout en bout** n’a été réalisé dans une application Windows ouverte et connectée au service YouTube Music. Ni les intégrations tierces, ni la stabilité des sélecteurs DOM, ni les flux de téléchargement ne peuvent être déclarés validés.
+## Problèmes corrigés par cet audit
 
-## Inventaire complet et contrôle fonctionnel restant
-
-| Plugin | Fonction à vérifier dans l’application | Validation réelle |
+| Composant | Défaut confirmé dans le code | Correction |
 |---|---|---|
-| [`album-actions`](../src/plugins/album-actions/index.tsx) | Boutons d’action de masse sur les albums et listes | À tester en application |
-| [`album-color-theme`](../src/plugins/album-color-theme/index.ts) | Thème dérivé des couleurs de la pochette | À tester en application |
-| [`ambient-mode`](../src/plugins/ambient-mode/index.ts) | Éclairage ambiant et animations | À tester en application |
-| [`amuse`](../src/plugins/amuse/index.ts) | Intégration Amuse | À tester en application |
-| [`anti-pause`](../src/plugins/anti-pause/index.ts) | Anti-inactivité, suppression des menus et annonces — **nettoyage corrigé, à tester en conditions réelles** | À tester en application |
-| [`audio-compressor`](../src/plugins/audio-compressor.ts) | Compression dynamique du son | À tester en application |
-| [`blur-nav-bar`](../src/plugins/blur-nav-bar/index.ts) | Effet de flou de la barre de navigation | À tester en application |
-| [`captions-selector`](../src/plugins/captions-selector/index.ts) | Sélection et chargement de sous-titres | À tester en application |
-| [`crossfade`](../src/plugins/crossfade/index.ts) | Fondu entre titres — **répétition d’un titre non prise en charge** | À tester en application |
-| [`custom-output-device`](../src/plugins/custom-output-device/index.ts) | Choix de la sortie audio | À tester en application |
-| [`disable-autoplay`](../src/plugins/disable-autoplay/index.ts) | Désactivation de la lecture automatique | À tester en application |
-| [`do-not-track`](../src/plugins/do-not-track/index.ts) | Blocage des requêtes de suivi selon le plugin | À tester en application |
-| [`downloader`](../src/plugins/downloader/index.ts) | Téléchargement de pistes/playlists et conversion audio | À tester en application |
-| [`equalizer`](../src/plugins/equalizer/index.ts) | Égaliseur et préréglages | À tester en application |
-| [`exponential-volume`](../src/plugins/exponential-volume/index.ts) | Courbe de volume | À tester en application |
-| [`in-app-menu`](../src/plugins/in-app-menu/index.ts) | Barre de titre et menu intégré | À tester en application |
-| [`navigation`](../src/plugins/navigation/index.tsx) | Boutons précédent/suivant | À tester en application |
-| [`notifications`](../src/plugins/notifications/index.ts) | Notifications système | À tester en application |
-| [`performance-improvement`](../src/plugins/performance-improvement/index.ts) | Scripts CPU et optimisations d’affichage | À tester en application |
-| [`picture-in-picture`](../src/plugins/picture-in-picture/index.ts) | Image dans l’image | À tester en application |
-| [`playback-speed`](../src/plugins/playback-speed/index.ts) | Réglage de vitesse de lecture | À tester en application |
-| [`precise-volume`](../src/plugins/precise-volume/index.ts) | Réglage numérique précis du volume | À tester en application |
-| [`quality-changer`](../src/plugins/quality-changer/index.tsx) | Sélecteur de qualité vidéo/audio — **arrêt potentiellement fragile** | À tester en application |
-| [`skip-disliked-songs`](../src/plugins/skip-disliked-songs/index.ts) | Passage automatique des titres non aimés | À tester en application |
-| [`skip-silences`](../src/plugins/skip-silences/index.ts) | Détection et saut des silences | À tester en application |
-| [`sponsorblock`](../src/plugins/sponsorblock/index.ts) | Segments SponsorBlock — test unitaire du tri uniquement | À tester en application |
-| [`synced-lyrics`](../src/plugins/synced-lyrics/index.ts) | Recherche, analyse LRC et synchronisation des paroles — parser LRC testé | À tester en application |
-| [`taskbar-mediacontrol`](../src/plugins/taskbar-mediacontrol/index.ts) | Commandes de lecture dans la barre des tâches Windows | À tester en application |
-| [`touchbar`](../src/plugins/touchbar/index.ts) | Commandes Touch Bar macOS | À tester en application |
-| [`transparent-player`](../src/plugins/transparent-player/index.ts) | Fenêtre transparente | À tester en application |
-| [`tuna-obs`](../src/plugins/tuna-obs/index.ts) | Intégration Tuna/OBS | À tester en application |
-| [`unobtrusive-player`](../src/plugins/unobtrusive-player/index.ts) | Lecture/affichage discret | À tester en application |
-| [`video-toggle`](../src/plugins/video-toggle/index.tsx) | Affichage et masquage de la vidéo | À tester en application |
-| [`visualizer`](../src/plugins/visualizer/index.ts) | Visualiseurs et graphiques réactifs à l’audio | À tester en application |
+| Chargement des plugins | Des commandes d'activation pouvaient arriver avant l'inscription des écouteurs renderer | Écouteurs enregistrés avant l'attente des plugins lents |
+| Extensions nécessitant un redémarrage | Activation à chaud de modules dont les hooks ne sont pas démontables proprement, avec des doublons ou un état trompeur | Changement enregistré, puis boîte de dialogue demandant de redémarrer avant application |
+| Anciennes configurations | Un identifiant de plugin supprimé pouvait provoquer une erreur dans l'observateur de configuration | Ignorer les identifiants inconnus et comparer à leurs valeurs par défaut |
+| Égaliseur | Activer pendant une musique déjà en cours n'émettait pas l'événement audio initial | Reprise de la session WebAudio existante |
+| Visualiseur | Même problème de session audio lors de l'activation tardive | Reprise de la session WebAudio existante |
+| Compresseur audio | Pouvait recharger la chanson pour tenter d'initialiser son contexte audio | Connexion à la source courante sans relancer le titre |
+| Passer les silences | Même absence de signal audio sur activation tardive | Reprise de la session WebAudio existante |
+| Paroles synchronisées | Attente illimitée de l'onglet, timer/observer/écouteurs restant après désactivation | Recherche bornée de l'onglet et nettoyage à l'arrêt |
+| Vitesse de lecture | Observateur et racine Solid conservés après la désactivation ; vitesse personnalisée conservée | Destruction des observateurs/éléments et retour à la vitesse normale |
+| Sélecteur de sous-titres | Retrait d'un bouton potentiellement détaché, éléments de rendu conservés ; options appliquées au changement de vidéo seulement | Destruction sûre du bouton et application des paramètres sans changer de piste |
 
-## Défauts et risques effectivement identifiés dans le code
+Ces modifications ciblent les erreurs identifiées dans le code. **Leur effet exact dans une session YouTube Music reste à confirmer sur un PC utilisant le service réel.**
 
-### 1. Anti-Pause & Purge Totale — modifications réalisées, validation réelle encore requise
+## État de revue de chaque plugin conservé
 
-[`src/plugins/anti-pause/index.ts`](../src/plugins/anti-pause/index.ts) a été modifié. Le plugin installe désormais un bloqueur réseau Ghostery **AdsOnly** (filtrage avant chargement, avec cache et repli si réseau indisponible), ainsi qu'un saut publicitaire DOM conservé en secours. Le son muet et la vitesse de lecture antérieurs sont restaurés après une annonce ; quatre tests automatisés couvrent les transitions ad / non-ad, le son volontairement muet et les changements de vidéo. Le code ne retire plus les boutons de paramètres ni les menus normaux de YouTube Music.
+Les points d'entrée sont présents et intégrés au build ; la colonne « test réel » ne prétend pas que l'extension a été exécutée avec des morceaux, un compte ou un service externe.
 
-Le plugin rafraîchit la valeur `_lact` toutes les 15 secondes et tente de fermer `ytmusic-you-there-renderer` si la fenêtre d'inactivité apparaît. Les minuteries, observateurs et écouteurs sont désormais libérés à la désactivation.
+| Plugin | Contrôle effectué ou contrainte | Test réel |
+|---|---|---|
+| Album Actions | Cycle DOM, rendu des boutons ; sensible à la structure de la page | Non vérifié |
+| Couleur de l'album | Activation en cours de lecture corrigée lors de l'audit visuel précédent | Non vérifié |
+| Mode ambiant | Moteur de Pear Desktop adapté lors de l'audit précédent | Non vérifié |
+| Amuse | Nécessite son intégration externe | Non vérifié |
+| Compresseur audio | Reprise WebAudio corrigée ici | Non vérifié |
+| Flou de navigation | Feuille CSS et injection Electron revues | Non vérifié |
+| Sélecteur de sous-titres | Nettoyage du bouton et actualisation des options corrigés ici | Non vérifié |
+| Crossfade | Nécessite redémarrage ; répétition d'une piste non entièrement prise en charge par son code | Non vérifié |
+| Sortie audio personnalisée | Dépend de `enumerateDevices` et `AudioContext.setSinkId` disponibles | Non vérifié |
+| Désactiver la lecture automatique | Contrôle des événements du lecteur et des options | Non vérifié |
+| Do Not Track | Blocage réseau et preload nécessitent redémarrage | Non vérifié |
+| Télécharger | Dépend des flux distants et du support de conversion sur PC | Non vérifié |
+| Égaliseur | Reprise WebAudio corrigée ici | Non vérifié |
+| Volume exponentiel | Redémarrage nécessaire pour ses hooks | Non vérifié |
+| Menu intégré | Dispatch, sous-menus et réglages corrigés dans les versions précédentes | Non vérifié |
+| Navigation | Rendu des boutons avec destruction de la racine Solid | Non vérifié |
+| Notifications | Dépend des notifications Windows et de leurs autorisations | Non vérifié |
+| Amélioration des performances | Redémarrage nécessaire ; optimisations nouvelles précédemment annulées à la demande | Non vérifié |
+| Picture-in-Picture | Dépend de l'API PiP et de la fenêtre native ; redémarrage nécessaire | Non vérifié |
+| Vitesse de lecture | Nettoyage et remise à 1× corrigés ici | Non vérifié |
+| Volume précis | Hooks audio et raccourcis, redémarrage nécessaire | Non vérifié |
+| Qualité | API de qualité du lecteur et boîte de dialogue Electron | Non vérifié |
+| Passer les chansons non aimées | DOM du bouton J'aime et de la file d'attente | Non vérifié |
+| Passer les silences | Reprise WebAudio corrigée ici | Non vérifié |
+| SponsorBlock | Dépend du service SponsorBlock et de la disponibilité des segments | Non vérifié |
+| Paroles synchronisées | Nettoyage et attente bornée corrigés ici ; dépend des fournisseurs de paroles | Non vérifié |
+| Commandes multimédias barre des tâches | Fonction native **Windows** | Non vérifié |
+| Touch Bar | Fonction réservée aux machines **macOS** disposant d'une Touch Bar ; non applicable à Windows | Non applicable |
+| Lecteur transparent | Rendu restauré dans les versions précédentes ; redémarrage requis | Non vérifié |
+| Tuna OBS | Dépend de l'outil externe OBS/Tuna | Non vérifié |
+| Lecteur discret | Comportement lié au DOM de la page YouTube Music | Non vérifié |
+| Basculer la vidéo | Sélecteurs du lecteur, redémarrage nécessaire | Non vérifié |
+| Visualiseur | Reprise WebAudio corrigée ici ; dépend des capacités de capture vidéo | Non vérifié |
 
-**Test automatisé :** un scénario de 30 minutes **simulées** a vérifié la régularité du rafraîchissement, l'arrêt du heartbeat et la tentative de fermeture d'une modale fictive. Cela **ne prouve pas** que le lecteur YouTube Music ne suspendra pas la lecture après 30 minutes réelles.
+**Anti-Pause & Purge Totale : hors périmètre sur demande.** Aucun de ses fichiers n'a été modifié.
 
-**Risques résiduels :** listes publicitaires parfois incomplètes, filtres susceptibles d'affecter des requêtes légitimes, changements d'interface côté YouTube Music ; efficacité et absence totale de flash non confirmées dans un lecteur réel.
+## Test de réception recommandé sur Windows
 
-Ce plugin est **activé par défaut** dans `src/config/defaults.ts`.
+Dans la version Setup puis Portable, tester l'activation, le réglage, le changement de piste, la désactivation et le redémarrage pour chaque plugin applicable. Les plugins qui déclarent nécessiter un redémarrage doivent être activés, **puis l'application complètement fermée et relancée**, avant de juger leur effet. Mesurer les erreurs réelles dans les journaux Electron et garder une capture d'écran ou une vidéo pour les effets visuels. Les intégrations externes doivent être testées avec leurs services.
 
-### 2. Crossfade — limitation déclarée dans le code
-
-[`src/plugins/crossfade/index.ts`](../src/plugins/crossfade/index.ts) comporte explicitement le commentaire `does not support "repeat 1" mode`. Cette option n’est donc **pas prise en charge** par la logique de transition actuelle. Le comportement sur les autres modes reste à tester sur le lecteur réel.
-
-### 3. Quality Changer et Album Actions — points fragiles
-
-- Le nettoyage de [Quality Changer](../src/plugins/quality-changer/index.tsx) retire un élément du DOM en supposant qu’il se trouve encore dans le conteneur d’origine.
-- [Album Actions](../src/plugins/album-actions/index.tsx) utilise une assertion non nulle sur `#browse-page`, dont l’existence dépend du chargement réel de la page.
-
-Ce sont des **risques de compatibilité ou de cycle de vie**, pas des dysfonctionnements observés et reproduits.
-
-### 4. Mises à jour — référence conservée au projet d’origine
-
-[`src/index.ts`](../src/index.ts) ouvre encore l’adresse des Releases `pear-devs/pear-desktop` lorsqu'une mise à jour est proposée. Le réglage `autoUpdates` est activé par défaut. Une édition indépendante devrait définir sa propre politique de mise à jour avant distribution ; aucune modification automatique du mécanisme n’a été faite dans cet audit.
-
-## Nettoyage effectué sans supprimer de fonctionnalités
-
-- Quatre fichiers JSON **strictement vides** supprimés : `be-Latn`, `ckb`, `km` et `kmr`.
-- Création d’un `.gitignore` pour exclure `node_modules/`, `dist/`, `pack/` et les artefacts locaux.
-- Conservation des sources, scripts, tests existants, traductions non vides, images et icônes utilisés pour la compilation multiplateforme.
-
-## Conditions pour déclarer un plugin « fonctionne réellement »
-
-1. **Compilation** correcte (déjà passée).
-2. **Activation** dans les paramètres sans erreur console.
-3. **Exécution effective** de toutes ses commandes et réglages.
-4. **Changement de piste/page** sans dysfonctionnement.
-5. **Désactivation puis réactivation** sans timer, gestionnaire d’événement ou style résiduel.
-6. **Tests de services externes** avec leurs applications ou comptes correspondants, sur la plateforme pertinente.
-7. **Tests de non-régression** après rechargement du client et redémarrage.
-
-**Conclusion de l'audit précédent :** la base compilait et seize tests passaient (la vérification de formatage reste non conforme). **La fiabilité individuelle des 34 plugins n’est pas encore certifiée.** Il serait factuellement incorrect de la déclarer acquise.
+**Ne pas déclarer « 33/33 fonctionnels » sur la base d'un succès GitHub Actions.**

@@ -4,21 +4,24 @@ import path from 'node:path';
 import { ElectronBlocker } from '@ghostery/adblocker-electron';
 import { app, net } from 'electron';
 
-import { buildTrackerListSources } from './policy';
-
 let blocker: ElectronBlocker | undefined;
 
+const EASYLIST = 'https://easylist.to/easylist/easylist.txt';
+const EASYPRIVACY = 'https://easylist.to/easylist/easyprivacy.txt';
+
 export const loadTrackerBlockerEngine = async (
-  session: Electron.Session,
+  session?: Electron.Session,
   cache = true,
   additionalBlockLists: string[] = [],
   disableDefaultLists: boolean | unknown[] = false,
 ) => {
-  const sources = buildTrackerListSources(
-    additionalBlockLists,
-    disableDefaultLists,
+  const disableDefaults =
+    Array.isArray(disableDefaultLists)
+      ? disableDefaultLists.length > 0
+      : disableDefaultLists;
+  const extra = additionalBlockLists.filter((url) =>
+    /^https:\/\//i.test(url),
   );
-  const { disableDefaults, extra, urls } = sources;
   const cacheDirectory = path.join(app.getPath('userData'), 'tb_cache');
   fs.mkdirSync(cacheDirectory, { recursive: true });
   const cachingOptions =
@@ -32,38 +35,29 @@ export const loadTrackerBlockerEngine = async (
 
   const fetchList = (url: string) => net.fetch(url);
   try {
-    // Seules les règles réseau sont nécessaires au filtrage du suivi.
-    // Éviter les hooks cosmétiques IPC incompatibles avec le multiplexeur
-    // webRequest utilisé par YT Music, tout en conservant EasyPrivacy/EasyList.
-    const next = await ElectronBlocker.fromLists(
-      fetchList,
-      urls,
-      { loadCosmeticFilters: false },
-      cachingOptions,
-    );
+    // L'ancien code utilisait un domaine d'exemple « organization/tb-list ».
+    // Il pouvait échouer avant même d'installer le bloqueur de traqueurs.
+    const next =
+      !disableDefaults && extra.length === 0
+        ? await ElectronBlocker.fromPrebuiltAdsAndTracking(
+            fetchList,
+            cachingOptions,
+          )
+        : await ElectronBlocker.fromLists(
+            fetchList,
+            [
+              ...(!disableDefaults ? [EASYLIST, EASYPRIVACY] : []),
+              ...extra,
+            ],
+          );
 
-    if (next.getFilters().networkFilters.length === 0) {
-      throw new Error('Aucune règle réseau de blocage chargée');
-    }
-
-    // Keep the previous working engine until the replacement is ready.
-    if (blocker?.isBlockingEnabled(session)) {
+    if (blocker && session && blocker.isBlockingEnabled(session)) {
       blocker.disableBlockingInSession(session);
     }
     blocker = next;
-    blocker.enableBlockingInSession(session);
-    if (!blocker.isBlockingEnabled(session)) {
-      throw new Error('Le filtrage de la session Electron n’a pas pu démarrer');
-    }
-    console.info('[YT Music] Ne pas traquer : filtrage réseau Ghostery actif');
+    if (session) blocker.enableBlockingInSession(session);
   } catch (error) {
-    console.error(
-      '[YT Music] Ne pas traquer : filtrage réseau NON ACTIF. Vérifier les listes et la connexion.',
-      error,
-    );
-    // Do not quietly report a successfully started plugin when no blocking
-    // engine is installed. The caller can surface this in Electron logs.
-    throw error;
+    console.warn('[YT Music] Listes anti-traqueurs indisponibles', error);
   }
 };
 

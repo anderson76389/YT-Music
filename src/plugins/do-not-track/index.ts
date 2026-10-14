@@ -25,7 +25,7 @@ export interface TrackerBlockerConfig {
   cache: boolean;
   /**
    * Which tracker blocker to use.
-   * @default blockers.WithBlocklists
+   * @default blockers.InPlayer
    */
   blocker: (typeof blockers)[keyof typeof blockers];
   /**
@@ -49,8 +49,7 @@ export default createPlugin({
   config: {
     enabled: false,
     cache: true,
-    // Unlike the ad-JSON pruner, this mode actually blocks network requests.
-    blocker: blockers.WithBlocklists,
+    blocker: blockers.InPlayer,
     additionalBlockLists: [],
     disableDefaultLists: false,
   } as TrackerBlockerConfig,
@@ -61,9 +60,7 @@ export default createPlugin({
       {
         label: t('plugins.do-not-track.menu.blocker'),
         submenu: Object.values(blockers).map((blocker) => ({
-          label: blocker === blockers.WithBlocklists
-            ? 'Bloquer traqueurs et publicités (EasyPrivacy / EasyList)'
-            : 'Filtrage du lecteur uniquement (ne bloque pas les traqueurs)',
+          label: blocker,
           type: 'radio',
           checked: (config.blocker || blockers.WithBlocklists) === blocker,
           click() {
@@ -94,21 +91,18 @@ export default createPlugin({
       }
     },
     async onConfigChange(newConfig) {
-      if (!this.mainWindow) return;
-      const session = this.mainWindow.webContents.session;
-      // Changing modes requires restarting the app. Leave the network
-      // listener untouched until then; the multiplexer cannot hot-unload
-      // Ghostery's null-listener teardown.
-      if (!newConfig.enabled || newConfig.blocker !== blockers.WithBlocklists) {
-        return;
-      }
-      if (!isBlockerEnabled(session)) {
-        await loadTrackerBlockerEngine(
-          session,
-          newConfig.cache,
-          newConfig.additionalBlockLists,
-          newConfig.disableDefaultLists,
-        );
+      if (this.mainWindow) {
+        if (
+          newConfig.blocker === blockers.WithBlocklists &&
+          !isBlockerEnabled(this.mainWindow.webContents.session)
+        ) {
+          await loadTrackerBlockerEngine(
+            this.mainWindow.webContents.session,
+            newConfig.cache,
+            newConfig.additionalBlockLists,
+            newConfig.disableDefaultLists,
+          );
+        }
       }
     },
   },

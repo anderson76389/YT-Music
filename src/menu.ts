@@ -27,28 +27,6 @@ import packageJson from '../package.json';
 
 export type MenuTemplate = Electron.MenuItemConstructorOptions[];
 
-/** The SolidJS menu cannot rely on Electron's automatically toggled checked value. */
-type BooleanOptionKey =
-  | 'options.autoUpdates'
-  | 'options.resumeOnStart'
-  | 'options.removeUpgradeButton'
-  | 'options.swapLikeButtonsOrder'
-  | 'options.alwaysOnTop'
-  | 'options.hideMenu'
-  | 'options.startAtLogin'
-  | 'options.trayClickPlayPause'
-  | 'options.overrideUserAgent'
-  | 'options.disableHardwareAcceleration'
-  | 'options.restartOnConfigChanges'
-  | 'options.autoResetAppCache';
-
-const toggleBooleanOption = (key: BooleanOptionKey, item: MenuItem): boolean => {
-  const enabled = !config.get(key);
-  config.setMenuOption(key, enabled);
-  item.checked = enabled;
-  return enabled;
-};
-
 const pluginEnabledMenu = async (
   plugin: string,
   label = '',
@@ -157,16 +135,15 @@ export const mainMenuTemplate = async (
             ? 'Le portable se met à jour depuis les Releases ; la mise à jour automatique nécessite Windows Setup.'
             : undefined,
           click(item: MenuItem) {
-            toggleBooleanOption('options.autoUpdates', item);
+            config.setMenuOption('options.autoUpdates', item.checked);
           },
         },
         {
           label: t('main.menu.options.submenu.resume-on-start'),
           type: 'checkbox',
           checked: config.get('options.resumeOnStart'),
-          id: 'ytmd-option:resumeOnStart',
           click(item: MenuItem) {
-            toggleBooleanOption('options.resumeOnStart', item);
+            config.setMenuOption('options.resumeOnStart', item.checked);
           },
         },
         {
@@ -177,7 +154,6 @@ export const mainMenuTemplate = async (
                 label: name,
                 type: 'radio',
                 checked: config.get('options.startingPage') === name,
-                id: `ytmd-radio:startingPage:${name}`,
                 click() {
                   config.set('options.startingPage', name);
                 },
@@ -186,7 +162,6 @@ export const mainMenuTemplate = async (
               label: t('main.menu.options.submenu.starting-page.unset'),
               type: 'radio',
               checked: config.get('options.startingPage') === '',
-              id: 'ytmd-radio:startingPage:unset',
               click() {
                 config.set('options.startingPage', '');
               },
@@ -203,9 +178,11 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.removeUpgradeButton'),
-              id: 'ytmd-option:removeUpgradeButton',
               click(item: MenuItem) {
-                toggleBooleanOption('options.removeUpgradeButton', item);
+                config.setMenuOption(
+                  'options.removeUpgradeButton',
+                  item.checked,
+                );
               },
             },
             {
@@ -253,7 +230,6 @@ export const mainMenuTemplate = async (
                   ),
                   type: 'radio',
                   checked: !config.get('options.likeButtons'),
-                  id: 'ytmd-radio:likeButtons:default',
                   click() {
                     config.set('options.likeButtons', '');
                   },
@@ -264,7 +240,6 @@ export const mainMenuTemplate = async (
                   ),
                   type: 'radio',
                   checked: config.get('options.likeButtons') === 'force',
-                  id: 'ytmd-radio:likeButtons:force',
                   click() {
                     config.set('options.likeButtons', 'force');
                   },
@@ -285,9 +260,11 @@ export const mainMenuTemplate = async (
                   ),
                   type: 'checkbox',
                   checked: config.get('options.swapLikeButtonsOrder'),
-                  id: 'ytmd-option:swapLikeButtonsOrder',
                   click(item: MenuItem) {
-                    toggleBooleanOption('options.swapLikeButtonsOrder', item);
+                    config.setMenuOption(
+                      'options.swapLikeButtonsOrder',
+                      item.checked,
+                    );
                   },
                 },
               ],
@@ -370,12 +347,11 @@ export const mainMenuTemplate = async (
           type: 'checkbox',
           checked: app.hasSingleInstanceLock(),
           click(item: MenuItem) {
-            if (app.hasSingleInstanceLock()) {
+            if (!item.checked && app.hasSingleInstanceLock()) {
               app.releaseSingleInstanceLock();
-            } else {
+            } else if (item.checked && !app.hasSingleInstanceLock()) {
               app.requestSingleInstanceLock();
             }
-            item.checked = app.hasSingleInstanceLock();
             void innerRefreshMenu();
           },
         },
@@ -384,8 +360,8 @@ export const mainMenuTemplate = async (
           type: 'checkbox',
           checked: config.get('options.alwaysOnTop'),
           click(item: MenuItem) {
-            toggleBooleanOption('options.alwaysOnTop', item);
-            win.setAlwaysOnTop(config.get('options.alwaysOnTop'));
+            config.setMenuOption('options.alwaysOnTop', item.checked);
+            win.setAlwaysOnTop(item.checked);
           },
         },
         ...((is.windows() || is.linux()
@@ -395,8 +371,8 @@ export const mainMenuTemplate = async (
                 type: 'checkbox',
                 checked: config.get('options.hideMenu'),
                 click(item) {
-                  const hidden = toggleBooleanOption('options.hideMenu', item);
-                  if (hidden && !config.get('options.hideMenuWarned')) {
+                  config.setMenuOption('options.hideMenu', item.checked);
+                  if (item.checked && !config.get('options.hideMenuWarned')) {
                     dialog.showMessageBox(win, {
                       type: 'info',
                       title: t(
@@ -420,7 +396,7 @@ export const mainMenuTemplate = async (
                 type: 'checkbox',
                 checked: config.get('options.startAtLogin'),
                 click(item) {
-                  toggleBooleanOption('options.startAtLogin', item);
+                  config.setMenuOption('options.startAtLogin', item.checked);
                 },
               },
             ]
@@ -475,9 +451,11 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.trayClickPlayPause'),
-              id: 'ytmd-option:trayClickPlayPause',
               click(item: MenuItem) {
-                toggleBooleanOption('options.trayClickPlayPause', item);
+                config.setMenuOption(
+                  'options.trayClickPlayPause',
+                  item.checked,
+                );
               },
             },
           ],
@@ -540,7 +518,7 @@ export const mainMenuTemplate = async (
               checked: config.get('options.overrideUserAgent'),
               toolTip: 'Nécessite un redémarrage de YT Music pour modifier les requêtes du navigateur.',
               click(item: MenuItem) {
-                toggleBooleanOption('options.overrideUserAgent', item);
+                config.setMenuOption('options.overrideUserAgent', item.checked);
               },
             },
             {
@@ -551,7 +529,10 @@ export const mainMenuTemplate = async (
               checked: config.get('options.disableHardwareAcceleration'),
               toolTip: 'Nécessite un redémarrage de YT Music (Electron).',
               click(item: MenuItem) {
-                toggleBooleanOption('options.disableHardwareAcceleration', item);
+                config.setMenuOption(
+                  'options.disableHardwareAcceleration',
+                  item.checked,
+                );
               },
             },
             {
@@ -561,7 +542,10 @@ export const mainMenuTemplate = async (
               type: 'checkbox',
               checked: config.get('options.restartOnConfigChanges'),
               click(item: MenuItem) {
-                toggleBooleanOption('options.restartOnConfigChanges', item);
+                config.setMenuOption(
+                  'options.restartOnConfigChanges',
+                  item.checked,
+                );
               },
             },
             {
@@ -571,7 +555,7 @@ export const mainMenuTemplate = async (
               type: 'checkbox',
               checked: config.get('options.autoResetAppCache'),
               click(item: MenuItem) {
-                toggleBooleanOption('options.autoResetAppCache', item);
+                config.setMenuOption('options.autoResetAppCache', item.checked);
               },
             },
             { type: 'separator' },

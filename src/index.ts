@@ -104,6 +104,20 @@ app.on('second-instance', (_, commandLine) => {
   focusOrRouteSecondInstance(commandLine);
 });
 
+const applyStartAtLogin = (enabled: boolean) => {
+  try {
+    const portableExecutable = process.env.PORTABLE_EXECUTABLE_FILE;
+    app.setLoginItemSettings({
+      openAtLogin: enabled,
+      ...(process.platform === 'win32' && portableExecutable
+        ? { path: portableExecutable }
+        : {}),
+    });
+  } catch (error) {
+    console.error('[YT Music] Démarrage avec Windows indisponible', error);
+  }
+};
+
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.exit();
@@ -355,11 +369,26 @@ const initHook = async (win: BrowserWindow) => {
       win.webContents.send('ytmd:set-menu-collapsed', hidden);
     }
     if (nextOptions.startAtLogin !== previousOptions.startAtLogin) {
-      try {
-        app.setLoginItemSettings({ openAtLogin: nextOptions.startAtLogin === true });
-      } catch (error) {
-        console.error('[YT Music] Impossible de modifier le démarrage Windows', error);
-      }
+      applyStartAtLogin(nextOptions.startAtLogin === true);
+    }
+    if (nextOptions.tray !== previousOptions.tray) {
+      setUpTray(app, win);
+    }
+    if (nextOptions.alwaysOnTop !== previousOptions.alwaysOnTop) {
+      win.setAlwaysOnTop(nextOptions.alwaysOnTop === true);
+    }
+    if (nextOptions.customWindowTitle !== previousOptions.customWindowTitle) {
+      const customTitle = nextOptions.customWindowTitle;
+      win.setTitle(typeof customTitle === 'string' && customTitle.trim()
+        ? customTitle
+        : win.webContents.getTitle());
+    }
+    if (
+      nextOptions.removeUpgradeButton !== previousOptions.removeUpgradeButton ||
+      nextOptions.likeButtons !== previousOptions.likeButtons ||
+      nextOptions.swapLikeButtonsOrder !== previousOptions.swapLikeButtonsOrder
+    ) {
+      win.webContents.send('ytmd:appearance-settings-changed');
     }
     if (nextOptions.autoUpdates !== previousOptions.autoUpdates) {
       scheduleUpdateCheck(win, nextOptions.autoUpdates === true);
@@ -804,14 +833,14 @@ app.once('browser-window-created', (_event, win) => {
     event.preventDefault();
   });
 
-  const customWindowTitle = config.get('options.customWindowTitle');
-
-  if (customWindowTitle) {
-    win.on('page-title-updated', (event) => {
+  // The title can be enabled, edited or cleared without restarting.
+  win.on('page-title-updated', (event) => {
+    const customTitle = config.get('options.customWindowTitle');
+    if (customTitle) {
       event.preventDefault();
-      win.setTitle(customWindowTitle);
-    });
-  }
+      win.setTitle(customTitle);
+    }
+  });
 });
 
 app.on('window-all-closed', () => {
@@ -936,10 +965,8 @@ app.whenReady().then(async () => {
     focusOrRouteSecondInstance(pending);
   }
 
-  // Autostart at login
-  app.setLoginItemSettings({
-    openAtLogin: config.get('options.startAtLogin'),
-  });
+  // Portable launcher must not register its temporary extracted binary.
+  applyStartAtLogin(config.get('options.startAtLogin'));
 
   // Vérification contre le manifeste SHA512 de notre propre GitHub.
   // Elle ne télécharge et n'installe rien sans accord explicite.
@@ -964,15 +991,13 @@ app.whenReady().then(async () => {
     forceQuit = true;
   });
 
-  if (is.macOS() || config.get('options.tray')) {
-    mainWindow.on('close', (event) => {
-      // Hide the window instead of quitting (quit is available in tray options)
-      if (!forceQuit) {
-        event.preventDefault();
-        mainWindow!.hide();
-      }
-    });
-  }
+  mainWindow.on('close', (event) => {
+    // The tray can be turned on/off while the window is open.
+    if (!forceQuit && (is.macOS() || config.get('options.tray'))) {
+      event.preventDefault();
+      mainWindow?.hide();
+    }
+  });
 });
 
 function showUnresponsiveDialog(

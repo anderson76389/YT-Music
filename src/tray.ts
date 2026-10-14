@@ -16,6 +16,9 @@ import type { MenuTemplate } from './menu';
 
 // Prevent tray being garbage collected
 let tray: Electron.Tray | undefined;
+let trayIconDefault: Electron.NativeImage | null = null;
+let trayIconPaused: Electron.NativeImage | null = null;
+let songInfoListenerInstalled = false;
 
 type TrayEvent = (
   event: Electron.KeyboardEvent,
@@ -43,9 +46,13 @@ export const setTrayOnDoubleClick = (fn: TrayEvent) => {
 
 export const setUpTray = (app: Electron.App, win: Electron.BrowserWindow) => {
   if (!config.get('options.tray')) {
+    tray?.destroy();
     tray = undefined;
     return;
   }
+  // Rebuild the tray after changing settings, without orphan icons.
+  tray?.destroy();
+  tray = undefined;
 
   const { playPause, next, previous } = getSongControls(win);
 
@@ -66,6 +73,8 @@ export const setUpTray = (app: Electron.App, win: Electron.BrowserWindow) => {
       height: 16 * pixelRatio,
     });
 
+  trayIconDefault = defaultTrayIcon;
+  trayIconPaused = pausedTrayIcon;
   tray = new Tray(defaultTrayIcon);
 
   tray.setToolTip(
@@ -130,15 +139,14 @@ export const setUpTray = (app: Electron.App, win: Electron.BrowserWindow) => {
   const trayMenu = Menu.buildFromTemplate(template);
   tray.setContextMenu(trayMenu);
 
-  registerCallback((songInfo, event) => {
-    if (event === SongInfoEvent.TimeChanged) return;
-
-    if (tray) {
+  if (!songInfoListenerInstalled) {
+    songInfoListenerInstalled = true;
+    registerCallback((songInfo, event) => {
+      if (event === SongInfoEvent.TimeChanged || !tray || !trayIconDefault) return;
       if (typeof songInfo.isPaused === 'undefined') {
-        tray.setImage(defaultTrayIcon);
+        tray.setImage(trayIconDefault);
         return;
       }
-
       tray.setToolTip(
         t('main.tray.tooltip.with-song-info', {
           artist: songInfo.artist,
@@ -146,8 +154,7 @@ export const setUpTray = (app: Electron.App, win: Electron.BrowserWindow) => {
           applicationName: APPLICATION_NAME,
         }),
       );
-
-      tray.setImage(songInfo.isPaused ? pausedTrayIcon : defaultTrayIcon);
-    }
-  });
+      tray.setImage(songInfo.isPaused && trayIconPaused ? trayIconPaused : trayIconDefault);
+    });
+  }
 };

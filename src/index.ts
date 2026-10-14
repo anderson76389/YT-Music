@@ -813,10 +813,66 @@ async function createMainWindow() {
             ? await window.ipcRenderer.invoke('peard:menu-event', updatedToggle.ytmdPath)
             : false;
           const final = await window.mainConfig.plugins.isEnabled('blur-nav-bar');
+
+          // Do not publish an application with a working Plugins menu but
+          // nonfunctional Settings. Exercise real IPC clicks at multiple
+          // submenu depths against persistent main-process configuration.
+          const findById = async (id) => {
+            const menu = await window.ipcRenderer.invoke('get-menu');
+            const walk = (nodes) => {
+              for (const node of nodes || []) {
+                if (node.id === id) return node;
+                const nested = walk(node.submenu?.items);
+                if (nested) return nested;
+              }
+              return null;
+            };
+            return walk(menu?.items);
+          };
+          const settingChecks = [];
+          for (const [key, id] of [
+            ['resumeOnStart', 'ytmd-option:resumeOnStart'],
+            ['removeUpgradeButton', 'ytmd-option:removeUpgradeButton'],
+            ['swapLikeButtonsOrder', 'ytmd-option:swapLikeButtonsOrder'],
+            ['trayClickPlayPause', 'ytmd-option:trayClickPlayPause'],
+          ]) {
+            const beforeValue = window.mainConfig.get('options.' + key);
+            const entry = await findById(id);
+            const firstClick = entry?.ytmdPath
+              ? await window.ipcRenderer.invoke('peard:menu-event', entry.ytmdPath)
+              : false;
+            const afterValue = window.mainConfig.get('options.' + key);
+            const refreshed = await findById(id);
+            const secondClick = refreshed?.ytmdPath
+              ? await window.ipcRenderer.invoke('peard:menu-event', refreshed.ytmdPath)
+              : false;
+            const finalValue = window.mainConfig.get('options.' + key);
+            settingChecks.push({
+              key, firstClick, secondClick, beforeValue, afterValue, finalValue,
+              pass: firstClick === true && secondClick === true &&
+                afterValue === !beforeValue && finalValue === beforeValue,
+            });
+          }
+          const initialLikeButtons = window.mainConfig.get('options.likeButtons');
+          const forceRadio = await findById('ytmd-radio:likeButtons:force');
+          const forced = forceRadio?.ytmdPath
+            ? await window.ipcRenderer.invoke('peard:menu-event', forceRadio.ytmdPath)
+            : false;
+          const forcedValue = window.mainConfig.get('options.likeButtons');
+          const defaultRadio = await findById('ytmd-radio:likeButtons:default');
+          const reset = defaultRadio?.ytmdPath
+            ? await window.ipcRenderer.invoke('peard:menu-event', defaultRadio.ytmdPath)
+            : false;
+          const resetValue = window.mainConfig.get('options.likeButtons');
+          const radioPass = forced === true && forcedValue === 'force' &&
+            reset === true && resetValue === '';
           return {
             bridgeReady,
             menuClicksPass: clicked === true && after !== before &&
               restored === true && final === before,
+            settingsPass: settingChecks.every((entry) => entry.pass) &&
+              radioPass && initialLikeButtons === '',
+            settingChecks, radioPass, initialLikeButtons,
             clicked, before, after, persistedAfter, mainAfter, restored, final,
           };
         })()`,
@@ -824,6 +880,7 @@ async function createMainWindow() {
       ).then((result: {
         bridgeReady: boolean;
         menuClicksPass: boolean;
+        settingsPass: boolean;
         reason?: string;
       }) => {
         traceStartup('bridge-and-menu', JSON.stringify(result));
@@ -832,7 +889,7 @@ async function createMainWindow() {
           portable: Boolean(process.env.PORTABLE_EXECUTABLE_FILE),
           windowCreated: true,
         }));
-        app.exit(result.bridgeReady && result.menuClicksPass ? 0 : 2);
+        app.exit(result.bridgeReady && result.menuClicksPass && result.settingsPass ? 0 : 2);
       }).catch((error: unknown) => {
         fs.writeFileSync(smokeMarker, JSON.stringify({ bridgeReady: false, error: String(error) }));
         app.exit(3);

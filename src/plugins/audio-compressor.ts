@@ -1,4 +1,5 @@
 import { t } from '@/i18n';
+import { getAudioSession } from '@/providers/audio-session';
 import { type MusicPlayer } from '@/types/music-player';
 import { createPlugin } from '@/utils';
 
@@ -95,34 +96,30 @@ const audioCanPlayHandler = ({
   );
 };
 
-const ensureAudioContextLoad = (playerApi: MusicPlayer) => {
-  if (playerApi.getPlayerState() !== 1 || storage.lastContext) return;
 
-  playerApi.loadVideoById(
-    playerApi.getPlayerResponse().videoDetails.videoId,
-    playerApi.getCurrentTime(),
-    playerApi.getUserPlaybackQualityPreference(),
-  );
-};
 
 export default createPlugin({
   name: () => t('plugins.audio-compressor.name'),
   description: () => t('plugins.audio-compressor.description'),
 
   renderer: {
-    onPlayerApiReady(playerApi) {
-      ensureAudioContextLoad(playerApi);
+    onPlayerApiReady(_playerApi) {
+      // The active player exposes the WebAudio source without reloading
+      // the current track just to initialize the compressor.
+      const session = getAudioSession();
+      if (session) {
+        audioCanPlayHandler(new CustomEvent('peard:audio-can-play', { detail: session }));
+      }
     },
 
     start() {
       document.addEventListener('peard:audio-can-play', audioCanPlayHandler, {
         passive: true,
       });
-      storage.connectToCompressor(
-        storage.lastSource,
-        storage.lastContext,
-        storage.lastCompressor,
-      );
+      const session = getAudioSession();
+      if (session) {
+        audioCanPlayHandler(new CustomEvent('peard:audio-can-play', { detail: session }));
+      }
     },
 
     stop() {

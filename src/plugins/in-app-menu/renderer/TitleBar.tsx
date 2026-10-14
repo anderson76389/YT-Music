@@ -1,4 +1,3 @@
-import type { MenuItem } from 'electron';
 import {
   createEffect,
   createResource,

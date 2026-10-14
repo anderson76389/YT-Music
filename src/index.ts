@@ -807,6 +807,7 @@ async function createMainWindow() {
           const clicked = await window.ipcRenderer.invoke('peard:menu-event', toggle.ytmdPath);
           const after = await window.mainConfig.plugins.isEnabled('blur-nav-bar');
           const updatedToggle = await getToggle();
+          const mainAfter = updatedToggle?.checked;
           const restored = updatedToggle?.ytmdPath
             ? await window.ipcRenderer.invoke('peard:menu-event', updatedToggle.ytmdPath)
             : false;
@@ -815,7 +816,7 @@ async function createMainWindow() {
             bridgeReady,
             menuClicksPass: clicked === true && after !== before &&
               restored === true && final === before,
-            clicked, before, after, restored, final,
+            clicked, before, after, mainAfter, restored, final,
           };
         })()`,
         true,

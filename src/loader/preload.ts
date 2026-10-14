@@ -1,6 +1,6 @@
 import { deepmerge } from 'deepmerge-ts';
 import { ipcRenderer } from 'electron';
-import { allPlugins, preloadPlugins } from 'virtual:plugins';
+import { preloadPlugins } from 'virtual:plugins';
 
 import { t } from '@/i18n';
 import { LoggerPrefix, startPlugin, stopPlugin } from '@/utils';

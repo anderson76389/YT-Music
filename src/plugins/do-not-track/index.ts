@@ -25,7 +25,7 @@ export interface TrackerBlockerConfig {
   cache: boolean;
   /**
    * Which tracker blocker to use.
-   * @default blockers.InPlayer
+   * @default blockers.WithBlocklists
    */
   blocker: (typeof blockers)[keyof typeof blockers];
   /**
@@ -49,7 +49,8 @@ export default createPlugin({
   config: {
     enabled: false,
     cache: true,
-    blocker: blockers.InPlayer,
+    // Unlike the ad-JSON pruner, this mode actually blocks network requests.
+    blocker: blockers.WithBlocklists,
     additionalBlockLists: [],
     disableDefaultLists: false,
   } as TrackerBlockerConfig,
@@ -60,7 +61,9 @@ export default createPlugin({
       {
         label: t('plugins.do-not-track.menu.blocker'),
         submenu: Object.values(blockers).map((blocker) => ({
-          label: blocker,
+          label: blocker === blockers.WithBlocklists
+            ? 'Bloquer les traqueurs et publicités (listes Ghostery)'
+            : 'Filtrage du lecteur uniquement (ne bloque pas les traqueurs)',
           type: 'radio',
           checked: (config.blocker || blockers.WithBlocklists) === blocker,
           click() {
@@ -91,18 +94,19 @@ export default createPlugin({
       }
     },
     async onConfigChange(newConfig) {
-      if (this.mainWindow) {
-        if (
-          newConfig.blocker === blockers.WithBlocklists &&
-          !isBlockerEnabled(this.mainWindow.webContents.session)
-        ) {
-          await loadTrackerBlockerEngine(
-            this.mainWindow.webContents.session,
-            newConfig.cache,
-            newConfig.additionalBlockLists,
-            newConfig.disableDefaultLists,
-          );
-        }
+      if (!this.mainWindow) return;
+      const session = this.mainWindow.webContents.session;
+      if (!newConfig.enabled || newConfig.blocker !== blockers.WithBlocklists) {
+        if (isBlockerEnabled(session)) unloadTrackerBlockerEngine(session);
+        return;
+      }
+      if (!isBlockerEnabled(session)) {
+        await loadTrackerBlockerEngine(
+          session,
+          newConfig.cache,
+          newConfig.additionalBlockLists,
+          newConfig.disableDefaultLists,
+        );
       }
     },
   },

@@ -110,11 +110,8 @@ export default createPlugin({
       if (this.onVideoDataChange) {
         document.removeEventListener('videodatachange', this.onVideoDataChange);
       }
-      const listener: EventListener = async (event) => {
+      const updateCurrentAlbum = async () => {
         if (!this.active) return;
-        const videoEvent = event as CustomEvent<{ name: string }>;
-        if (videoEvent.detail?.name !== 'dataloaded') return;
-
         const playerResponse = playerApi.getPlayerResponse();
         const thumbnail =
           playerResponse?.videoDetails?.thumbnail?.thumbnails?.at(0);
@@ -163,8 +160,14 @@ export default createPlugin({
         }
         (this as Renderer).updateColor(alpha ?? 1);
       };
+      const listener: EventListener = (event) => {
+        const videoEvent = event as CustomEvent<{ name: string }>;
+        if (videoEvent.detail?.name === 'dataloaded') void updateCurrentAlbum();
+      };
       this.onVideoDataChange = listener;
       document.addEventListener('videodatachange', listener);
+      // Apply the theme to the song already playing at activation.
+      void updateCurrentAlbum();
     },
     stop() {
       this.active = false;

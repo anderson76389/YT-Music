@@ -2,7 +2,7 @@ name: Verification du code
 
 on:
   push:
-    branches: [main, fix-portable-plugin-controls-20261014]
+    branches: [main]
   pull_request:
   workflow_dispatch:
   schedule:
@@ -33,7 +33,7 @@ jobs:
           node-version: '22'
           cache: pnpm
 
-      - name: Auditer la présence des 32 plugins et les 10 suppressions
+      - name: Auditer la présence des 34 plugins et les 8 suppressions
         run: node tools/audit-plugin-sources.mjs
 
       - name: Installer les dependances verrouillees

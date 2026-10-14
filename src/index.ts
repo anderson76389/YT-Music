@@ -835,6 +835,10 @@ async function createMainWindow() {
             ['removeUpgradeButton', 'ytmd-option:removeUpgradeButton'],
             ['swapLikeButtonsOrder', 'ytmd-option:swapLikeButtonsOrder'],
             ['trayClickPlayPause', 'ytmd-option:trayClickPlayPause'],
+            ['alwaysOnTop', 'ytmd-option:alwaysOnTop'],
+            ['overrideUserAgent', 'ytmd-option:overrideUserAgent'],
+            ['disableHardwareAcceleration', 'ytmd-option:disableHardwareAcceleration'],
+            ['autoResetAppCache', 'ytmd-option:autoResetAppCache'],
           ]) {
             const beforeValue = window.mainConfig.get('options.' + key);
             const entry = await findById(id);
@@ -850,9 +854,32 @@ async function createMainWindow() {
             settingChecks.push({
               key, firstClick, secondClick, beforeValue, afterValue, finalValue,
               pass: firstClick === true && secondClick === true &&
+                entry?.checked === beforeValue &&
+                refreshed?.checked === afterValue &&
                 afterValue === !beforeValue && finalValue === beforeValue,
             });
           }
+          const initialStartingPage = window.mainConfig.get('options.startingPage');
+          // A submenu radio click must update the saved page, its tick,
+          // and restore the original page before the smoke process exits.
+          const pageToSelect = initialStartingPage === 'Home' ? 'Explore' : 'Home';
+          const pageEntry = await findById('ytmd-radio:startingPage:' + pageToSelect);
+          const selectedPage = pageEntry?.ytmdPath
+            ? await window.ipcRenderer.invoke('peard:menu-event', pageEntry.ytmdPath)
+            : false;
+          const changedStartingPage = window.mainConfig.get('options.startingPage');
+          const selectedSnapshot = await findById('ytmd-radio:startingPage:' + pageToSelect);
+          const originalPageEntry = await findById(
+            'ytmd-radio:startingPage:' + (initialStartingPage || 'unset'),
+          );
+          const restoredPage = originalPageEntry?.ytmdPath
+            ? await window.ipcRenderer.invoke('peard:menu-event', originalPageEntry.ytmdPath)
+            : false;
+          const finalStartingPage = window.mainConfig.get('options.startingPage');
+          const startingPagePass = selectedPage === true && restoredPage === true &&
+            changedStartingPage === pageToSelect &&
+            selectedSnapshot?.checked === true &&
+            finalStartingPage === initialStartingPage;
           const initialLikeButtons = window.mainConfig.get('options.likeButtons');
           const forceRadio = await findById('ytmd-radio:likeButtons:force');
           const forced = forceRadio?.ytmdPath
@@ -871,8 +898,9 @@ async function createMainWindow() {
             menuClicksPass: clicked === true && after !== before &&
               restored === true && final === before,
             settingsPass: settingChecks.every((entry) => entry.pass) &&
-              radioPass && initialLikeButtons === '',
+              radioPass && initialLikeButtons === '' && startingPagePass,
             settingChecks, radioPass, initialLikeButtons,
+            startingPagePass, initialStartingPage, changedStartingPage, finalStartingPage,
             clicked, before, after, persistedAfter, mainAfter, restored, final,
           };
         })()`,

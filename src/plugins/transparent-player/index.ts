@@ -6,23 +6,13 @@ import { onMenu } from './menu';
 import style from './style.css?inline';
 import { MaterialType, type TransparentPlayerConfig } from './types';
 
-import type { BrowserWindow } from 'electron';
-
 const defaultConfig: TransparentPlayerConfig = {
   enabled: false,
   opacity: 0.5,
   type: MaterialType.NONE,
 };
 
-type TransparentBackendState = { window: BrowserWindow | null };
-
-type TransparentRendererState = {
-  props: TransparentPlayerConfig;
-  applyVisuals(): void;
-  applyVariables(): void;
-};
-
-export default createPlugin<TransparentBackendState, unknown, TransparentRendererState, TransparentPlayerConfig>({
+export default createPlugin({
   name: () => t('plugins.transparent-player.name'),
   description: () => t('plugins.transparent-player.description'),
   addedVersion: '3.11.x',
@@ -38,12 +28,21 @@ export default createPlugin<TransparentBackendState, unknown, TransparentRendere
       type: defaultConfig.type,
     } as TransparentPlayerConfig,
     async start({ getConfig }) {
-      this.props = await getConfig();
-      this.applyVisuals();
+      const config = await getConfig();
+      this.props = config;
+      if (config.enabled) {
+        document.body.classList.add('transparent-background-color');
+        document.body.classList.add('transparent-player-backdrop-filter');
+
+        if (!(await window.mainConfig.plugins.isEnabled('album-color-theme'))) {
+          document.body.classList.add('transparent-player');
+        }
+        this.applyVariables();
+      }
     },
     onConfigChange(newConfig) {
       this.props = newConfig;
-      this.applyVisuals();
+      this.applyVariables();
     },
     stop() {
       document.body.classList.remove('transparent-background-color');
@@ -52,12 +51,6 @@ export default createPlugin<TransparentBackendState, unknown, TransparentRendere
       document.documentElement.style.removeProperty(
         '--ytmd-transparent-player-opacity',
       );
-    },
-    applyVisuals() {
-      document.body.classList.add('transparent-background-color');
-      document.body.classList.add('transparent-player-backdrop-filter');
-      document.body.classList.add('transparent-player');
-      this.applyVariables();
     },
     applyVariables(this: { props: TransparentPlayerConfig }) {
       const { opacity } = this.props;

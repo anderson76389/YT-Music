@@ -12,44 +12,35 @@ import {
 import type { BackendContext } from '@/types/contexts';
 import type { BrowserWindow } from 'electron';
 
-export const setWindowTransparency = (
-  window: BrowserWindow,
-  material: MaterialType,
-  _opacity: number,
-) => {
-  // L'opacité est pilotée par le CSS HTML. Même à 100 %, le fond natif
-  // reste transparent pour ne pas masquer les couleurs du lecteur.
-
-  // Le matériau OS est facultatif (Mica nécessite une version Windows
-  // compatible). La fenêtre Electron est déjà créée avec transparent: true
-  // dans src/index.ts lorsque le plugin est activé au lancement.
+const setWindowTransparency = (window: BrowserWindow, material: MaterialType, opacity: number) => {
+  // Some Windows editions do not support Mica; it must not abort the plugin.
   try {
-    if (is.windows()) {
+  if (is.windows()) {
+    if (WINDOWS_MATERIALS.includes(material)) {
       window.setBackgroundMaterial(
-        WINDOWS_MATERIALS.includes(material)
-          ? (material as Parameters<BrowserWindow['setBackgroundMaterial']>[0])
-          : 'none',
+        material as Parameters<BrowserWindow['setBackgroundMaterial']>[0],
       );
-    } else if (is.macOS()) {
-      window.setVibrancy(
-        MACOS_MATERIALS.includes(material)
-          ? (material as Parameters<BrowserWindow['setVibrancy']>[0])
-          : null,
-      );
+    } else {
+      window.setBackgroundMaterial('none');
     }
+  } else if (is.macOS()) {
+    if (MACOS_MATERIALS.includes(material)) {
+      window.setVibrancy(
+        material as Parameters<BrowserWindow['setVibrancy']>[0],
+      );
+    } else {
+      window.setVibrancy(null);
+    }
+  }
+
   } catch (error) {
     console.warn('[YT Music] Matériau système non disponible', error);
   }
-
-  // L'opacité visuelle est pilotée par le CSS du contenu. Ne jamais redonner
-  // un fond opaque à la BrowserWindow : cela annulait toute transparence.
-  window.setBackgroundColor('#00000000');
+  // Restore Pear Desktop's native transparency handling.
+  window.setBackgroundColor(`rgba(0, 0, 0, ${opacity})`);
 };
 
-export const backend = createBackend<
-  { window: BrowserWindow | null },
-  TransparentPlayerConfig
->({
+export const backend = createBackend({
   window: null as BrowserWindow | null,
   async start({ window, getConfig }: BackendContext<TransparentPlayerConfig>) {
     const config = await getConfig();
@@ -61,13 +52,7 @@ export const backend = createBackend<
     setWindowTransparency(this.window, newConfig.type, newConfig.opacity);
   },
   stop({ window }) {
-    try {
-      if (is.windows()) window.setBackgroundMaterial('none');
-      if (is.macOS()) window.setVibrancy(null);
-    } catch {
-      // Les matériaux de la plateforme peuvent être indisponibles.
-    }
-    window.setBackgroundColor('#000000');
+    setWindowTransparency(window, MaterialType.NONE, 1);
     this.window = null;
   },
 });

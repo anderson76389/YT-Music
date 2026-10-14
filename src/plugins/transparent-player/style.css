@@ -1,137 +1,114 @@
 :root {
-  --ytmd-transparent-player-opacity: 0.5;
-  --ytmd-transparent-player-surface: rgb(
-    8 8 12 / var(--ytmd-transparent-player-opacity)
+  --ytmd-transparent-player-transparency-color: #111;
+  --ytmd-transparent-player-transparent-background: rgb(
+    from var(--ytmd-transparent-player-transparency-color) r g b /
+      var(--ytmd-transparent-player-opacity, 0.5)
   );
-  --ytmd-transparent-player-elevated: rgb(16 16 20 / 0.62);
+  --ytmd-transparent-player-transparent-background-dark: rgb(
+    from var(--ytmd-transparent-player-transparency-color) r g b / 0.8
+  );
   --ytmd-transparent-player-backdrop-blur: blur(20px);
 }
 
-/* Les fonds de la page et du site doivent être réellement transparents.
-   Changer uniquement body ne suffit pas : #layout est normalement opaque. */
-html:has(body.transparent-player),
-body.transparent-player,
-body.transparent-player ytmusic-app,
-body.transparent-player ytmusic-app-layout,
-body.transparent-player #layout,
-body.transparent-player #content,
-body.transparent-player #player-page {
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-body.transparent-player #nav-bar-background,
-body.transparent-player #player-bar-background,
-body.transparent-player ytmusic-player-bar,
-body.transparent-player #mini-guide-background,
-body.transparent-player #guide-wrapper,
-body.transparent-player #guide,
-body.transparent-player #background,
-body.transparent-player .background-gradient,
-body.transparent-player #browse-page {
-  background-color: transparent !important;
-  background-image: none !important;
-}
-
-body.transparent-player #nav-bar,
-body.transparent-player #guide,
-body.transparent-player #player-bar,
-body.transparent-player #side-panel {
-  background: var(--ytmd-transparent-player-surface) !important;
-}
-
-body.transparent-player #nav-bar-background,
-body.transparent-player #player-bar-background,
-body.transparent-player #search-page #tabs.stuck,
-body.transparent-player ytmusic-menu-popup-renderer,
-body.transparent-player #ytmd-title-bar-main-panel {
-  backdrop-filter: var(--ytmd-transparent-player-backdrop-blur) !important;
-}
-
-body.transparent-player #search-page #tabs.stuck,
-body.transparent-player #ytmd-title-bar-main-panel,
-body.transparent-player ytmusic-menu-popup-renderer {
-  background: var(--ytmd-transparent-player-elevated) !important;
-}
-
-body.transparent-player nav[data-ytmd-main-panel] {
-  background-color: transparent !important;
-}
-
-body.transparent-player .av-toggle.ytmusic-av-toggle {
-  background-color: var(--ytmd-transparent-player-elevated) !important;
-}
-
-/* Renforcer la transparence sur les structures des lecteurs YouTube Music
-   actuels. Le thème de pochette ne doit pas redessiner un fond opaque par
-   dessus la surface transparente de la BrowserWindow. */
-body.transparent-player #player,
-body.transparent-player #main-panel,
-body.transparent-player #player-page #main-panel,
-body.transparent-player ytmusic-player-page,
-body.transparent-player ytmusic-browse-response,
-body.transparent-player ytmusic-browse-response #background,
-body.transparent-player #mini-guide,
-body.transparent-player #guide-section,
-body.transparent-player ytmusic-guide-renderer,
-body.transparent-player ytmusic-nav-bar,
-body.transparent-player #player-bar,
-body.transparent-player #player-bar-background,
-body.transparent-player #player-page #side-panel,
-body.transparent-player #player-page .background-gradient,
-body.transparent-player #content-scroller {
-  background-color: transparent !important;
-  background-image: none !important;
-}
-
-/* Les panneaux contextuels restent lisibles même avec 10 % d'opacité. */
-body.transparent-player tp-yt-iron-dropdown,
-body.transparent-player tp-yt-paper-dialog,
-body.transparent-player ytmusic-menu-popup-renderer,
-body.transparent-player #ytmd-title-bar-main-panel {
-  background-color: rgb(18 18 22 / 0.93) !important;
-  color: #fff !important;
-}
-
-body.transparent-player #guide,
-body.transparent-player #player-bar,
-body.transparent-player ytmusic-player-bar {
-  background: rgb(
-    8 8 12 / clamp(0.12, var(--ytmd-transparent-player-opacity, 0.5), 1)
+body.transparent-background-color {
+  background-color: var(
+    --ytmd-transparent-player-transparent-background
   ) !important;
 }
 
-/* YouTube Music réinjecte un fond noir dans le gestionnaire de pages,
-   le lecteur et le menu latéral. Ces surfaces doivent être explicitement
-   transparentes pour voir le bureau derrière la fenêtre Electron. */
-html:has(body.transparent-player) {
-  background: transparent !important;
-}
-body.transparent-player #page-manager,
-body.transparent-player #content-wrapper,
-body.transparent-player #content,
-body.transparent-player #main-panel,
-body.transparent-player #player-container,
-body.transparent-player #player-container-outer,
-body.transparent-player #player-page,
-body.transparent-player #player,
-body.transparent-player #player-bar,
-body.transparent-player #nav-bar,
-body.transparent-player #guide,
-body.transparent-player #side-panel,
-body.transparent-player ytmusic-player-page,
-body.transparent-player ytmusic-app-layout,
-body.transparent-player ytmusic-app,
-body.transparent-player ytmusic-browse-response,
-body.transparent-player ytmusic-section-list-renderer {
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
+body.transparent-player-backdrop-filter {
+  #layout {
+    #nav-bar-background,
+    #player-bar-background {
+      backdrop-filter: var(--ytmd-transparent-player-backdrop-blur) !important;
+    }
+  }
+
+  #search-page {
+    #tabs {
+      &.stuck {
+        backdrop-filter: var(
+          --ytmd-transparent-player-backdrop-blur
+        ) !important;
+      }
+    }
+  }
+
+  ytmusic-menu-popup-renderer {
+    backdrop-filter: var(--ytmd-transparent-player-backdrop-blur) !important;
+  }
+
+  #ytmd-title-bar-main-panel {
+    backdrop-filter: var(--ytmd-transparent-player-backdrop-blur) !important;
+  }
 }
 
-body.transparent-player #nav-bar,
-body.transparent-player #guide,
-body.transparent-player #player-bar,
-body.transparent-player #side-panel {
-  background-color: rgb(9 9 13 / var(--ytmd-transparent-player-opacity, 0.5)) !important;
+body.transparent-player {
+  ytmusic-app {
+    ytmusic-app-layout[player-page-open] {
+      #nav-bar-background.ytmusic-app-layout,
+      #player-bar-background.ytmusic-app-layout {
+        opacity: 0 !important;
+      }
+    }
+
+    #layout {
+      #nav-bar-background,
+      #player-bar-background {
+        background: var(
+          --ytmd-transparent-player-transparent-background-dark
+        ) !important;
+      }
+
+      #mini-guide-background {
+        background: none !important;
+        border: 0 !important;
+      }
+
+      #guide {
+        #guide-wrapper {
+          background: none !important;
+          border: 0 !important;
+        }
+      }
+
+      ytmusic-player-bar {
+        background: none !important;
+      }
+
+      #player-page {
+        background: none !important;
+      }
+
+      #search-page {
+        #tabs {
+          &.stuck {
+            background: var(
+              --ytmd-transparent-player-transparent-background
+            ) !important;
+          }
+        }
+      }
+
+      #browse-page {
+        #background {
+          display: none !important;
+        }
+
+        .background-gradient {
+          background: none !important;
+        }
+      }
+    }
+  }
+
+  /* Window Top Panel */
+  nav[data-ytmd-main-panel] {
+    background-color: transparent !important;
+  }
+
+  /* Video Toggle Plugin */
+  .av-toggle.ytmusic-av-toggle {
+    background-color: var(--ytmd-transparent-player-transparent-background);
+  }
 }

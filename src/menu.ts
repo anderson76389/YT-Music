@@ -398,7 +398,7 @@ export const mainMenuTemplate = async (
                 label: t('main.menu.options.submenu.hide-menu.label'),
                 type: 'checkbox',
                 checked: config.get('options.hideMenu'),
-          id: 'ytmd-option:hideMenu',
+                id: 'ytmd-option:hideMenu',
                 click(item) {
                   const hidden = toggleBooleanOption('options.hideMenu', item);
                   // Apply immediately to the SolidJS title bar, not only on restart.
@@ -428,7 +428,7 @@ export const mainMenuTemplate = async (
                 label: t('main.menu.options.submenu.start-at-login'),
                 type: 'checkbox',
                 checked: config.get('options.startAtLogin'),
-          id: 'ytmd-option:startAtLogin',
+                id: 'ytmd-option:startAtLogin',
                 click(item) {
                   toggleBooleanOption('options.startAtLogin', item);
                 },
@@ -548,7 +548,7 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.overrideUserAgent'),
-          id: 'ytmd-option:overrideUserAgent',
+              id: 'ytmd-option:overrideUserAgent',
               toolTip: 'Nécessite un redémarrage de YT Music pour modifier les requêtes du navigateur.',
               click(item: MenuItem) {
                 toggleBooleanOption('options.overrideUserAgent', item);
@@ -560,7 +560,7 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.disableHardwareAcceleration'),
-          id: 'ytmd-option:disableHardwareAcceleration',
+              id: 'ytmd-option:disableHardwareAcceleration',
               toolTip: 'Nécessite un redémarrage de YT Music (Electron).',
               click(item: MenuItem) {
                 toggleBooleanOption('options.disableHardwareAcceleration', item);
@@ -572,7 +572,7 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.restartOnConfigChanges'),
-          id: 'ytmd-option:restartOnConfigChanges',
+              id: 'ytmd-option:restartOnConfigChanges',
               click(item: MenuItem) {
                 toggleBooleanOption('options.restartOnConfigChanges', item);
               },
@@ -583,7 +583,7 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.autoResetAppCache'),
-          id: 'ytmd-option:autoResetAppCache',
+              id: 'ytmd-option:autoResetAppCache',
               click(item: MenuItem) {
                 toggleBooleanOption('options.autoResetAppCache', item);
               },

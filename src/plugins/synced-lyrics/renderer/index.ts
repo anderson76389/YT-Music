@@ -1,5 +1,4 @@
 import { createRenderer } from '@/utils';
-import { waitForElement } from '@/utils/wait-for-element';
 
 import { disposeReactiveRoot } from './reactive-root';
 import { setConfig, setCurrentTime } from './renderer';
@@ -22,10 +21,19 @@ export const renderer = createRenderer<
     observerCallback: MutationCallback;
     observer?: MutationObserver;
     videoDataChange: () => Promise<void>;
-    updateTimestampInterval?: NodeJS.Timeout | string | number;
+    updateTimestampInterval?: ReturnType<typeof setInterval>;
+    retryTimeout?: ReturnType<typeof setTimeout>;
+    retryCount: number;
+    active: boolean;
+    songInfoListenerInstalled: boolean;
+    api?: MusicPlayer;
   },
   SyncedLyricsPluginConfig
 >({
+  active: false,
+  retryCount: 0,
+  songInfoListenerInstalled: false,
+
   onConfigChange(newConfig) {
     setConfig(newConfig);
   },
@@ -46,13 +54,15 @@ export const renderer = createRenderer<
   },
 
   async onPlayerApiReady(api: MusicPlayer) {
+    if (this.api) this.api.removeEventListener('videodatachange', this.videoDataChange);
+    this.api = api;
     _ytAPI = api;
-
+    if (!this.active) return;
     api.addEventListener('videodatachange', this.videoDataChange);
-
     await this.videoDataChange();
   },
   async videoDataChange() {
+    if (!this.active) return;
     if (!this.updateTimestampInterval) {
       this.updateTimestampInterval = setInterval(
         () => setCurrentTime((_ytAPI?.getCurrentTime() ?? 0) * 1000),
@@ -64,28 +74,51 @@ export const renderer = createRenderer<
     this.observer ??= new MutationObserver(this.observerCallback);
     this.observer.disconnect();
 
-    // Force the lyrics tab to be enabled at all times.
-    const header = await waitForElement<HTMLElement>(selectors.head);
-    {
-      header.removeAttribute('disabled');
-      tabStates[header.ariaSelected ?? 'false']();
+    // The lyrics tab may be mounted late by YouTube Music.
+    // Avoid an unbounded waiter when the plugin is disabled.
+    const header = document.querySelector<HTMLElement>(selectors.head);
+    if (!header) {
+      if (this.retryCount < 20 && !this.retryTimeout) {
+        this.retryCount++;
+        this.retryTimeout = setTimeout(() => {
+          this.retryTimeout = undefined;
+          if (this.active) void this.videoDataChange();
+        }, 500);
+      }
+      return;
     }
-
-    this.observer.observe(header, { attributes: true });
+    this.retryCount = 0;
+    if (this.retryTimeout) clearTimeout(this.retryTimeout);
+    this.retryTimeout = undefined;
     header.removeAttribute('disabled');
+    tabStates[header.ariaSelected ?? 'false']();
+    this.observer.observe(header, { attributes: true });
   },
 
   async start(ctx: RendererContext<SyncedLyricsPluginConfig>) {
+    this.active = true;
+    this.retryCount = 0;
     netFetch = ctx.ipc.invoke.bind(ctx.ipc, 'synced-lyrics:fetch');
-
     setConfig(await ctx.getConfig());
-
-    ctx.ipc.on('peard:update-song-info', (info: SongInfo) => {
-      fetchLyrics(info);
-    });
+    if (!this.songInfoListenerInstalled) {
+      this.songInfoListenerInstalled = true;
+      ctx.ipc.on('peard:update-song-info', (info: SongInfo) => {
+        if (this.active) fetchLyrics(info);
+      });
+    }
   },
 
   stop() {
+    this.active = false;
+    if (this.retryTimeout) clearTimeout(this.retryTimeout);
+    this.retryTimeout = undefined;
+    this.retryCount = 0;
+    if (this.updateTimestampInterval) clearInterval(this.updateTimestampInterval);
+    this.updateTimestampInterval = undefined;
+    this.observer?.disconnect();
+    this.api?.removeEventListener('videodatachange', this.videoDataChange);
+    this.api = undefined;
+    _ytAPI = null;
     disposeReactiveRoot();
   },
 });

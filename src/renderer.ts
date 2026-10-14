@@ -21,6 +21,7 @@ import { startingPages } from './providers/extracted-data';
 import { setupSongInfo } from './providers/song-info-front';
 import { setupSidebarPolish } from './providers/sidebar-polish';
 import { applyAppearanceOptions } from './providers/settings-appearance';
+import { rememberAudioSession } from './providers/audio-session';
 
 import type { MusicPlayer } from '@/types/music-player';
 import type { MusicPlayerAppElement } from '@/types/music-player-app-element';
@@ -317,6 +318,9 @@ async function onApiLoaded() {
   const audioContext = new AudioContext();
   const audioSource = audioContext.createMediaElementSource(video);
   audioSource.connect(audioContext.destination);
+  // Plugins audio activés après le démarrage ont besoin de la source
+  // courante; l'événement peard:audio-can-play n'est pas rejoué seul.
+  rememberAudioSession({ audioContext, audioSource });
 
   for (const [id, plugin] of Object.entries(getAllLoadedRendererPlugins())) {
     if (typeof plugin.renderer !== 'function') {

@@ -1,5 +1,6 @@
 import { t } from '@/i18n';
 import { createPlugin } from '@/utils';
+import { getAudioSession } from '@/providers/audio-session';
 
 import emptyStyle from './empty-player.css?inline';
 import {
@@ -265,6 +266,8 @@ export default createPlugin({
       };
       this.props.audioListener = listener;
       document.addEventListener('peard:audio-can-play', listener, { passive: true });
+      const session = getAudioSession();
+      if (session) void listener(new CustomEvent('peard:audio-can-play', { detail: session }));
     },
 
     stop() {

@@ -1,5 +1,6 @@
 import { t } from '@/i18n';
 import { createPlugin } from '@/utils';
+import { getAudioSession } from '@/providers/audio-session';
 
 import {
   defaultPresets,
@@ -135,6 +136,12 @@ export default createPlugin({
         );
       }) as EventListener;
       document.addEventListener('peard:audio-can-play', this.onAudioReady);
+      // Activation en cours de lecture : connecter immédiatement les filtres
+      // à l'AudioContext déjà créé par le lecteur.
+      const session = getAudioSession();
+      if (session) {
+        this.onAudioReady(new CustomEvent('peard:audio-can-play', { detail: session }));
+      }
     },
     onConfigChange(config: EqualizerPluginConfig) {
       this.settings = config;

@@ -1,3 +1,5 @@
+import { getAudioSession } from '@/providers/audio-session';
+
 import type { SkipSilencesPluginConfig } from './index';
 import type { RendererContext } from '@/types/contexts';
 
@@ -107,6 +109,10 @@ export const onRendererLoad = async ({
   document.addEventListener('peard:audio-can-play', audioCanPlayListener, {
     passive: true,
   });
+  const session = getAudioSession();
+  if (session) {
+    audioCanPlayListener(new CustomEvent('peard:audio-can-play', { detail: session }));
+  }
 };
 
 export const onConfigChange = (newConfig: SkipSilencesPluginConfig) => {

@@ -26,7 +26,7 @@ export function buildAppearanceStyles(
       justify-content: ${hide ? 'flex-start' : 'space-between'} !important;
     }`);
   }
-  if (options.swapLikeButtonsOrder) {
+  if (options.swapLikeButtonsOrder && options.likeButtons !== 'hide') {
     rules.push('#like-button-renderer { display: inline-flex; flex-direction: row-reverse; }');
   }
   return rules.join('\n');
@@ -35,7 +35,7 @@ export function buildAppearanceStyles(
 export function applyAppearanceOptions(doc: Document, options: AppearanceOptions): void {
   let selector = 'ytmusic-guide-entry-renderer:last-child';
   const symbol = doc.querySelector<SVGElement>(
-    'iron-iconset-svg[name="yt-sys-icons"] #\\u0079\\u006f\\u0075\\u0074\\u0075\\u0062\\u0065_music_monochrome',
+    'iron-iconset-svg[name="yt-sys-icons"] #youtube_music_monochrome',
   );
   const first = symbol?.firstElementChild;
   if (first?.tagName.toLowerCase() === 'path') {

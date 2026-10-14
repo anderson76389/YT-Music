@@ -152,6 +152,7 @@ export const mainMenuTemplate = async (
           label: t('main.menu.options.submenu.auto-update'),
           type: 'checkbox',
           checked: config.get('options.autoUpdates'),
+          id: 'ytmd-option:autoUpdates',
           enabled: !(process.platform === 'win32' && !!process.env.PORTABLE_EXECUTABLE_FILE),
           toolTip: process.platform === 'win32' && process.env.PORTABLE_EXECUTABLE_FILE
             ? 'Le portable se met à jour depuis les Releases ; la mise à jour automatique nécessite Windows Setup.'
@@ -275,6 +276,7 @@ export const mainMenuTemplate = async (
                   ),
                   type: 'radio',
                   checked: config.get('options.likeButtons') === 'hide',
+                  id: 'ytmd-radio:likeButtons:hide',
                   click() {
                     config.set('options.likeButtons', 'hide');
                   },
@@ -369,6 +371,7 @@ export const mainMenuTemplate = async (
           label: t('main.menu.options.submenu.single-instance-lock'),
           type: 'checkbox',
           checked: app.hasSingleInstanceLock(),
+          id: 'ytmd-option:singleInstanceLock',
           click(item: MenuItem) {
             if (app.hasSingleInstanceLock()) {
               app.releaseSingleInstanceLock();
@@ -383,6 +386,7 @@ export const mainMenuTemplate = async (
           label: t('main.menu.options.submenu.always-on-top'),
           type: 'checkbox',
           checked: config.get('options.alwaysOnTop'),
+          id: 'ytmd-option:alwaysOnTop',
           click(item: MenuItem) {
             toggleBooleanOption('options.alwaysOnTop', item);
             win.setAlwaysOnTop(config.get('options.alwaysOnTop'));
@@ -394,8 +398,13 @@ export const mainMenuTemplate = async (
                 label: t('main.menu.options.submenu.hide-menu.label'),
                 type: 'checkbox',
                 checked: config.get('options.hideMenu'),
+          id: 'ytmd-option:hideMenu',
                 click(item) {
                   const hidden = toggleBooleanOption('options.hideMenu', item);
+                  // Apply immediately to the SolidJS title bar, not only on restart.
+                  if (!win.webContents.isDestroyed()) {
+                    win.webContents.send('ytmd:set-menu-collapsed', hidden);
+                  }
                   if (hidden && !config.get('options.hideMenuWarned')) {
                     dialog.showMessageBox(win, {
                       type: 'info',
@@ -419,6 +428,7 @@ export const mainMenuTemplate = async (
                 label: t('main.menu.options.submenu.start-at-login'),
                 type: 'checkbox',
                 checked: config.get('options.startAtLogin'),
+          id: 'ytmd-option:startAtLogin',
                 click(item) {
                   toggleBooleanOption('options.startAtLogin', item);
                 },
@@ -538,6 +548,7 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.overrideUserAgent'),
+          id: 'ytmd-option:overrideUserAgent',
               toolTip: 'Nécessite un redémarrage de YT Music pour modifier les requêtes du navigateur.',
               click(item: MenuItem) {
                 toggleBooleanOption('options.overrideUserAgent', item);
@@ -549,6 +560,7 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.disableHardwareAcceleration'),
+          id: 'ytmd-option:disableHardwareAcceleration',
               toolTip: 'Nécessite un redémarrage de YT Music (Electron).',
               click(item: MenuItem) {
                 toggleBooleanOption('options.disableHardwareAcceleration', item);
@@ -560,6 +572,7 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.restartOnConfigChanges'),
+          id: 'ytmd-option:restartOnConfigChanges',
               click(item: MenuItem) {
                 toggleBooleanOption('options.restartOnConfigChanges', item);
               },
@@ -570,6 +583,7 @@ export const mainMenuTemplate = async (
               ),
               type: 'checkbox',
               checked: config.get('options.autoResetAppCache'),
+          id: 'ytmd-option:autoResetAppCache',
               click(item: MenuItem) {
                 toggleBooleanOption('options.autoResetAppCache', item);
               },

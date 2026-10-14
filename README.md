@@ -38,7 +38,7 @@
 
 **YT Music** est un projet de bureau autonome maintenu dans **[ce dépôt GitHub](https://github.com/anderson76389/YT-Music)**. Il reprend et adapte du code open source de l'écosystème YouTube Music ; il n'a besoin d'aucun dépôt Pear Desktop pour être compilé à partir des sources enregistrées ici.
 
-L'objectif est de retrouver l'expérience du service musical dans une véritable application de bureau, avec **34 plugins conservés : thèmes, transparence, mode ambiant, paroles, audio et contrôles du lecteur**.
+L'objectif est de retrouver l'expérience du service musical dans une véritable application de bureau, avec **32 plugins conservés : thèmes, transparence, mode ambiant, paroles, audio et contrôles du lecteur**.
 
 Ce dépôt héberge les **fichiers sources** de cette édition. Il ne représente pas un client officiel de Google ou de YouTube et ne fournit pas de catalogue musical indépendant : la lecture et certaines fonctionnalités dépendent du service YouTube Music.
 
@@ -77,7 +77,7 @@ Les modules ci-dessous sont **présents dans le code source**. Leur disponibilit
 
 ## 🧹 Nettoyage de la version 3.12.1
 
-Huit plugins ont été **supprimés des sources**, ainsi que leurs ressources : adaptateur de proxy d’authentification, Discord Rich Presence, Horloge, Lumia Stream, Music Together, Raccourcis & MPRIS, Scrobbler et Serveur API. Les autres **34 plugins sont conservés**.
+Dix plugins ont été **supprimés des sources**, ainsi que leurs ressources : adaptateur de proxy d’authentification, Discord Rich Presence, Horloge, Lumia Stream, Music Together, Raccourcis & MPRIS, Scrobbler, Serveur API, Amuse et Amélioration des performances. Les autres **32 plugins sont conservés**.
 
 Les mentions « Beta/Bêta » ont été retirées des intitulés des plugins conservés, mais cela ne signifie pas que leurs fonctions ont toutes été certifiées en conditions réelles.
 
@@ -124,7 +124,6 @@ La case **Mise à jour automatique** sert à proposer une nouvelle version au d�
 
 **Important :** si tu utilises une ancienne Build 51/62 ou une version portable, il faut installer une fois la nouvelle version Setup pour activer ce mécanisme. La version portable est conservée, mais son propre exécutable ne peut pas être remplacé pendant qu'il est ouvert : son bouton de mise à jour ouvre les Releases.
 
-Si tu constates qu'un mode visuel ne réagit pas, utilise **Plugins → Diagnostiquer les modes ambiant / transparent**, puis copie le résultat. Ce diagnostic distingue une option décochée, un élément de page absent et un CSS non chargé ; il facilite une correction sur l'interface réellement affichée par YouTube Music.
 
 ### Option 2 — Lancer depuis le code source
 

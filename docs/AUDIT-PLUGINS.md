@@ -1,8 +1,8 @@
 # Audit des plugins YT Music — 14 octobre 2026
 
-**Périmètre :** les 33 extensions hors **Anti-Pause & Purge Totale**. Le plugin Anti-Pause et ses fichiers n'ont pas été modifiés dans cet audit.
+**Périmètre :** les 31 extensions hors **Anti-Pause & Purge Totale**. Le plugin Anti-Pause et ses fichiers n'ont pas été modifiés dans cet audit.
 
-**Niveaux de preuve :** le script `tools/audit-plugin-sources.mjs` contrôle la présence des **34 points d'entrée** (Anti-Pause compris) et des 8 suppressions précédentes. Le workflow Windows exécute aussi lint, TypeScript, tests unitaires et compilation Electron ; il démarre le vrai portable sur une page de contrôle locale, sans connexion au site de musique. Ces contrôles ne certifient pas chaque fonction ou service externe.
+**Niveaux de preuve :** le script `tools/audit-plugin-sources.mjs` contrôle la présence des **32 points d'entrée** (Anti-Pause compris) et des 10 suppressions (dont Amuse et Amélioration des performances). Le workflow Windows exécute aussi lint, TypeScript, tests unitaires et compilation Electron ; il démarre le vrai portable sur une page de contrôle locale, sans connexion au site de musique. Ces contrôles ne certifient pas chaque fonction ou service externe.
 
 ## Problèmes corrigés par cet audit
 
@@ -30,7 +30,6 @@ Les points d'entrée sont présents et intégrés au build ; la colonne « test 
 | Album Actions | Cycle DOM, rendu des boutons ; sensible à la structure de la page | Non vérifié |
 | Couleur de l'album | Activation en cours de lecture corrigée lors de l'audit visuel précédent | Non vérifié |
 | Mode ambiant | Moteur de Pear Desktop adapté lors de l'audit précédent | Non vérifié |
-| Amuse | Nécessite son intégration externe | Non vérifié |
 | Compresseur audio | Reprise WebAudio corrigée ici | Non vérifié |
 | Flou de navigation | Feuille CSS et injection Electron revues | Non vérifié |
 | Sélecteur de sous-titres | Nettoyage du bouton et actualisation des options corrigés ici | Non vérifié |
@@ -44,7 +43,6 @@ Les points d'entrée sont présents et intégrés au build ; la colonne « test 
 | Menu intégré | Dispatch, sous-menus et réglages corrigés dans les versions précédentes | Non vérifié |
 | Navigation | Rendu des boutons avec destruction de la racine Solid | Non vérifié |
 | Notifications | Dépend des notifications Windows et de leurs autorisations | Non vérifié |
-| Amélioration des performances | Redémarrage nécessaire ; optimisations nouvelles précédemment annulées à la demande | Non vérifié |
 | Picture-in-Picture | Dépend de l'API PiP et de la fenêtre native ; redémarrage nécessaire | Non vérifié |
 | Vitesse de lecture | Nettoyage et remise à 1× corrigés ici | Non vérifié |
 | Volume précis | Hooks audio et raccourcis, redémarrage nécessaire | Non vérifié |

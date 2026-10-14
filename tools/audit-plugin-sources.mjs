@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Audit structurel reproductible des 34 extensions YT Music conservées.
+ * Audit structurel reproductible des 32 extensions YT Music conservées.
  * Cette vérification garantit l'inventaire, les entrées et leur compilation,
  * pas le fonctionnement des services externes ou du DOM Google en direct.
  */
@@ -10,11 +10,11 @@ import { join, resolve } from 'node:path';
 
 const root = resolve('src/plugins');
 const expected = [
-  'album-actions', 'album-color-theme', 'ambient-mode', 'amuse',
+  'album-actions', 'album-color-theme', 'ambient-mode',
   'anti-pause', 'audio-compressor', 'blur-nav-bar', 'captions-selector',
   'crossfade', 'custom-output-device', 'disable-autoplay', 'do-not-track',
   'downloader', 'equalizer', 'exponential-volume', 'in-app-menu',
-  'navigation', 'notifications', 'performance-improvement',
+  'navigation', 'notifications',
   'picture-in-picture', 'playback-speed', 'precise-volume',
   'quality-changer', 'skip-disliked-songs', 'skip-silences',
   'sponsorblock', 'synced-lyrics', 'taskbar-mediacontrol', 'touchbar',
@@ -22,6 +22,7 @@ const expected = [
   'video-toggle', 'visualizer',
 ].sort();
 const removed = [
+  'amuse', 'performance-improvement',
   'auth-proxy-adapter', 'discord', 'clock', 'lumiastream',
   'music-together', 'shortcuts', 'scrobbler', 'api-server',
 ];
@@ -54,4 +55,4 @@ for (const id of actual) {
     `Nom de plugin absent : ${id}`);
   console.log(`OK ${id}`);
 }
-console.log(`Audit structurel terminé : ${actual.length}/34 plugins présents.`);
+console.log(`Audit structurel terminé : ${actual.length}/32 plugins présents.`);

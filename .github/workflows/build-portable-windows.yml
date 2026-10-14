@@ -118,7 +118,7 @@ jobs:
           }
           $report = Get-Content -LiteralPath $marker -Raw | ConvertFrom-Json
           $report | ConvertTo-Json | Write-Host
-          if ($report.bridgeReady -ne $true -or $report.portable -ne $true -or $report.menuClicksPass -ne $true -or $report.settingsPass -ne $true) {
+          if ($report.bridgeReady -ne $true -or $report.portable -ne $true -or $report.menuClicksPass -ne $true -or $report.settingsPass -ne $true -or $report.trackerNetworkPass -ne $true) {
             $trace = "$marker.trace"
             if (Test-Path -LiteralPath $trace) {
               Write-Host 'Trace de demarrage :'
@@ -127,7 +127,7 @@ jobs:
             throw "Echec du lancement portable, de l'activation d'un plugin ou des commandes Parametres."
           }
           Remove-Item Env:\YTMD_SMOKE_RESULT
-          Write-Host 'Portable : demarrage, plugin et 4 options plus selection radio dans Parametres OK.'
+          Write-Host 'Portable : demarrage, plugins, Parametres et requete de suivi locale bloquee par Ghostery OK.'
 
       - name: Generer le manifeste de mise a jour SHA512
         shell: pwsh

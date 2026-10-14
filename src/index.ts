@@ -39,6 +39,7 @@ import {
 import { refreshMenu, setApplicationMenu } from '@/menu';
 import musicPlayerCss from '@/music-player.css?inline';
 import { injectCSS, injectCSSAsFile } from '@/plugins/utils/main';
+import { verifyTrackerNetworkBlocking } from '@/plugins/do-not-track/smoke';
 import { restart, setupAppControls } from '@/providers/app-controls';
 import { scheduleUpdateCheck } from '@/providers/app-update';
 import {
@@ -883,13 +884,29 @@ async function createMainWindow() {
         settingsPass: boolean;
         reason?: string;
       }) => {
-        traceStartup('bridge-and-menu', JSON.stringify(result));
-        fs.writeFileSync(smokeMarker, JSON.stringify({
-          ...result,
-          portable: Boolean(process.env.PORTABLE_EXECUTABLE_FILE),
-          windowCreated: true,
-        }));
-        app.exit(result.bridgeReady && result.menuClicksPass && result.settingsPass ? 0 : 2);
+        // The smoke test also proves that Ghostery intercepts an actual
+        // local HTTP request, not just that a filter object was instantiated.
+        void verifyTrackerNetworkBlocking(win).then((trackerNetworkPass) => {
+          const report = { ...result, trackerNetworkPass };
+          traceStartup('bridge-menu-tracker', JSON.stringify(report));
+          fs.writeFileSync(smokeMarker, JSON.stringify({
+            ...report,
+            portable: Boolean(process.env.PORTABLE_EXECUTABLE_FILE),
+            windowCreated: true,
+          }));
+          app.exit(report.bridgeReady && report.menuClicksPass &&
+            report.settingsPass && report.trackerNetworkPass ? 0 : 2);
+        }).catch((error: unknown) => {
+          traceStartup('tracker-network-failed', String(error));
+          fs.writeFileSync(smokeMarker, JSON.stringify({
+            ...result,
+            trackerNetworkPass: false,
+            error: String(error),
+            portable: Boolean(process.env.PORTABLE_EXECUTABLE_FILE),
+            windowCreated: true,
+          }));
+          app.exit(3);
+        });
       }).catch((error: unknown) => {
         fs.writeFileSync(smokeMarker, JSON.stringify({ bridgeReady: false, error: String(error) }));
         app.exit(3);

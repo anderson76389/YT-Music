@@ -7,7 +7,7 @@ import { app, type BrowserWindow } from 'electron';
 import { createPlugin } from '@/utils';
 
 import { processAdPlayback, restoreAdPlayback, type AdPlaybackSnapshot } from './ad-skip';
-import { dismissIdlePrompt, hasRelevantAntiPauseMutation, startIdleHeartbeat } from './runtime';
+import { dismissIdlePrompt, startIdleHeartbeat } from './runtime';
 
 type VideoBinding = {
   video: HTMLVideoElement;
@@ -228,9 +228,7 @@ export default createPlugin<
         this.skipAdIfPresent();
       };
 
-      this.observer = new MutationObserver((changes) => {
-        if (hasRelevantAntiPauseMutation(changes)) refresh();
-      });
+      this.observer = new MutationObserver(refresh);
       this.observer.observe(document.documentElement, {
         childList: true,
         subtree: true,

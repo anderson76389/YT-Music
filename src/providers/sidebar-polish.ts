@@ -26,30 +26,6 @@ export function preferredSidebarLabel(pathname: string): string | null {
 
 const GUIDE_SELECTOR =
   '#guide ytmusic-guide-entry-renderer, #guide-wrapper ytmusic-guide-entry-renderer, ytmusic-guide-renderer ytmusic-guide-entry-renderer';
-const GUIDE_ROOT_SELECTOR = '#guide, #guide-wrapper, ytmusic-guide-renderer';
-
-/** N'inspecter la barre latérale que si la mutation peut la concerner. */
-function isGuideNode(node: Node, checkAncestors: boolean): boolean {
-  if (node.nodeType !== 1) return false;
-  const element = node as Element;
-  return element.matches(GUIDE_ROOT_SELECTOR) ||
-    (checkAncestors
-      ? element.closest(GUIDE_ROOT_SELECTOR) !== null
-      : element.querySelector(GUIDE_ROOT_SELECTOR) !== null);
-}
-
-export function hasSidebarChange(changes: readonly MutationRecord[]): boolean {
-  for (const change of changes) {
-    if (isGuideNode(change.target, true)) return true;
-    for (const node of change.addedNodes) {
-      if (isGuideNode(node, false)) return true;
-    }
-    for (const node of change.removedNodes) {
-      if (isGuideNode(node, false)) return true;
-    }
-  }
-  return false;
-}
 
 export function polishSidebar(doc: Document, pathname: string): void {
   const entries = Array.from(doc.querySelectorAll<HTMLElement>(GUIDE_SELECTOR));
@@ -60,7 +36,13 @@ export function polishSidebar(doc: Document, pathname: string): void {
     ),
   );
 
-
+  entries.forEach((entry, index) => {
+    entry.toggleAttribute(
+      'data-ytmd-subscribe-hidden',
+      isSubscribeGuideItem(labels[index]),
+    );
+    entry.removeAttribute('data-ytmd-active-nav');
+  });
 
   const routeLabel = preferredSidebarLabel(pathname);
   let activeIndex = routeLabel
@@ -81,47 +63,32 @@ export function polishSidebar(doc: Document, pathname: string): void {
     }
   }
 
-  // Éviter les écritures DOM et les recalculs CSS si l'état n'a pas changé.
-  entries.forEach((entry, index) => {
-    const hidden = isSubscribeGuideItem(labels[index]);
-    if (entry.hasAttribute('data-ytmd-subscribe-hidden') !== hidden) {
-      entry.toggleAttribute('data-ytmd-subscribe-hidden', hidden);
-    }
-    const selected = index === activeIndex;
-    if (entry.hasAttribute('data-ytmd-active-nav') !== selected) {
-      entry.toggleAttribute('data-ytmd-active-nav', selected);
-    }
-  });
+  if (activeIndex >= 0) {
+    entries[activeIndex].setAttribute('data-ytmd-active-nav', '');
+  }
 }
 
 export function setupSidebarPolish(doc: Document = document): () => void {
   let queued = false;
-  let disposed = false;
-  let frame: number | undefined;
   const refresh = () => {
-    if (queued || disposed) return;
+    if (queued) return;
     queued = true;
-    frame = window.requestAnimationFrame(() => {
-      frame = undefined;
+    requestAnimationFrame(() => {
       queued = false;
-      if (!disposed) polishSidebar(doc, window.location.pathname);
+      polishSidebar(doc, window.location.pathname);
     });
   };
 
   refresh();
-  // Les mutations de listes de titres et des lecteurs ne nécessitent pas de
-  // rescanner la navigation. Une insertion/reconstruction du guide, oui.
-  const observer = new MutationObserver((changes) => {
-    if (hasSidebarChange(changes)) refresh();
-  });
+  // Les nouveaux éléments sont ajoutés par YouTube Music lors des navigations.
+  // Éviter d'observer les attributs pour ne pas boucler sur nos propres marqueurs.
+  const observer = new MutationObserver(refresh);
   observer.observe(doc.documentElement, { childList: true, subtree: true });
   const onRoute = () => refresh();
   window.addEventListener('popstate', onRoute);
   window.addEventListener('yt-navigate-finish', onRoute);
   return () => {
-    disposed = true;
     observer.disconnect();
-    if (frame !== undefined) window.cancelAnimationFrame(frame);
     window.removeEventListener('popstate', onRoute);
     window.removeEventListener('yt-navigate-finish', onRoute);
   };

@@ -13,7 +13,10 @@ import type { BrowserWindow } from 'electron';
  *
  * This does NOT claim that every tracker is present in downloaded lists.
  */
-export async function verifyTrackerNetworkBlocking(win: BrowserWindow): Promise<boolean> {
+export async function verifyTrackerNetworkBlocking(
+  win: BrowserWindow,
+  trace: (stage: string) => void = () => {},
+): Promise<boolean> {
   let received = 0;
   const server = createServer((_request, response) => {
     received++;
@@ -38,6 +41,7 @@ export async function verifyTrackerNetworkBlocking(win: BrowserWindow): Promise<
     throw new Error('Cannot determine the local tracker probe port');
   }
 
+  trace('server-listening');
   const target = `http://127.0.0.1:${address.port}/ytmd-tracker-probe`;
   const runFetch = async (stage: string) => {
     const targetUrl = `${target}?stage=${stage}`;
@@ -54,22 +58,32 @@ export async function verifyTrackerNetworkBlocking(win: BrowserWindow): Promise<
   try {
     const baseline = await runFetch('before');
     const deliveredBefore = received;
+    trace(`baseline=${baseline} received=${deliveredBefore}`);
     tracker = ElectronBlocker.parse('||127.0.0.1^$xmlhttprequest');
+    trace(`parsed-filter count=${tracker.getFilters().networkFilters.length}`);
     if (tracker.getFilters().networkFilters.length === 0) return false;
+    trace('enabling-filter');
     tracker.enableBlockingInSession(win.webContents.session);
+    trace('filter-enabled');
     if (!tracker.isBlockingEnabled(win.webContents.session)) return false;
     const blockedFetchSucceeded = await runFetch('blocked');
     const deliveredWhileBlocked = received;
+    trace(`blockedSuccess=${blockedFetchSucceeded} delivered=${deliveredWhileBlocked}`);
+    trace('disabling-filter');
     tracker.disableBlockingInSession(win.webContents.session);
+    trace('filter-disabled');
     const restored = await runFetch('after');
     const deliveredAfter = received;
+    trace(`restored=${restored} delivered=${deliveredAfter}`);
 
     return baseline && deliveredBefore === 1 &&
       !blockedFetchSucceeded && deliveredWhileBlocked === 1 &&
       restored && deliveredAfter === 2;
   } finally {
     if (tracker?.isBlockingEnabled(win.webContents.session)) {
+      trace('finally-disabling-filter');
       tracker.disableBlockingInSession(win.webContents.session);
+      trace('finally-filter-disabled');
     }
     server.closeAllConnections();
     await new Promise<void>((resolve) => { server.close(() => resolve()); });

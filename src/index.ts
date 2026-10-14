@@ -886,7 +886,10 @@ async function createMainWindow() {
       }) => {
         // The smoke test also proves that Ghostery intercepts an actual
         // local HTTP request, not just that a filter object was instantiated.
-        void verifyTrackerNetworkBlocking(win).then((trackerNetworkPass) => {
+        void verifyTrackerNetworkBlocking(
+          win,
+          (stage) => traceStartup('tracker-smoke', stage),
+        ).then((trackerNetworkPass) => {
           const report = { ...result, trackerNetworkPass };
           traceStartup('bridge-menu-tracker', JSON.stringify(report));
           fs.writeFileSync(smokeMarker, JSON.stringify({
@@ -897,7 +900,7 @@ async function createMainWindow() {
           app.exit(report.bridgeReady && report.menuClicksPass &&
             report.settingsPass && report.trackerNetworkPass ? 0 : 2);
         }).catch((error: unknown) => {
-          traceStartup('tracker-network-failed', String(error));
+          traceStartup('tracker-network-failed', error instanceof Error ? error.stack ?? error.message : String(error));
           fs.writeFileSync(smokeMarker, JSON.stringify({
             ...result,
             trackerNetworkPass: false,

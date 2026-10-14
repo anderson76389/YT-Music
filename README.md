@@ -1,7 +1,7 @@
 <a id="haut"></a>
 <div align="center">
 
-  <img src="assets/readme-banner.svg" alt="YT Music — une onde musicale violette, rose et cyan sur fond sombre" width="100%">
+  <img src="assets/yt-music-apercu.png" alt="Capture d’écran de YT Music en lecture avec l’interface personnalisée" width="100%">
 
   <br><br>
 

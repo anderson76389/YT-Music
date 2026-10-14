@@ -20,6 +20,7 @@ import {
 import { startingPages } from './providers/extracted-data';
 import { setupSongInfo } from './providers/song-info-front';
 import { setupSidebarPolish } from './providers/sidebar-polish';
+import { applyAppearanceOptions } from './providers/settings-appearance';
 
 import type { MusicPlayer } from '@/types/music-player';
 import type { MusicPlayerAppElement } from '@/types/music-player-app-element';
@@ -368,58 +369,10 @@ async function onApiLoaded() {
       ?.navigate(startingPages[startingPage]);
   }
 
-  // Remove upgrade button
-  if (window.mainConfig.get('options.removeUpgradeButton')) {
-    const itemsSelector = 'ytmusic-guide-section-renderer #items';
-    let selector = 'ytmusic-guide-entry-renderer:last-child';
+  // Mêmes réglages visuels que Pear Desktop, appliqués aussi lorsqu'ils
+  // changent dans Paramètres pendant la lecture.
+  updateSettingsAppearance();
 
-    const upgradeBtnIcon = document.querySelector<SVGGElement>(
-      'iron-iconset-svg[name="yt-sys-icons"] #\u0079\u006f\u0075\u0074\u0075\u0062\u0065_music_monochrome',
-    );
-    if (upgradeBtnIcon) {
-      const path = upgradeBtnIcon.firstChild as SVGPathElement;
-      const data = path.getAttribute('d')!.substring(0, 15);
-      selector = `ytmusic-guide-entry-renderer:has(> tp-yt-paper-item > yt-icon path[d^="${data}"])`;
-    }
-
-    const styles = document.createElement('style');
-    styles.textContent = `${itemsSelector} ${selector} { display: none; }`;
-
-    document.head.appendChild(styles);
-  }
-
-  // Hide / Force show like buttons
-  const likeButtonsOptions: string = window.mainConfig.get(
-    'options.likeButtons',
-  );
-  if (likeButtonsOptions) {
-    const style = document.createElement('style');
-    style.textContent = `
-      ytmusic-player-bar[is-mweb-player-bar-modernization-enabled] .middle-controls-buttons.ytmusic-player-bar, #like-button-renderer {
-        display: ${
-          likeButtonsOptions === 'hide' ? 'none' : 'inherit'
-        } !important;
-      }
-      ytmusic-player-bar[is-mweb-player-bar-modernization-enabled] .middle-controls.ytmusic-player-bar {
-        justify-content: ${
-          likeButtonsOptions === 'hide' ? 'flex-start' : 'space-between'
-        } !important;
-      }`;
-
-    document.head.appendChild(style);
-  }
-
-  // Swap like button order
-  if (window.mainConfig.get('options.swapLikeButtonsOrder')) {
-    const style = document.createElement('style');
-    style.textContent = `
-      #like-button-renderer {
-        display: inline-flex;
-        flex-direction: row-reverse;
-      }`;
-
-    document.head.appendChild(style);
-  }
 }
 
 const definePearTransElements = () => {
@@ -451,7 +404,17 @@ const preload = async () => {
   }
 };
 
+const updateSettingsAppearance = () => {
+  applyAppearanceOptions(document, {
+    removeUpgradeButton: window.mainConfig.get('options.removeUpgradeButton'),
+    likeButtons: window.mainConfig.get('options.likeButtons'),
+    swapLikeButtonsOrder: window.mainConfig.get('options.swapLikeButtonsOrder'),
+  });
+};
+
 const main = async () => {
+  window.ipcRenderer.on('ytmd:appearance-settings-changed', updateSettingsAppearance);
+  updateSettingsAppearance();
   await loadAllRendererPlugins();
   isPluginLoaded = true;
 

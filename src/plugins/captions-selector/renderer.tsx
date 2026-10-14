@@ -38,6 +38,7 @@ export default createRenderer<
     api: MusicPlayer | null;
     config: CaptionsSelectorConfig | null;
     videoChangeListener: () => void;
+    disposeButton?: () => void;
   },
   CaptionsSelectorConfig
 >({
@@ -71,19 +72,27 @@ export default createRenderer<
   },
   stop() {
     this.api?.unloadModule('captions');
-    document
-      .querySelector('video')
+    document.querySelector('video')
       ?.removeEventListener('peard:src-changed', this.videoChangeListener);
-    if (this.captionsSettingsButton) {
-      document
-        .querySelector('.right-controls-buttons')
-        ?.removeChild(this.captionsSettingsButton);
-    }
+    this.disposeButton?.();
+    this.disposeButton = undefined;
+    this.captionsSettingsButton?.remove();
+    this.captionsSettingsButton = undefined;
+    this.api = null;
+    this.captionTrackList = null;
   },
   onPlayerApiReady(playerApi, { ipc, setConfig }) {
     this.api = playerApi;
+    this.disposeButton?.();
+    this.disposeButton = undefined;
 
-    render(
+    const controls = document.querySelector<HTMLElement>('.right-controls-buttons');
+    if (!controls) {
+      console.warn('[YT Music] Sous-titres : commandes du lecteur non montées');
+      return;
+    }
+
+    this.disposeButton = render(
       () => (
         <Show when={!hidden()}>
           <CaptionsSettingButton
@@ -148,7 +157,7 @@ export default createRenderer<
           />
         </Show>
       ),
-      document.querySelector('.right-controls-buttons')!,
+      controls,
     );
 
     this.captionTrackList =
@@ -160,5 +169,7 @@ export default createRenderer<
   },
   onConfigChange(newConfig) {
     this.config = newConfig;
+    // Apply disable/autoload immediately, not only after changing songs.
+    if (this.api) this.videoChangeListener();
   },
 });

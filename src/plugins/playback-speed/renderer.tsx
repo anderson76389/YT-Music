@@ -26,8 +26,22 @@ const roundToTwo = (n: number) => Math.round(n * 1e2) / 1e2;
 
 const [speed, setSpeed] = createSignal(1);
 const sliderContainer = document.createElement('div');
+let popupObserver: MutationObserver | null = null;
+let disposeSlider: (() => void) | null = null;
+let activeVideo: HTMLVideoElement | null = null;
 
 export const onPlayerApiReady = () => {
+  // Do not stack Solid roots or DOM observers across activations.
+  popupObserver?.disconnect();
+  popupObserver = null;
+  disposeSlider?.();
+  disposeSlider = null;
+  sliderContainer.remove();
+  if (activeVideo) {
+    activeVideo.removeEventListener('ratechange', forcePlaybackRate);
+    activeVideo.removeEventListener('peard:src-changed', forcePlaybackRate);
+  }
+  activeVideo = null;
   const observePopupContainer = () => {
     const updatePlayBackSpeed = () => {
       const videoElement = document.querySelector<HTMLVideoElement>('video');
@@ -38,7 +52,7 @@ export const onPlayerApiReady = () => {
       setSpeed(speed());
     };
 
-    render(
+    disposeSlider = render(
       () => (
         <PlaybackSpeedSlider
           onImmediateValueChanged={(e) => {
@@ -81,7 +95,7 @@ export const onPlayerApiReady = () => {
       sliderContainer,
     );
 
-    const observer = new MutationObserver(() => {
+    popupObserver = new MutationObserver(() => {
       const menu = getSongMenu();
 
       if (
@@ -96,7 +110,7 @@ export const onPlayerApiReady = () => {
 
     const popupContainer = document.querySelector('ytmusic-popup-container');
     if (popupContainer) {
-      observer.observe(popupContainer, {
+      popupObserver.observe(popupContainer, {
         childList: true,
         subtree: true,
       });
@@ -106,6 +120,7 @@ export const onPlayerApiReady = () => {
   const observeVideo = () => {
     const video = document.querySelector<HTMLVideoElement>('video');
     if (video) {
+      activeVideo = video;
       video.addEventListener('ratechange', forcePlaybackRate);
       video.addEventListener('peard:src-changed', forcePlaybackRate);
     }
@@ -116,10 +131,17 @@ export const onPlayerApiReady = () => {
 };
 
 export const onUnload = () => {
-  const video = document.querySelector<HTMLVideoElement>('video');
-  if (video) {
-    video.removeEventListener('ratechange', forcePlaybackRate);
-    video.removeEventListener('peard:src-changed', forcePlaybackRate);
+  popupObserver?.disconnect();
+  popupObserver = null;
+  disposeSlider?.();
+  disposeSlider = null;
+  sliderContainer.remove();
+  if (activeVideo) {
+    activeVideo.removeEventListener('ratechange', forcePlaybackRate);
+    activeVideo.removeEventListener('peard:src-changed', forcePlaybackRate);
+    // Disabling the plugin should restore the ordinary playback rate.
+    activeVideo.playbackRate = 1;
   }
-  getSongMenu()?.removeChild(sliderContainer);
+  activeVideo = null;
+  setSpeed(1);
 };

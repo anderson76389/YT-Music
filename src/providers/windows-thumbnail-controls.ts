@@ -2,7 +2,7 @@ import NextIcon from '@assets/media-icons-white/next.png?asset&asarUnpack';
 import PauseIcon from '@assets/media-icons-white/pause.png?asset&asarUnpack';
 import PlayIcon from '@assets/media-icons-white/play.png?asset&asarUnpack';
 import PreviousIcon from '@assets/media-icons-white/previous.png?asset&asarUnpack';
-import { nativeImage, type BrowserWindow } from 'electron';
+import { ipcMain, nativeImage, type BrowserWindow } from 'electron';
 
 import { getSongControls } from '@/providers/song-controls';
 import { registerCallback, SongInfoEvent } from '@/providers/song-info';
@@ -29,7 +29,7 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
 
   const { previous, playPause, next } = getSongControls(win);
   let isPlaying = false;
-  let hasPlaybackState = false;
+  let rendererStateAvailable = false;
   let appliedState: boolean | undefined;
   let registered = false;
   let retries = 0;
@@ -95,10 +95,9 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
   const onPlayPauseClick = () => {
     if (win.isDestroyed()) return;
     playPause();
-    if (hasPlaybackState) {
-      isPlaying = !isPlaying;
-      applyButtons();
-    }
+    // Instantané même avant les métadonnées, puis confirmé par le média.
+    isPlaying = !isPlaying;
+    applyButtons();
   };
 
   const onWindowShown = () => {
@@ -106,6 +105,11 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
     cancelRetry();
     // Reapply even if Windows recreated the preview after minimizing/hiding.
     applyButtons(true);
+    // Le renderer peut s'être initialisé avant l'inscription IPC du processus
+    // principal : redemander l'état réel à chaque affichage de la fenêtre.
+    if (!win.webContents.isDestroyed()) {
+      win.webContents.send('ytmd:request-playback-state');
+    }
   };
 
   win.on('show', onWindowShown);
@@ -113,13 +117,31 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
   win.on('focus', () => {
     if (!registered) applyButtons();
   });
-  win.on('closed', cancelRetry);
+  const onRendererPlaybackState = (
+    event: Electron.IpcMainEvent,
+    playing: unknown,
+  ) => {
+    if (win.isDestroyed() || event.sender !== win.webContents ||
+        typeof playing !== 'boolean') return;
+    rendererStateAvailable = true;
+    isPlaying = playing;
+    applyButtons();
+  };
+  ipcMain.on('ytmd:taskbar-playback-state', onRendererPlaybackState);
 
+  win.on('closed', () => {
+    cancelRetry();
+    ipcMain.removeListener('ytmd:taskbar-playback-state', onRendererPlaybackState);
+  });
+
+  // Repli existant si la page ne peut pas encore envoyer les événements
+  // play/pause. Ignorer VideoSrcChanged : son champ isPaused est initialisé
+  // de façon approximative lors du chargement des métadonnées.
   registerCallback((songInfo, event) => {
-    if (win.isDestroyed() || event === SongInfoEvent.TimeChanged) return;
-    if (typeof songInfo.isPaused !== 'boolean') return;
+    if (win.isDestroyed() || rendererStateAvailable ||
+        event !== SongInfoEvent.PlayOrPaused ||
+        typeof songInfo.isPaused !== 'boolean') return;
 
-    hasPlaybackState = true;
     isPlaying = !songInfo.isPaused;
     applyButtons();
   });

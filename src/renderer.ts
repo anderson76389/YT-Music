@@ -315,6 +315,21 @@ async function onApiLoaded() {
   setupSidebarPolish();
 
   const video = document.querySelector('video')!;
+
+  // L'aperçu de Windows a besoin de l'état réel du lecteur, y compris avant
+  // le premier chargement des métadonnées. Simple observation du média :
+  // aucune modification de playVideo/pauseVideo ni des plugins.
+  if (window.electronIs.windows()) {
+    const reportThumbnailPlayback = () => {
+      window.ipcRenderer.send('ytmd:taskbar-playback-state', !video.paused && !video.ended);
+    };
+    for (const eventName of ['play', 'playing', 'pause', 'ended', 'loadedmetadata', 'emptied']) {
+      video.addEventListener(eventName, reportThumbnailPlayback, { passive: true });
+    }
+    window.ipcRenderer.on('ytmd:request-playback-state', reportThumbnailPlayback);
+    reportThumbnailPlayback();
+  }
+
   const audioContext = new AudioContext();
   const audioSource = audioContext.createMediaElementSource(video);
   audioSource.connect(audioContext.destination);

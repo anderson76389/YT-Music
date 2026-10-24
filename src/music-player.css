@@ -165,3 +165,10 @@ ytmusic-app-layout#layout #page-manager::-webkit-scrollbar {
   width: 0 !important;
   display: none !important;
 }
+
+/* Masquer seulement les trois points de la barre de navigation, lorsque
+   « Se connecter » est affiché. Conserver l'accès au compte une fois connecté
+   et tous les menus ⋮ propres aux morceaux, albums et playlists. */
+ytmusic-nav-bar:has(.sign-in-link.ytmusic-nav-bar) ytmusic-settings-button {
+  display: none !important;
+}

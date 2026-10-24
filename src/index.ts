@@ -47,6 +47,7 @@ import {
   setupProtocolHandler,
 } from '@/providers/protocol-handler';
 import { setupSongInfo } from '@/providers/song-info';
+import { setupWindowsThumbnailControls } from '@/providers/windows-thumbnail-controls';
 import { setUpTray } from '@/tray';
 import { LoggerPrefix } from '@/utils';
 import { isTesting } from '@/utils/testing';
@@ -968,6 +969,7 @@ app.once('browser-window-created', (_event, win) => {
   }
 
   setupSongInfo(win);
+  setupWindowsThumbnailControls(win);
   setupAppControls();
 
   win.webContents.on(

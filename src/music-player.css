@@ -141,3 +141,27 @@ ytmusic-app-layout#layout[player-visible]:not([player-page-open]):not([player-ui
   bottom: 0 !important;
   top: auto !important;
 }
+
+/* Windows : masquer uniquement la barre de défilement principale, tout à
+   droite de la fenêtre. La file « À suivre » conserve sa propre barre.
+   Aucun overflow:hidden : molette, tactile et défilement restent actifs. */
+html,
+body,
+ytmusic-app-layout#layout,
+ytmusic-app-layout#layout #main-panel,
+ytmusic-app-layout#layout #content,
+ytmusic-app-layout#layout #content-wrapper,
+ytmusic-app-layout#layout #page-manager {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+ytmusic-app-layout#layout::-webkit-scrollbar,
+ytmusic-app-layout#layout #main-panel::-webkit-scrollbar,
+ytmusic-app-layout#layout #content::-webkit-scrollbar,
+ytmusic-app-layout#layout #content-wrapper::-webkit-scrollbar,
+ytmusic-app-layout#layout #page-manager::-webkit-scrollbar {
+  width: 0 !important;
+  display: none !important;
+}

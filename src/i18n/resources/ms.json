@@ -566,16 +566,6 @@
       "description": "Menambah sokongan Lumia Stream",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Menambahkan sokongan lirik untuk kebanyakan lagu",
-      "menu": {
-        "romanized-lyrics": "Lirik Romanized"
-      },
-      "name": "Lirik Genius",
-      "renderer": {
-        "fetched-lyrics": "Lirik yang diambil untuk Genius"
-      }
-    },
     "music-together": {
       "description": "Kongsi senarai main dengan orang lain. Apabila hos memainkan lagu, semua orang akan mendengar lagu yang sama",
       "dialog": {
@@ -633,20 +623,6 @@
         "lastfm": {
           "api-key": "kunci API Last.fm",
           "api-secret": "rahasia API Last.fm"
-        }
-      }
-    },
-    "synced-lyrics": {
-      "errors": {
-        "not-found": "⚠️ Tak ada liriks untuk lagu ini."
-      },
-      "menu": {
-        "show-lyrics-even-if-inexact": {
-          "label": "Tunjukkan lirik walaupun tidak tepat",
-          "tooltip": "Jika lagu tidak ditemui, plugin cuba lagi dengan pertanyaan carian yang berbeza. \nHasil dari percubaan kedua mungkin tidak tepat."
-        },
-        "show-time-codes": {
-          "tooltip": "Tunjukkan kod masa di sebelah lirik"
         }
       }
     },

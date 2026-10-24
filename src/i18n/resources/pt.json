@@ -597,16 +597,6 @@
       "description": "Adicionar suporte a Lumia Stream",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Adiciona suporte a letras para a maioria das músicas",
-      "menu": {
-        "romanized-lyrics": "Letras romanizadas"
-      },
-      "name": "Letras Genius",
-      "renderer": {
-        "fetched-lyrics": "Letras encontradas no Genius"
-      }
-    },
     "music-together": {
       "description": "Partilhe uma lista de reprodução com terceiros. Sempre que o anfitrião tocar uma música, todos os outros ouvirão a mesma música",
       "dialog": {
@@ -827,93 +817,6 @@
     "sponsorblock": {
       "description": "Ignorar automaticamente partes que não são música, como a introdução e outras partes dos vídeos em que a música não está a ser reproduzida",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Disponibiliza letras de músicas sincronizadas, utilizando fornecedores como o LRClib",
-      "errors": {
-        "fetch": "⚠️\tOcorreu um erro ao obter a letrad da música.\n\tPor favor tente mais tarde.",
-        "not-found": "⚠️ Não foram encontradas letras para esta música."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Converter caracteres em mandarim",
-          "submenu": {
-            "disabled": {
-              "label": "Desativado",
-              "tooltip": "Desativar conversão de caracteres em mandarim"
-            },
-            "simplified-to-traditional": {
-              "label": "Simplificado para Tradicional",
-              "tooltip": "Converter Mandarim Simplificado para Mandarim Tradicional"
-            },
-            "traditional-to-simplified": {
-              "label": "Tradicional para Simplificado",
-              "tooltip": "Converter Mandarim Tradicional para Mandarim Simplificado"
-            }
-          },
-          "tooltip": "Converter caracteres em mandarim para Tradicional ou Simplificado"
-        },
-        "default-text-string": {
-          "label": "Carácter padrão entre letras",
-          "tooltip": "Escolha o carácter padrão a utilizar para o intervalo entre as letras"
-        },
-        "line-effect": {
-          "label": "Efeito da linha",
-          "submenu": {
-            "fancy": {
-              "label": "Elegante",
-              "tooltip": "Utilizar grandes efeitos semelhantes aos da aplicação (na linha atual)"
-            },
-            "focus": {
-              "label": "Foco",
-              "tooltip": "Definir apenas a linha atual como branca"
-            },
-            "offset": {
-              "label": "Deslocação",
-              "tooltip": "Deslocação à direita da linha atual"
-            },
-            "scale": {
-              "label": "Escala",
-              "tooltip": "Ajustar linha atual"
-            }
-          },
-          "tooltip": "Escolha o efeito para aplicar à linha atual"
-        },
-        "precise-timing": {
-          "label": "Sincronização perfeita da entre letra e música",
-          "tooltip": "Calcular, ao milissegundo, a exibição da linha seguinte (pode ter um pequeno impacto no desempenho)"
-        },
-        "preferred-provider": {
-          "label": "Serviço preferencial",
-          "none": {
-            "label": "Nenhum",
-            "tooltip": "Nenhum serviço preferencial"
-          },
-          "tooltip": "Escolha o serviço padrão a utilizar"
-        },
-        "romanization": {
-          "label": "Letras romanas",
-          "tooltip": "Se as letras estiverem num idioma diferente, tentar mostrar uma versão em latim"
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Mostrar letras, mesmo que imprecisas",
-          "tooltip": "Se a música não for encontrada, o plugin tenta novamente com uma consulta de pesquisa diferente.\nO resultado da segunda tentativa pode não ser exato."
-        },
-        "show-time-codes": {
-          "label": "Mostrar códigos temporais",
-          "tooltip": "Mostrar códigos temporais ao lado das letras"
-        }
-      },
-      "name": "Letras sincronizadas",
-      "refetch-btn": {
-        "fetching": "A obter...",
-        "normal": "Tentar nova obtenção"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - A letra da música pode não estar corretamente sincronizada devido a um erro de duração.",
-        "inexact": "⚠️ - A letra desta canção pode não ser exata",
-        "instrumental": "⚠️ - Esta é uma música instrumental"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Controlar reprodução a partir da barra de tarefas do Windows",

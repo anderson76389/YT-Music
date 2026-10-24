@@ -594,16 +594,6 @@
       "description": "Voegt ondersteuning voor Lumia Stream toe",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Voegt songtekstondersteuning toe voor de meeste nummers",
-      "menu": {
-        "romanized-lyrics": "Geromaniseerde Teksten"
-      },
-      "name": "Lyrics Genius",
-      "renderer": {
-        "fetched-lyrics": "Teksten opgehaald voor Genius"
-      }
-    },
     "music-together": {
       "description": "Deel een afspeellijst met anderen. Wanneer de host een nummer afspeelt, hoort iedereen hetzelfde nummer",
       "dialog": {
@@ -824,87 +814,6 @@
     "sponsorblock": {
       "description": "Slaat automatisch niet-muziekgedeelten over, zoals intro/outro of gedeelten van muziekvideo's waarin het nummer niet wordt afgespeeld",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Biedt gesynchroniseerde songteksten voor nummers, met behulp van providers zoals LRClib.",
-      "errors": {
-        "fetch": "⚠️\tEr is een fout opgetreden bij het ophalen van de songtekst.\n\tProbeer het later opnieuw.",
-        "not-found": "⚠️ Er is geen songtekst gevonden voor dit nummer."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "submenu": {
-            "simplified-to-traditional": {
-              "label": "Vereenvoudigd naar Traditioneel",
-              "tooltip": "Zet Vereenvoudigd Chinees om naar Traditioneel Chinees"
-            },
-            "traditional-to-simplified": {
-              "label": "Traditioneel naar Vereenvoudigd",
-              "tooltip": "Zet Traditioneel Chinees om naar Vereenvoudigd Chinees"
-            }
-          }
-        },
-        "default-text-string": {
-          "label": "Standaardteken tussen songteksten",
-          "tooltip": "Kies het standaardteken dat u wilt gebruiken voor de opening tussen de songteksten"
-        },
-        "line-effect": {
-          "label": "Lijneffect",
-          "submenu": {
-            "fancy": {
-              "label": "Luxe",
-              "tooltip": "Gebruik grote, app-achtige effecten op de huidige regel"
-            },
-            "focus": {
-              "label": "Focus",
-              "tooltip": "Maak alleen de huidige regel wit"
-            },
-            "offset": {
-              "label": "Offset",
-              "tooltip": "Offset aan de rechterkant van de huidige lijn"
-            },
-            "scale": {
-              "label": "Schaal",
-              "tooltip": "Schaal de huidige regel"
-            }
-          },
-          "tooltip": "Kies het effect dat u op de huidige regel wilt toepassen"
-        },
-        "precise-timing": {
-          "label": "Zorg ervoor dat de songteksten perfect gesynchroniseerd zijn",
-          "tooltip": "Bereken tot op de milliseconde de weergave van de volgende regel (kan een kleine impact hebben op de prestaties)"
-        },
-        "preferred-provider": {
-          "label": "Voorkeur van Provider",
-          "none": {
-            "label": "Geen",
-            "tooltip": "Geen provider beschikbaar"
-          },
-          "tooltip": "Kies de standaardprovider om te gebruiken"
-        },
-        "romanization": {
-          "label": "Romaniseer songtekst",
-          "tooltip": "Als de songtekst in een andere taal is, probeer dan een Latijnse versie weer te geven."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Toon songteksten, zelfs als ze onnauwkeurig zijn",
-          "tooltip": "Als het nummer niet wordt gevonden, probeert de plug-in het opnieuw met een andere zoekopdracht.\nHet resultaat van de tweede poging is mogelijk niet exact."
-        },
-        "show-time-codes": {
-          "label": "Toon tijdcodes",
-          "tooltip": "Toon de tijdcodes naast de songtekst"
-        }
-      },
-      "name": "Gesynchroniseerde songteksten",
-      "refetch-btn": {
-        "fetching": "Ophalen...",
-        "normal": "Songteksten opnieuw ophalen"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - De songteksten zijn mogelijk niet synchroon vanwege een niet-overeenkomende duur.",
-        "inexact": "⚠️ - De songtekst van dit nummer is mogelijk niet exact",
-        "instrumental": "⚠️ - Dit is een instrumentaal nummer"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Bedien het afspelen vanaf uw Windows-taakbalk",

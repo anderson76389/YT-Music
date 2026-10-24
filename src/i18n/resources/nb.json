@@ -403,16 +403,6 @@
       "description": "Legger til Lumia Stream-støtte",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Gir sangtekststøtte for de fleste spor",
-      "menu": {
-        "romanized-lyrics": "Romaniserte sangtekster"
-      },
-      "name": "Sangtekster fra Genius",
-      "renderer": {
-        "fetched-lyrics": "Henter sangtekster for Genius"
-      }
-    },
     "navigation": {
       "description": "Direkte integrering av neste/tilbake-navigasjonspilene i grensesnittet, som din favorittnettleser",
       "name": "Navigasjon"

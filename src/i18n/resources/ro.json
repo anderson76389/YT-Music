@@ -589,16 +589,6 @@
       "description": "Adaugă asistenta pentru Lumia Stream",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Adaugă versuri pentru majoritatea cântecelor",
-      "menu": {
-        "romanized-lyrics": "Versuri romantizate"
-      },
-      "name": "Lyrics Genius",
-      "renderer": {
-        "fetched-lyrics": "Versuri preluate de pe Genius"
-      }
-    },
     "music-together": {
       "description": "Împărtășește lista de redare cu alții. Când gazda va pune o piesă, toți ceilalți vor auzi aceeași melodie",
       "dialog": {
@@ -819,82 +809,6 @@
     "sponsorblock": {
       "description": "Treci automat peste părțile non-muzicale precum intro/outro sau părți din video-ul melodiei, când nu se aude melodia",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Furnizează versuri sincronizate melodiilor, folosind furnizori precum LRClib.",
-      "errors": {
-        "fetch": "⚠️ - A apărut o eroare în timpul încărcării versurilor. \nTe rog încearcă din nou mai târziu.",
-        "not-found": "⚠️ Nu au fost găsite versuri pentru această melodie."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "submenu": {
-            "disabled": {
-              "label": "Dezactivat"
-            }
-          }
-        },
-        "default-text-string": {
-          "label": "Caracter implicit între versuri",
-          "tooltip": "Alege caracterul implicit folosit pentru spațiul dintre versuri"
-        },
-        "line-effect": {
-          "label": "Efect de linie",
-          "submenu": {
-            "fancy": {
-              "label": "Elegant",
-              "tooltip": "Folosește efecte largi pe linia curentă"
-            },
-            "focus": {
-              "label": "Focalizare",
-              "tooltip": "Doar linia curentă este albă"
-            },
-            "offset": {
-              "label": "Deplasare",
-              "tooltip": "Deplasare la dreapta pentru linia curentă"
-            },
-            "scale": {
-              "label": "Mărime",
-              "tooltip": "Schimbă dimensiunea liniei curente"
-            }
-          },
-          "tooltip": "Alege efectul aplicat liniei curente"
-        },
-        "precise-timing": {
-          "label": "Sincronizează versurile perfect",
-          "tooltip": "Calculează afisarea următoarei linii până la milisecundă (poate afecta performanța)"
-        },
-        "preferred-provider": {
-          "label": "Furnizor preferat",
-          "none": {
-            "label": "Niciunul",
-            "tooltip": "Niciun furnizor preferat"
-          },
-          "tooltip": "Alegeți furnizorul preferat"
-        },
-        "romanization": {
-          "label": "Transcrie versurile în alfabet latin",
-          "tooltip": "Dacă versurile sunt într-o altă limbă, încearcă să afișezi o versiune în alfabet latin."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Afișează versurile chiar dacă sunt inexacte",
-          "tooltip": "Dacă melodia nu este găsită, plugin-ul încearcă din nou cu o căutare diferită.\nRezultatul acestei încercări poate să nu fie exact."
-        },
-        "show-time-codes": {
-          "label": "Afișează codurile de timp",
-          "tooltip": "Afișează codurile de timp lângă versuri"
-        }
-      },
-      "name": "Versuri Sincronizate",
-      "refetch-btn": {
-        "fetching": "Încărcare...",
-        "normal": "Reîncărcare versuri"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Versurile pot fi desincronizate din cauza unei nepotriviri de durație.",
-        "inexact": "⚠️ - Versurile pentru această melodie pot fi inexacte",
-        "instrumental": "⚠️ - Această melodie este instrumentală"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Controlează redarea din Bara de Activități Windows",

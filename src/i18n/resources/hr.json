@@ -585,16 +585,6 @@
       "description": "Dodaje podršku za Lumia Stream",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Dodaje podršku za tekstove pjesama za većinu pjesama",
-      "menu": {
-        "romanized-lyrics": "Romanizirani tekstovi pjesme"
-      },
-      "name": "Genius tekstovi",
-      "renderer": {
-        "fetched-lyrics": "Dobavljen tekst pjesme s Genius-a"
-      }
-    },
     "music-together": {
       "description": "Podijeli playlistu s drugima. Kada domaćin (host) pusti pjesmu, svi ostali će čuti istu pjesmu",
       "dialog": {
@@ -815,75 +805,6 @@
     "sponsorblock": {
       "description": "Automatski preskače dijelove pjesama koji nisu glazba poput uvoda/odjave ili dijelove spotova u kojima nema muzike",
       "name": "Bloker sponzora"
-    },
-    "synced-lyrics": {
-      "description": "Obezbjeđava sinkronizirane lirike pjesama, korištenjem dobavljača poput LRClib.",
-      "errors": {
-        "fetch": "⚠️\tDošlo je do greške prilikom dobavljanja stihova pjesme.\n\tMolimo vas da probate ponovno kasnije.",
-        "not-found": "⚠️ Tekst ove pjesme nije pronađen."
-      },
-      "menu": {
-        "default-text-string": {
-          "label": "Zadani karakteri između stihova pjesama",
-          "tooltip": "Odaberi zadane karaktere koji će biti korišteni za razmake između stihova pjesama"
-        },
-        "line-effect": {
-          "label": "Efekt crte",
-          "submenu": {
-            "fancy": {
-              "label": "Kitnjast",
-              "tooltip": "Koristi velike (kao iz aplikacije) efekte na trenutnu crtu"
-            },
-            "focus": {
-              "label": "Fokus",
-              "tooltip": "Pretvorite samo trenutnu crtu bijelu"
-            },
-            "offset": {
-              "label": "Izmak",
-              "tooltip": "Izmak na trenutnoj crti"
-            },
-            "scale": {
-              "label": "Razmjera",
-              "tooltip": "Promjeni razmjeru trenutne crte"
-            }
-          },
-          "tooltip": "Odaberi efekt koji će biti primijenjen na trenutnoj crti"
-        },
-        "precise-timing": {
-          "label": "Napravi da tekst pjesme bude izvrsno usklađen",
-          "tooltip": "Izračunaj do milisekunde prikaz sljedeće crteteksta (može malo utjecati na učinak)"
-        },
-        "preferred-provider": {
-          "label": "Željeni davatelj usluga",
-          "none": {
-            "label": "Nema / prazno",
-            "tooltip": "Nema željenog pružatelja usluga"
-          },
-          "tooltip": "Odaberite zadanog pružatelja usluga kojeg ćete koristiti"
-        },
-        "romanization": {
-          "label": "Romanizuj stihove pjesama",
-          "tooltip": "Ako je tekst pjesme na drugom jeziku, probajte ga prikazati na latinici."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Prikaži tekst pjesme čak i ako je netačan",
-          "tooltip": "Ako pjesma nije pronađena, produžetak će probati ponovno sa novim upitom za pretragu.\nRezultat iz drugog pokušaja možda neće biti tačan."
-        },
-        "show-time-codes": {
-          "label": "Prikaži vremenske oznake",
-          "tooltip": "Prikaži vremenske oznake pored teksta pjesme"
-        }
-      },
-      "name": "Sinkronizirani stihovi pjesama",
-      "refetch-btn": {
-        "fetching": "Dobavljanje...",
-        "normal": "Ponovo dobavite tekst pjesme"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Tekst pjesme možda nije usklađen zbog neuklapanja u daljini trajanja.",
-        "inexact": "⚠️ - Tekst ove pjesme možda nije točan",
-        "instrumental": "⚠️ - Ovo je instrumentalna glazba"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Upravljajte reprodukcijom iz Windows radne trake",

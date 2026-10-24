@@ -592,16 +592,6 @@
       "description": "Nabibigay suporta sa Lumia Stream",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Nagdaragdag ng suporta sa lyrics para sa karamihan ng kanta",
-      "menu": {
-        "romanized-lyrics": "Romanized na mga Lyrics"
-      },
-      "name": "Lyrics Genius",
-      "renderer": {
-        "fetched-lyrics": "Kinuha ang lyrics para sa Genius"
-      }
-    },
     "music-together": {
       "description": "Magbahagi ng playlist sa iba. Kapag nagpatugtog ang host ng isang kanta, maririnig ng lahat ang parehong kanta",
       "dialog": {
@@ -814,93 +804,6 @@
     },
     "sponsorblock": {
       "description": "Automatikong Laktawan ang di part ng kanta tulad ng intro/outro o part ng mga music video na ang kanta ay di nagple-play"
-    },
-    "synced-lyrics": {
-      "description": "Nagbibigay ng naka-sync na lyrics sa mga kanta, gamit ang mga provider tulad ng LRClib.",
-      "errors": {
-        "fetch": "⚠️\t Nagkaroon ng error habang kinukuha ang lyrics.\n\t Subukang muli mamaya.",
-        "not-found": "⚠️ Walang nakitang lyrics para sa kantang ito."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "I-convert ang karakter na Chinese",
-          "submenu": {
-            "disabled": {
-              "label": "Di-napagana",
-              "tooltip": "Huwag paganahin ang conversion ng karakter na Chinese"
-            },
-            "simplified-to-traditional": {
-              "label": "Pinasimple sa Tradisyonal",
-              "tooltip": "I-convert ang Pinasimpleng Chinese patungong Tradisyunal na Chinese"
-            },
-            "traditional-to-simplified": {
-              "label": "Tradisyonal patungong Pinasimple",
-              "tooltip": "I-convert ang Tradisyunal na Chinese sa Pinasimpleng Chinese"
-            }
-          },
-          "tooltip": "I-convert ang karakter na Chinese sa Tradisyonal o Pinasimple"
-        },
-        "default-text-string": {
-          "label": "Default na character sa pagitan ng lyrics",
-          "tooltip": "Pumili ng default na character na gagamitin sa pagitan ng lyrics"
-        },
-        "line-effect": {
-          "label": "Effect ng Linya",
-          "submenu": {
-            "fancy": {
-              "label": "Magarbo",
-              "tooltip": "Gumamit ng malaki, mala-app na effect sa kasalukuyang linya"
-            },
-            "focus": {
-              "label": "Focus",
-              "tooltip": "Gawing puti lamang ang kasalukuyang linya"
-            },
-            "offset": {
-              "label": "Offset",
-              "tooltip": "I-offset sa kanan ang kasalukuyang linya"
-            },
-            "scale": {
-              "label": "Scale",
-              "tooltip": "I-scale ang kasalukuyang linya"
-            }
-          },
-          "tooltip": "Pumili ng effect na ilalapat sa kasalukuyang linya"
-        },
-        "precise-timing": {
-          "label": "Gawing perpektong naka-sync ang lyrics",
-          "tooltip": "Kalkulahin sa millisecond ang pagpapakita ng susunod na linya (maaaring magkaroon ng maliit na epekto sa performance)"
-        },
-        "preferred-provider": {
-          "label": "Napiling Provider",
-          "none": {
-            "label": "Wala",
-            "tooltip": "Walang napiling provider"
-          },
-          "tooltip": "Pumili ng default na provider para gagamitin"
-        },
-        "romanization": {
-          "label": "I-romanize ang lyrics",
-          "tooltip": "Kung ang lyrics ay nasa ibang wika, subukang magpakita ng latin na bersyon."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Ipakita ang lyrics kahit di-eksakto",
-          "tooltip": "Kung hindi matagpuan ang kanta, susubukan muli ng plugin gamit ang ibang query sa paghahanap.\nAng resulta mula sa pangalawang pagsubok ay maaaring hindi eksakto."
-        },
-        "show-time-codes": {
-          "label": "Ipakita ang mga time code",
-          "tooltip": "Ipakita ang mga time code kasunod sa lyrics"
-        }
-      },
-      "name": "Pag-sync ng Lyrics",
-      "refetch-btn": {
-        "fetching": "Nag-fe-fetch...",
-        "normal": "I-fetch muli ang lyrics"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Maaaring hindi naka-sync ang lyrics dahil sa hindi pagkakatugma ng duration.",
-        "inexact": "⚠️ - Maaaring hindi eksakto ang lyrics para sa kantang ito",
-        "instrumental": "⚠️ - Ito ay isang instrumental na kanta"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Kontrolin ang pag-play mula sa iyong taskbar ng Windows"

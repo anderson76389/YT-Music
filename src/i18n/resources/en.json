@@ -472,16 +472,6 @@
       },
       "name": "In-App Menu"
     },
-    "lyrics-genius": {
-      "description": "Adds lyrics support for most songs",
-      "menu": {
-        "romanized-lyrics": "Romanized Lyrics"
-      },
-      "name": "Lyrics Genius",
-      "renderer": {
-        "fetched-lyrics": "Fetched lyrics for Genius"
-      }
-    },
     "navigation": {
       "description": "Next/Back navigation arrows directly integrated in the interface, like in your favorite browser",
       "name": "Navigation",
@@ -602,93 +592,6 @@
     "sponsorblock": {
       "description": "Automatically Skips non-music parts like intro/outro or parts of music videos where the song isn't playing",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Provides synced lyrics to songs, using providers like LRClib.",
-      "errors": {
-        "fetch": "⚠️\tAn error occurred while fetching the lyrics.\n\tPlease try again later.",
-        "not-found": "⚠️ No lyrics found for this song."
-      },
-      "menu": {
-        "preferred-provider": {
-          "label": "Preferred Provider",
-          "tooltip": "Choose the default provider to use",
-          "none": {
-            "label": "None",
-            "tooltip": "No preferred provider"
-          }
-        },
-        "default-text-string": {
-          "label": "Default character between lyrics",
-          "tooltip": "Choose the default character to use for the gap between lyrics"
-        },
-        "line-effect": {
-          "label": "Line effect",
-          "submenu": {
-            "fancy": {
-              "label": "Fancy",
-              "tooltip": "Use large, app-like effects on the current line"
-            },
-            "focus": {
-              "label": "Focus",
-              "tooltip": "Make only the current line white"
-            },
-            "offset": {
-              "label": "Offset",
-              "tooltip": "Offset on the right the current line"
-            },
-            "scale": {
-              "label": "Scale",
-              "tooltip": "Scale the current line"
-            }
-          },
-          "tooltip": "Choose the effect to apply to the current line"
-        },
-        "precise-timing": {
-          "label": "Make the lyrics perfectly synced",
-          "tooltip": "Calculate to the milisecond the display of the next line (can have a small impact on performance)"
-        },
-        "romanization": {
-          "label": "Romanize lyrics",
-          "tooltip": "If the lyrics are in a different language, try to display a latin version."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Show lyrics even if inexact",
-          "tooltip": "If the song is not found, the plugin tries again with a different search query.\nThe result from the second attempt may not be exact."
-        },
-        "show-time-codes": {
-          "label": "Show time codes",
-          "tooltip": "Show the time codes next to the lyrics"
-        },
-        "convert-chinese-character": {
-          "label": "Convert Chinese character",
-          "submenu": {
-            "disabled": {
-              "label": "Disabled",
-              "tooltip": "Disable Chinese character conversion"
-            },
-            "simplified-to-traditional": {
-              "label": "Simplified to Traditional",
-              "tooltip": "Convert Simplified Chinese to Traditional Chinese"
-            },
-            "traditional-to-simplified": {
-              "label": "Traditional to Simplified",
-              "tooltip": "Convert Traditional Chinese to Simplified Chinese"
-            }
-          },
-          "tooltip": "Convert Chinese character to Traditional or Simplified"
-        }
-      },
-      "name": "Synced Lyrics",
-      "refetch-btn": {
-        "fetching": "Fetching...",
-        "normal": "Refetch lyrics"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - The lyrics may be out of sync due to a duration mismatch.",
-        "inexact": "⚠️ - The lyrics for this song may not be exact",
-        "instrumental": "⚠️ - This is an instrumental song"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Control playback from your Windows taskbar",

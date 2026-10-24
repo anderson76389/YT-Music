@@ -602,12 +602,6 @@
       "description": "מוסיף תמיכת Lumia Stream",
       "name": "Lumia Stream [בטא]"
     },
-    "lyrics-genius": {
-      "description": "מוסיף תמיכת כתוביות לרוב השירים",
-      "renderer": {
-        "fetched-lyrics": "נאספו כתוביות לGenius"
-      }
-    },
     "music-together": {
       "description": "שתף רשימת השמעה עם אחרים. כאשר המארח מנגן שיר, כל השאר ישמעו את אותו שיר",
       "dialog": {

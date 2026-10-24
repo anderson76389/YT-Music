@@ -472,16 +472,6 @@
       },
       "name": "Menu intégré à l'application"
     },
-    "lyrics-genius": {
-      "description": "Ajoute la prise en charge des paroles pour la plupart des chansons",
-      "menu": {
-        "romanized-lyrics": "Paroles romanisées"
-      },
-      "name": "Paroles Genius",
-      "renderer": {
-        "fetched-lyrics": "Paroles récupérées pour Genius"
-      }
-    },
     "navigation": {
       "description": "Flèches de navigation Suivant/Retour directement intégrées dans l'interface, comme dans votre navigateur préféré",
       "name": "Navigation",
@@ -602,93 +592,6 @@
     "sponsorblock": {
       "description": "Saute automatiquement les parties non musicales comme l'intro/outro ou les parties de clips vidéo où la chanson n'est pas lue",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Ajoute des paroles synchronisées aux chansons, grâce à LRClib par exemple.",
-      "errors": {
-        "fetch": "⚠️\tUne erreur s'est produite en allant chercher les paroles.\n\tMerci de réessayer plus tard.",
-        "not-found": "⚠️ Aucune paroles trouvées pour ce titre."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Convertir les caractères Chinois",
-          "submenu": {
-            "disabled": {
-              "label": "Désactivé",
-              "tooltip": "Désactiver la conversion des caractères Chinois"
-            },
-            "simplified-to-traditional": {
-              "label": "Simplifié a Traditionnel",
-              "tooltip": "Convertir le Chinois Simplifié au Chinois Traditionnel"
-            },
-            "traditional-to-simplified": {
-              "label": "Traditionnel a Simplifié",
-              "tooltip": "Convertir le Chinois Traditionnel au Chinois Simplifié"
-            }
-          },
-          "tooltip": "Convertir les caractères Chinois en Traditionnel ou Simplifié"
-        },
-        "default-text-string": {
-          "label": "Caractère par défaut entre les paroles",
-          "tooltip": "Choisi le caractère par défaut à utiliser pour les blancs entre les paroles"
-        },
-        "line-effect": {
-          "label": "Effet de ligne",
-          "submenu": {
-            "fancy": {
-              "label": "Raffiné",
-              "tooltip": "Utilise de grands effets de type application sur la ligne actuelle"
-            },
-            "focus": {
-              "label": "Focus",
-              "tooltip": "Rend blanche seulement la ligne actuelle"
-            },
-            "offset": {
-              "label": "Décalage",
-              "tooltip": "Décale sur la droite la ligne actuelle"
-            },
-            "scale": {
-              "label": "Grossissement",
-              "tooltip": "Agrandis la ligne actuelle"
-            }
-          },
-          "tooltip": "Choisi l'effet à appliquer sur la ligne actuelle"
-        },
-        "precise-timing": {
-          "label": "Rend les paroles parfaitement synchronisées",
-          "tooltip": "Calcul à la milliseconde près l'affichage de la ligne suivante (peut avoir un faible impact sur les performances)"
-        },
-        "preferred-provider": {
-          "label": "Fournisseur privilégié",
-          "none": {
-            "label": "Aucun",
-            "tooltip": "Aucun fournisseur privilégié"
-          },
-          "tooltip": "Choisissez le fournisseur à utiliser par défaut"
-        },
-        "romanization": {
-          "label": "Romaniser les paroles",
-          "tooltip": "Si les paroles sont dans une autre langue, essayez de les afficher dans une version latine."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Afficher les paroles même si inexactes",
-          "tooltip": "Si la musique n'est pas trouvé, le plugin essaye à nouveau avec une différence requête.\nLe résultat du deuxième essais peut ne pas être exacte."
-        },
-        "show-time-codes": {
-          "label": "Afficher les timecodes",
-          "tooltip": "Affiche le timecode à côté de chaque paroles"
-        }
-      },
-      "name": "Paroles Synchronisées",
-      "refetch-btn": {
-        "fetching": "Chargement...",
-        "normal": "Rafraîchir les paroles"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Les paroles peuvent ne pas être synchronisées à cause d'une différence de durée.",
-        "inexact": "⚠️ - Les paroles de cette chanson peuvent ne pas être exactes",
-        "instrumental": "⚠️ - C'est un titre instrumental"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Contrôlez la lecture depuis votre barre des tâches Windows",

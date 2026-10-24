@@ -281,16 +281,6 @@
       "description": "Muudab navigatsiooniriba läbipaistavaks ja hägusaks",
       "name": "Hägus navigatsiooniriba"
     },
-    "lyrics-genius": {
-      "description": "Lisa enamustele lugudele laulusõnad",
-      "menu": {
-        "romanized-lyrics": "Latiniseeritud laulusõnad"
-      },
-      "name": "Lyrics Genius",
-      "renderer": {
-        "fetched-lyrics": "Leidsime Geeniuse jaoks ühed laulusõnad"
-      }
-    },
     "navigation": {
       "name": "Liikumine"
     },
@@ -341,13 +331,6 @@
             "label": "Sisesta oma ListenBrainz'i tunnusluba:",
             "title": "ListenBrainz'i tunnusluba"
           }
-        }
-      }
-    },
-    "synced-lyrics": {
-      "menu": {
-        "show-lyrics-even-if-inexact": {
-          "tooltip": "Kui lugu ei leidu, siis lisamoodul üritab uut otsingut teistsuguse päringuga.\nTeise katse puhul tulemused ei pruugi olla väga täpsed."
         }
       }
     },

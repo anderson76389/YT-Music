@@ -547,16 +547,6 @@
       "description": "Lisää tuen Lumia Stream -palvelulle",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Lisää tuen useimpien kappaleiden sanoituksille",
-      "menu": {
-        "romanized-lyrics": "Latinaistetut sanoitukset"
-      },
-      "name": "Lyrics Genius",
-      "renderer": {
-        "fetched-lyrics": "Sanoitukset haettu Geniukselle"
-      }
-    },
     "music-together": {
       "description": "Jaa soittolista muiden kanssa. Kun isäntä soittaa kappaleen, kaikki muut kuulevat saman kappaleen",
       "dialog": {

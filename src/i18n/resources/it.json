@@ -597,16 +597,6 @@
       "description": "Aggiungi supporto per Lumia Stream",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Aggiunge il supporto dei testi per la maggior parte delle canzoni",
-      "menu": {
-        "romanized-lyrics": "Alfabeto latino per i brani con testo in caratteri orientali"
-      },
-      "name": "Lyrics Genius",
-      "renderer": {
-        "fetched-lyrics": "Testi recuperati per Genius"
-      }
-    },
     "music-together": {
       "description": "Condividi una playlist con altri. Quando l'Host riproduce un brano, tutti gli altri ascolteranno lo stesso brano",
       "dialog": {
@@ -827,93 +817,6 @@
     "sponsorblock": {
       "description": "Salta automaticamente le parti non musicali, come l'intro/outro delle canzoni o le parti dei video musicali in cui non viene riprodotto il brano",
       "name": "Blocco sponsor"
-    },
-    "synced-lyrics": {
-      "description": "Fornisce testi sincronizzati alle canzoni, utilizzando provider come LRClib.",
-      "errors": {
-        "fetch": "⚠️ \tSi è verificato un errore nel recuperare il testo.\n\tPer favore riprova più tardi.",
-        "not-found": "⚠️ Nessun testo trovato per questa canzone."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Convertire i caratteri Cinesi",
-          "submenu": {
-            "disabled": {
-              "label": "Disabilitato",
-              "tooltip": "Disabilita conversione caretteri Cinesi"
-            },
-            "simplified-to-traditional": {
-              "label": "Semplificato al Tradizionale",
-              "tooltip": "Converti Cinese Semplificato in Cinese Tradizionale"
-            },
-            "traditional-to-simplified": {
-              "label": "Da Tradizionale a Semplificato",
-              "tooltip": "Converti Cinese Tradizionale a Cinese Semplificato"
-            }
-          },
-          "tooltip": "Converti carettere Cinese da Tradizionale a Semplificato"
-        },
-        "default-text-string": {
-          "label": "Carattere predefinito tra i testi",
-          "tooltip": "Scegliere il carattere predefinito da utilizzare per l'intervallo tra i testi"
-        },
-        "line-effect": {
-          "label": "Effetto linea",
-          "submenu": {
-            "fancy": {
-              "label": "Fantasia",
-              "tooltip": "Usa effetti grandi, simili a quelli di un'app sulla riga attuale"
-            },
-            "focus": {
-              "label": "Focus",
-              "tooltip": "Rendi bianca solo la riga corrente"
-            },
-            "offset": {
-              "label": "Offset",
-              "tooltip": "Offset a destra della riga corrente"
-            },
-            "scale": {
-              "label": "Ingrandimento",
-              "tooltip": "Ingrandisci la linea corrente"
-            }
-          },
-          "tooltip": "Scegli l'effetto da applicare alla linea corrente"
-        },
-        "precise-timing": {
-          "label": "Rendi i testi perfettamente sincronizzati",
-          "tooltip": "Calcola al millisecondo la visualizzazione della riga successiva (può avere un piccolo impatto sulle prestazioni)"
-        },
-        "preferred-provider": {
-          "label": "Provider preferito",
-          "none": {
-            "label": "Nessuno",
-            "tooltip": "Nessun provider preferito"
-          },
-          "tooltip": "Scegli quale provider predefinito utilizzare"
-        },
-        "romanization": {
-          "label": "Testi in caratteri occidentali",
-          "tooltip": "Qualora il testo fosse scritto in una lingua non occidentale, prova a visualizzarlo in caratteri latini."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Mostra le lyric anche se incorrette",
-          "tooltip": "Se il brano non viene trovato, il plugin riprova con un'altra query di ricerca.\nIl risultato del secondo tentativo potrebbe non essere esatto."
-        },
-        "show-time-codes": {
-          "label": "Mostra time code",
-          "tooltip": "Mostra i codici temporali accanto ai testi"
-        }
-      },
-      "name": "Testi sincronizzati",
-      "refetch-btn": {
-        "fetching": "Caricamento...",
-        "normal": "Recupera i testi"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - I testi potrebbero non essere sincronizzati a causa di una mancata corrispondenza della durata.",
-        "inexact": "⚠️ - Il testo di questa canzone potrebbe essere inesatto",
-        "instrumental": "⚠️ - Questo è un brano strumentale"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Controlla riproduzione dalla taskbar di Windows",

@@ -604,16 +604,6 @@
       "description": "Tambah dukungan Lumia Stream",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Tambah dukungan lirik untuk kebanyakan lagu",
-      "menu": {
-        "romanized-lyrics": "Romanisasi Lirik"
-      },
-      "name": "Lirik Genius",
-      "renderer": {
-        "fetched-lyrics": "Lirik yang diambil untuk Genius"
-      }
-    },
     "music-together": {
       "description": "Bagikan daftar putar dengan yang lain. Saat host memainkan lagu, semua orang akan mendengarkan lagu yang sama",
       "dialog": {
@@ -834,93 +824,6 @@
     "sponsorblock": {
       "description": "Otomatis Melewati bagian yang bukan musik seperti intro/outro atau bagian dari video musik di mana lagu tidak dimainkan",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Menyediakan lirik lagu yang disinkronkan, menggunakan penyedia seperti LRClib.",
-      "errors": {
-        "fetch": "⚠️\tTerjadi kesalahan saat mengambil lirik.\n\tSilakan coba lagi nanti.",
-        "not-found": "⚠️ Tidak ada lirik yang ditemukan untuk lagu ini."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Konversi karakter Tionghoa",
-          "submenu": {
-            "disabled": {
-              "label": "Dinonaktifkan",
-              "tooltip": "Nonaktifkan konversi karakter Tionghoa"
-            },
-            "simplified-to-traditional": {
-              "label": "Sederhana ke Tradisional",
-              "tooltip": "Konversi Tionghoa Sederhana ke Tionghoa Tradisional"
-            },
-            "traditional-to-simplified": {
-              "label": "Tradisional ke Sederhana",
-              "tooltip": "Konversi Tionghoa Tradisional ke Tionghoa Sederhana"
-            }
-          },
-          "tooltip": "Konversi karakter Tionghoa ke Tradisional atau Sederhana"
-        },
-        "default-text-string": {
-          "label": "Karakter default antara lirik",
-          "tooltip": "Pilih karakter default yang akan digunakan untuk celah antar lirik"
-        },
-        "line-effect": {
-          "label": "Efek garis",
-          "submenu": {
-            "fancy": {
-              "label": "Mewah",
-              "tooltip": "Gunakan efek besar seperti aplikasi pada baris saat ini"
-            },
-            "focus": {
-              "label": "Fokus",
-              "tooltip": "Jadikan hanya baris saat ini berwarna putih"
-            },
-            "offset": {
-              "label": "Offset",
-              "tooltip": "Mengimbangi garis saat ini di sebelah kanan"
-            },
-            "scale": {
-              "label": "Skala",
-              "tooltip": "Skala garis saat ini"
-            }
-          },
-          "tooltip": "Pilih efek yang akan diterapkan ke baris saat ini"
-        },
-        "precise-timing": {
-          "label": "Buat liriknya tersinkronisasi dengan sempurna",
-          "tooltip": "Hitung hingga milidetik tampilan baris berikutnya (dapat berdampak kecil pada kinerja)"
-        },
-        "preferred-provider": {
-          "label": "Penyedia Pilihan",
-          "none": {
-            "label": "Tidak ada",
-            "tooltip": "Tidak ada penyedia pilihan"
-          },
-          "tooltip": "Pilih penyedia bawaan untuk dipakai"
-        },
-        "romanization": {
-          "label": "Romanize Liriknya",
-          "tooltip": "Apabila lirik berada dalam bahasa berbeda, cobalah untuk menampilkan versi latinnya."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Tampilkan lirik meskipun tidak tepat",
-          "tooltip": "Jika lagu tidak ditemukan, plugin akan mencoba lagi dengan kueri pencarian yang berbeda.\nHasil dari percobaan kedua mungkin tidak tepat."
-        },
-        "show-time-codes": {
-          "label": "Tampilkan kode waktu",
-          "tooltip": "Tampilkan kode waktu di samping lirik"
-        }
-      },
-      "name": "Lirik yang Disinkronkan",
-      "refetch-btn": {
-        "fetching": "Mengambil...",
-        "normal": "Ambil ulang lirik"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Liriknya mungkin tidak sinkron karena ketidakcocokan durasi.",
-        "inexact": "⚠️ - Lirik lagu ini mungkin tidak tepat",
-        "instrumental": "⚠️ - Ini adalah lagu instrumental"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Kendalikan pemutaran dari bilah alat Windows",

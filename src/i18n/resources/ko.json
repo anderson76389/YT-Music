@@ -604,16 +604,6 @@
       "description": "Lumia Stream 지원을 추가합니다",
       "name": "Lumia Stream [베타]"
     },
-    "lyrics-genius": {
-      "description": "더 많은 곡에 대해 가사 지원을 추가합니다",
-      "menu": {
-        "romanized-lyrics": "가사 로마자화"
-      },
-      "name": "Genius 가사",
-      "renderer": {
-        "fetched-lyrics": "Genius에서 가사 불러옴"
-      }
-    },
     "music-together": {
       "description": "여러명과 함께 플레이리스트를 공유합니다. 호스트가 음악을 재생하면, 다른 사용자들도 같은 노래를 들을 수 있습니다",
       "dialog": {
@@ -834,93 +824,6 @@
     "sponsorblock": {
       "description": "인트로/아웃트로와 같은 음악이 아닌 부분이나, 노래가 재생되지 않는 뮤직 비디오의 일부를 자동으로 건너뜁니다",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "LRClib등의 가사 제공자에서 싱크 가사를 불러옵니다.",
-      "errors": {
-        "fetch": "⚠️\t가사를 불러오는 동안 오류가 발생했습니다.\n\t나중에 다시 시도해 주세요.",
-        "not-found": "⚠️ 이 노래의 가사를 찾을 수 없습니다."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "중국어 변환",
-          "submenu": {
-            "disabled": {
-              "label": "비활성화됨",
-              "tooltip": "중국어 변환 비활성화"
-            },
-            "simplified-to-traditional": {
-              "label": "간체에서 번체로",
-              "tooltip": "중국어 간체에서 번체로 번역"
-            },
-            "traditional-to-simplified": {
-              "label": "번체에서 간체",
-              "tooltip": "번체에서 간체로 변환"
-            }
-          },
-          "tooltip": "중국어 간체 또는 번체로 변환하기"
-        },
-        "default-text-string": {
-          "label": "가사 사이에 표시할 문자",
-          "tooltip": "가사 사이의 빈 공간에 사용할 문자를 선택합니다"
-        },
-        "line-effect": {
-          "label": "줄 표시 효과",
-          "submenu": {
-            "fancy": {
-              "label": "예쁘게",
-              "tooltip": "유튜브 뮤직 앱처럼 커다란 효과를 현재 라인에 사용합니다"
-            },
-            "focus": {
-              "label": "포커스",
-              "tooltip": "현재 줄만 하얀색으로 표시"
-            },
-            "offset": {
-              "label": "오프셋",
-              "tooltip": "현재 줄의 오른쪽에 오프셋 적용"
-            },
-            "scale": {
-              "label": "스케일",
-              "tooltip": "현재 줄에 스케일 적용"
-            }
-          },
-          "tooltip": "현재 줄에 적용할 효과를 선택합니다"
-        },
-        "precise-timing": {
-          "label": "가사를 최대한 정교하게 동기화",
-          "tooltip": "다음 줄의 표시를 밀리초 단위로 계산합니다 (성능에 약간의 영향을 미칠 수 있음)"
-        },
-        "preferred-provider": {
-          "label": "선호하는 가사 제공자",
-          "none": {
-            "label": "없음",
-            "tooltip": "선호하는 가사 제공자 없음"
-          },
-          "tooltip": "사용할 기본 가사 제공자를 선택하세요"
-        },
-        "romanization": {
-          "label": "가사 로마자 변환",
-          "tooltip": "가사가 영어가 아닌 언어로 되어있는 경우, 로마자 표기를 표시합니다."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "가사가 정확하지 않더라도 표시",
-          "tooltip": "노래를 찾을 수 없는 경우, 플러그인이 다른 검색어로 다시 검색합니다.\n두번째 검색 결과는 정확하지 않을 수 있습니다."
-        },
-        "show-time-codes": {
-          "label": "시간 코드 표시",
-          "tooltip": "가사 옆에 시간 코드 표시"
-        }
-      },
-      "name": "싱크 가사",
-      "refetch-btn": {
-        "fetching": "가져오는 중...",
-        "normal": "가사 다시 가져오기"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - 곡 길이 불일치로 인해 가사가 일치하지 않을 수 있습니다.",
-        "inexact": "⚠️ - 이 노래의 가사는 정확하지 않을 수 있습니다",
-        "instrumental": "⚠️ - 연주곡입니다"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Windows 작업 표시줄에서 재생을 제어하세요",

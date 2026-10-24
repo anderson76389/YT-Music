@@ -567,16 +567,6 @@
       "description": "Pievieno Lumia Stream atbalstu",
       "name": "Lumia Stream [Beta versija]"
     },
-    "lyrics-genius": {
-      "description": "Pievieno dziesmu tekstu atbalstu lielākajai daļai dziesmu",
-      "menu": {
-        "romanized-lyrics": "Romanizēti dziesmu teksti"
-      },
-      "name": "Dziesmu vārdu ģēnijs",
-      "renderer": {
-        "fetched-lyrics": "Iegūti dziesmu vārdi priekš oriģināla"
-      }
-    },
     "music-together": {
       "description": "Kopīgojiet atskaņošanas sarakstu ar citiem. Kad vadītājs atskaņo dziesmu, visi pārējie dzirdēs to pašu dziesmu.",
       "dialog": {

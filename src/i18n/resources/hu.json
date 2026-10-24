@@ -566,16 +566,6 @@
       "description": "Lumia Stream támogatás hozzáadása",
       "name": "Lumia Stream [Béta]"
     },
-    "lyrics-genius": {
-      "description": "Dalszöveg támogatást ad a legtöbb dalhoz",
-      "menu": {
-        "romanized-lyrics": "Latin betűs dalszövegek"
-      },
-      "name": "Lyrics Genius",
-      "renderer": {
-        "fetched-lyrics": "Dalszövegek lekérése a Genius-ról"
-      }
-    },
     "music-together": {
       "description": "Lehetővé teszi a lejátszási listák megosztását másokkal. Amikor a házigazda lejátszik egy dalt, mindenki más is ugyanazt a dalt fogja hallani",
       "dialog": {
@@ -790,67 +780,6 @@
     "sponsorblock": {
       "description": "Automatikusan kihagyja a nem zenés részeket, mint például az intro/outro vagy a zenei videók olyan részeit, ahol a zene nem szól",
       "name": "SzponzorBlokk"
-    },
-    "synced-lyrics": {
-      "description": "Szinkronizált dalszövegeket biztosít dalokhoz, LRClib-hez hasonló szolgáltatókat használva.",
-      "errors": {
-        "fetch": "⚠️\tHiba történt a dalszöveg lekérése közben.\n\tKérjük, próbálja meg később újra.",
-        "not-found": "⚠️ - Ehhez a dalhoz nem található dalszöveg."
-      },
-      "menu": {
-        "default-text-string": {
-          "label": "Alapértelmezett karakter a dalszövegek között",
-          "tooltip": "Válassza ki az alapértelmezett karaktert, amelyet a dalszövegek közötti szünethez használni szeretne"
-        },
-        "line-effect": {
-          "label": "Soreffekt",
-          "submenu": {
-            "fancy": {
-              "label": "Díszes",
-              "tooltip": "Használj nagy, alkalmazásszerű effektusokat az aktuális sorhoz"
-            },
-            "focus": {
-              "label": "Fókuszált",
-              "tooltip": "Az aktuális sor kijelőlése fehérrel"
-            },
-            "offset": {
-              "label": "Eltolás",
-              "tooltip": "Az aktuális sort jobbra tolja. (mintha tabulálnád)"
-            },
-            "scale": {
-              "label": "Méretezett",
-              "tooltip": "Az aktuális sort kissé nagyobbra méretezi, kiemelve azt a többi sor közül"
-            }
-          },
-          "tooltip": "Válassza ki az aktuális sorra alkalmazandó effektust"
-        },
-        "precise-timing": {
-          "label": "Dalszöveg tökéletes szinkronizálása",
-          "tooltip": "Számítsa ki az aktuális sor megjelenítésének idejét ezredmásodperc pontossággal (ez kis mértékben befolyásolhatja a teljesítményt)"
-        },
-        "romanization": {
-          "label": "Latin betűs szöveg",
-          "tooltip": "Idegennyelvű szöveg esetén próbálkozás a szöveglatin betűs megjelenítésével."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Pontatlan időzítésű dalszövegek megjelenítése",
-          "tooltip": "Ha a dalt nem találja, a bővítmény újra próbálkozik egy másik keresési lekérdezéssel.\nAz eredmény a második próbálkozás után nem biztos, hogy pontos lesz."
-        },
-        "show-time-codes": {
-          "label": "Időkódok megjelenítése",
-          "tooltip": "Az időkódok megjelenítése a dalszövegek mellett"
-        }
-      },
-      "name": "Szinkronizált dalszövegek",
-      "refetch-btn": {
-        "fetching": "Lekérés folyamatban...",
-        "normal": "Dalszöveg újra lekérése"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - A dalszövegek időzítése eltérhet a zene hossza miatt.",
-        "inexact": "⚠️ - Ennek a zenének a dalszövege pontatlan lehet",
-        "instrumental": "⚠️ - Ez egy hangszerekkel játszott zene"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Lejátszás vezérlése a Windows tálcáról",

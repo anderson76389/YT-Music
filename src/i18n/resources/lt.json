@@ -597,16 +597,6 @@
       "description": "Prideda „Lumia Stream“ palaikymą",
       "name": "„Lumia Stream“ [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Daugumai dainų prideda jų dainų žodžius",
-      "menu": {
-        "romanized-lyrics": "Romanizuoti dainų tekstai"
-      },
-      "name": "„Lyrics Genius“ dainų žodžiai",
-      "renderer": {
-        "fetched-lyrics": "Gauti žodžiai iš „Genius“"
-      }
-    },
     "music-together": {
       "description": "Pasidalinti grojaraščiu su kitais. Kai vedėjas paleis dainą, visi kiti girdės tą pačią dainą",
       "dialog": {
@@ -827,93 +817,6 @@
     "sponsorblock": {
       "description": "Automatiškai praleidžia ne muzikines dalis, pvz., įžangą/užvedimą arba muzikinių vaizdo įrašų dalis, kuriose daina negrojama",
       "name": "Rėmėjų blokuotojas"
-    },
-    "synced-lyrics": {
-      "description": "Teikia sinchronizuotus dainų žodžius, naudojantis tiekėjais kaip „LRClib“.",
-      "errors": {
-        "fetch": "⚠️\t\tĮvyko klaida gaunant dainos žodžius.\n\tPabandykite dar karta vėliau.",
-        "not-found": "⚠️ Šiai dainai nerasti dainos tekstai."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Konvertuoti Kinietišką ženklą",
-          "submenu": {
-            "disabled": {
-              "label": "Išjungtas",
-              "tooltip": "Išjungti Kinietiškų ženklų konvertavimą"
-            },
-            "simplified-to-traditional": {
-              "label": "Supaprastintą į Tradicinę",
-              "tooltip": "Konvertuoti Supaprastintą Kinų kalbą į Tradicinę Kinų kalbą"
-            },
-            "traditional-to-simplified": {
-              "label": "Tradicionalią į Supaprastintą",
-              "tooltip": "Konvertuoti Tradicionalią Kinų kalbą į Supaprastintą Kinų kalbą"
-            }
-          },
-          "tooltip": "Konvertuoti Kinietiškus ženklus į Tradicinę arba Supaprastintą"
-        },
-        "default-text-string": {
-          "label": "Numatyti simboliai tarp dainos žodžių",
-          "tooltip": "Pasirinkite numatytąjį simbolį kurį naudoti tarpui tarp dainos žodžių"
-        },
-        "line-effect": {
-          "label": "Teksto linijos efektas",
-          "submenu": {
-            "fancy": {
-              "label": "Prašmatnus",
-              "tooltip": "Naudoti didelius, panašius į programos efektus dabartinei eilutei"
-            },
-            "focus": {
-              "label": "Sutelkti dėmesį",
-              "tooltip": "Padaryti tik dabartinę eilutę baltą"
-            },
-            "offset": {
-              "label": "Nuokrypis",
-              "tooltip": "Dabartinę eilutę pastumti iš dešinės"
-            },
-            "scale": {
-              "label": "Skalė",
-              "tooltip": "Padidinti dabartinę eilutę"
-            }
-          },
-          "tooltip": "Pasirinkti efektą, kurį pritaikyti dabartinei linijai"
-        },
-        "precise-timing": {
-          "label": "Tobulai sinchronizuoti dainos žodžius",
-          "tooltip": "Apskaičiuoti kitos eilutės rodymą milisekundės tikslumu (gali turėti nedidelę įtaką našumui)"
-        },
-        "preferred-provider": {
-          "label": "Pageidaujamas tiekėjas",
-          "none": {
-            "label": "Jokio",
-            "tooltip": "Jokio pageidaujamo tiekėjo"
-          },
-          "tooltip": "Pasirinkti numatytąjį tiekėją kurį naudoti"
-        },
-        "romanization": {
-          "label": "Romanizuoti dainos žodžius",
-          "tooltip": "jei dainos žodžiai yra kita kalba, bandyti pateikti lotyniškų ženklų versiją."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Rodyti dainos žodžius, net jei jie netikslūs",
-          "tooltip": "Jeigu daina nerasta, įskiepis bando iš naujo su skirtinga paieškos užklausa.\nAntro bandymo rezultatas gali būti netikslus."
-        },
-        "show-time-codes": {
-          "label": "Rodyti laiko žymes",
-          "tooltip": "Rodyti laiko žymes kartu su dainos žodžiais"
-        }
-      },
-      "name": "„Synced Lyrics“",
-      "refetch-btn": {
-        "fetching": "Gaunama...",
-        "normal": "Atgauti dainos žodžius"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Dainos žodžiai gali būti nesinchronizuoti dėl trukmės nesutikimo.",
-        "inexact": "⚠️ - Dainos žodžiai gali šiek tiek skirtis",
-        "instrumental": "⚠️ – Tai instrumentinė daina"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Valdykite atkūrimą iš „Windows“ užduočių juostos",

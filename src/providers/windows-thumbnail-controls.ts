@@ -8,8 +8,11 @@ import { getSongControls } from '@/providers/song-controls';
 import { registerCallback, SongInfoEvent } from '@/providers/song-info';
 
 /**
- * Contrôles natifs de la miniature Windows : ils ne modifient ni les plugins
- * ni le lecteur. La barre d'outils est gérée par Windows, pas par du CSS.
+ * Windows thumbnail-toolbar controls. Explorer cannot reliably register the
+ * thumbar before the window is visible, so install on 'show' and retry only
+ * a few times if Windows reports that it is not ready yet.
+ *
+ * Uses the existing player commands and never changes plugins or playback.
  */
 export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
   if (process.platform !== 'win32') return;
@@ -20,30 +23,38 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
   const nextIcon = nativeImage.createFromPath(NextIcon).resize({ width: 16, height: 16 });
 
   if ([previousIcon, playIcon, pauseIcon, nextIcon].some((icon) => icon.isEmpty())) {
-    console.warn('[YT Music] Icônes de la miniature Windows indisponibles.');
+    console.warn('[YT Music] Impossible de charger les icônes des contrôles Windows.');
     return;
   }
 
   const { previous, playPause, next } = getSongControls(win);
-  let currentPlaybackState = false;
-  let appliedPlaybackState: boolean | undefined;
+  let isPlaying = false;
+  let appliedState: boolean | undefined;
+  let registered = false;
+  let retries = 0;
+  let retryTimer: ReturnType<typeof setTimeout> | undefined;
 
-  const updateButtons = (playing: boolean, force = false) => {
-    currentPlaybackState = playing;
-    if (win.isDestroyed() || (!force && appliedPlaybackState === playing)) return;
+  const cancelRetry = () => {
+    if (retryTimer !== undefined) {
+      clearTimeout(retryTimer);
+      retryTimer = undefined;
+    }
+  };
 
-    // La position et le nombre de boutons restent fixes ; seul Lecture/Pause
-    // change en fonction de l'état réel envoyé par le lecteur.
+  const applyButtons = (force = false) => {
+    if (win.isDestroyed() || !win.isVisible()) return;
+    if (!force && registered && appliedState === isPlaying) return;
+
     try {
-      const applied = win.setThumbarButtons([
+      const success = win.setThumbarButtons([
         {
           icon: previousIcon,
           tooltip: 'Précédent',
           click: previous,
         },
         {
-          icon: playing ? pauseIcon : playIcon,
-          tooltip: playing ? 'Pause' : 'Lecture',
+          icon: isPlaying ? pauseIcon : playIcon,
+          tooltip: isPlaying ? 'Pause' : 'Lecture',
           click: playPause,
         },
         {
@@ -52,20 +63,53 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
           click: next,
         },
       ]);
-      if (applied) appliedPlaybackState = playing;
+
+      if (success) {
+        registered = true;
+        appliedState = isPlaying;
+        retries = 0;
+        cancelRetry();
+        return;
+      }
     } catch (error) {
-      console.warn('[YT Music] Mini-commandes Windows indisponibles :', error);
+      console.warn('[YT Music] Erreur des contrôles de miniature Windows :', error);
+    }
+
+    // Windows 11 may not expose its taskbar button until after the show event.
+    // A bounded retry avoids interfering with playback or consuming resources.
+    if (retryTimer === undefined && retries < 5) {
+      retries += 1;
+      retryTimer = setTimeout(() => {
+        retryTimer = undefined;
+        applyButtons(true);
+      }, 600);
+    } else if (retries >= 5) {
+      console.warn('[YT Music] Barre de miniature non disponible sur cette fenêtre Windows.');
     }
   };
 
-  updateButtons(false);
-  // Réessayer quand Windows a créé l'aperçu, sans rouvrir la fenêtre.
-  win.once('ready-to-show', () => updateButtons(currentPlaybackState, true));
+  const onWindowShown = () => {
+    retries = 0;
+    cancelRetry();
+    // Reapply even if Windows recreated the preview after minimizing/hiding.
+    applyButtons(true);
+  };
+
+  win.on('show', onWindowShown);
+  win.on('restore', onWindowShown);
+  win.on('focus', () => {
+    if (!registered) applyButtons();
+  });
+  win.on('closed', cancelRetry);
 
   registerCallback((songInfo, event) => {
     if (win.isDestroyed() || event === SongInfoEvent.TimeChanged) return;
-    if (typeof songInfo.isPaused === 'boolean') {
-      updateButtons(!songInfo.isPaused);
-    }
+    if (typeof songInfo.isPaused !== 'boolean') return;
+
+    isPlaying = !songInfo.isPaused;
+    applyButtons();
   });
+
+  // The window may already be showing when the provider is initialized.
+  if (win.isVisible()) onWindowShown();
 };

@@ -4,8 +4,10 @@
     from var(--ytmd-transparent-player-transparency-color) r g b /
       var(--ytmd-transparent-player-opacity, 0.5)
   );
+  /* Use the same opacity as the chosen transparency setting (e.g. 50%). */
   --ytmd-transparent-player-transparent-background-dark: rgb(
-    from var(--ytmd-transparent-player-transparency-color) r g b / 0.8
+    from var(--ytmd-transparent-player-transparency-color) r g b /
+      var(--ytmd-transparent-player-opacity, 0.5)
   );
   --ytmd-transparent-player-backdrop-blur: blur(20px);
 }

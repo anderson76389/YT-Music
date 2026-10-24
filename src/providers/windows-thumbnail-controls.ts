@@ -29,6 +29,7 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
 
   const { previous, playPause, next } = getSongControls(win);
   let isPlaying = false;
+  let hasPlaybackState = false;
   let appliedState: boolean | undefined;
   let registered = false;
   let retries = 0;
@@ -55,7 +56,7 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
         {
           icon: isPlaying ? pauseIcon : playIcon,
           tooltip: isPlaying ? 'Pause' : 'Lecture',
-          click: playPause,
+          click: onPlayPauseClick,
         },
         {
           icon: nextIcon,
@@ -88,6 +89,18 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
     }
   };
 
+  // Windows draws native thumbnail buttons; it cannot animate their shape.
+  // Show the new glyph immediately after a click and let the actual player
+  // event confirm or correct the state, avoiding a stale play/pause icon.
+  const onPlayPauseClick = () => {
+    if (win.isDestroyed()) return;
+    playPause();
+    if (hasPlaybackState) {
+      isPlaying = !isPlaying;
+      applyButtons();
+    }
+  };
+
   const onWindowShown = () => {
     retries = 0;
     cancelRetry();
@@ -106,6 +119,7 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
     if (win.isDestroyed() || event === SongInfoEvent.TimeChanged) return;
     if (typeof songInfo.isPaused !== 'boolean') return;
 
+    hasPlaybackState = true;
     isPlaying = !songInfo.isPaused;
     applyButtons();
   });

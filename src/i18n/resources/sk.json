@@ -604,16 +604,6 @@
       "description": "Pridáva Lumia Stream podporu",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Pridáva podporu textov pre väčšinu piesní",
-      "menu": {
-        "romanized-lyrics": "Romanizované texty piesní"
-      },
-      "name": "Texty Genius",
-      "renderer": {
-        "fetched-lyrics": "Načítané texty piesní pre Genius"
-      }
-    },
     "music-together": {
       "description": "Zdieľajte zoznam s ostatnými. Keď hostiteľ prehrá skladbu, všetci ostatní budú počuť tú istú skladbu",
       "dialog": {
@@ -834,93 +824,6 @@
     "sponsorblock": {
       "description": "Automaticky preskakuje nehudbné časti ako intro/outro, alebo tie časti videoklipov v ktorých nehrá hudba",
       "name": "Sponzorský blok"
-    },
-    "synced-lyrics": {
-      "description": "Poskytuje synchronizované texty k skladbám, pričom používa poskytovateľov ako LRClib.",
-      "errors": {
-        "fetch": "⚠️\tPri získavaní textu sa vyskytla chyba.\n Skúste znova neskôr.",
-        "not-found": "⚠️Pre túto skladbu nebol nájdený žiadny text."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Konvertovať čínske znaky",
-          "submenu": {
-            "disabled": {
-              "label": "Vypnuté",
-              "tooltip": "Zakázať zmenu Čínskych znakov"
-            },
-            "simplified-to-traditional": {
-              "label": "Zjednodušená na tradičnú",
-              "tooltip": "Konvertovať Zjednodušenú čínštinu na Tradičnú čínštinu"
-            },
-            "traditional-to-simplified": {
-              "label": "Tradičná na Zjednodušenú",
-              "tooltip": "Konvertovať Tradičnú čínštinu na Zjednodušenú čínštinu"
-            }
-          },
-          "tooltip": "Konvertovať Čínsky znak na Tradičný alebo Zjednodušený"
-        },
-        "default-text-string": {
-          "label": "Predvolený znak medzi časťami textu",
-          "tooltip": "Vyberte predvolený znak na použitie pre medzeru medzi textami"
-        },
-        "line-effect": {
-          "label": "Čiarový efekt",
-          "submenu": {
-            "fancy": {
-              "label": "Luxusné",
-              "tooltip": "Použi veľké, aplikačné efekty na aktuálny riadok"
-            },
-            "focus": {
-              "label": "Zameranie",
-              "tooltip": "Urob len aktuálny riadok biely"
-            },
-            "offset": {
-              "label": "Offset",
-              "tooltip": "Offset na pravej strane aktuálneho riadku"
-            },
-            "scale": {
-              "label": "Mierka",
-              "tooltip": "Zväčšiť konkrétny riadok"
-            }
-          },
-          "tooltip": "Vyber efekt pre aktuálny riadok"
-        },
-        "precise-timing": {
-          "label": "Dokonale synchronizovať text piesne",
-          "tooltip": "Vypočítaj na presnú milisekundu zobrazenie ďalšieho riadku (môže mať menší vplyv na výkon)"
-        },
-        "preferred-provider": {
-          "label": "Preferovaný Poskytovateľ",
-          "none": {
-            "label": "Žiadne",
-            "tooltip": "Žiadny preferovaný poskytovateľ"
-          },
-          "tooltip": "Vybrať predvoleného poskytovateľa"
-        },
-        "romanization": {
-          "label": "prepísať texty do latinky",
-          "tooltip": "Ak sú texty v inom jazyku, skúste zobraziť verziu latinky."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Zobraziť texty, aj keď sú nepresné",
-          "tooltip": "Ak nie je nájdená pieseň, plugin sa opäť posnaží s iným vyhľadávaním.\nVýsledok z druhého pokusu nemusí byť presný."
-        },
-        "show-time-codes": {
-          "label": "Zobraziť časové značky",
-          "tooltip": "Zobraziť časové kódy vedľa textov"
-        }
-      },
-      "name": "Synchronizované texty",
-      "refetch-btn": {
-        "fetching": "Sťahujem...",
-        "normal": "Znova Stiahnuť texty"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Texty môžu byť nesynchronizované kvôli dĺžkovému nesúladu.",
-        "inexact": "⚠️ - Texty pre túto pieseň nemusia byť presné",
-        "instrumental": "⚠️ - Toto je inštrumentálna pieseň"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Ovládanie prehrávača pomocou Windows taskbaru",

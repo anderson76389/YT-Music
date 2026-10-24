@@ -604,16 +604,6 @@
       "description": "Lumia Stream desteği ekler",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Çoğu şarkı için şarkı sözü desteği ekler",
-      "menu": {
-        "romanized-lyrics": "Romanlaştırılmış Şarkı Sözleri"
-      },
-      "name": "Genius Şarkı Sözleri",
-      "renderer": {
-        "fetched-lyrics": "Şarkı sözleri genius tarafından alındı"
-      }
-    },
     "music-together": {
       "description": "Oynatma listesini başkalarıyla paylaşın. Sunucu sahibi bir şarkı çaldığında, diğer herkes aynı şarkıyı duyacak",
       "dialog": {
@@ -834,93 +824,6 @@
     "sponsorblock": {
       "description": "Giriş/Çıkış gibi müzik olmayan kısımları veya müzik videolarında şarkının çalmadığı kısımları otomatik olarak atlar",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "LRClib gibi sağlayıcıları kullanarak şarkılara senkronize şarkı sözleri sağlar.",
-      "errors": {
-        "fetch": "⚠️ \tŞarkı sözleri alınırken bir hata oluştu.\n\tLütfen daha sonra tekrar deneyin.",
-        "not-found": "⚠️ Bu şarkı için şarkı sözleri bulunamadı."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Çince karakterleri çevir",
-          "submenu": {
-            "disabled": {
-              "label": "Devre dışı bırak",
-              "tooltip": "Çince karakterleri çevirmeyi devre dışı bırak"
-            },
-            "simplified-to-traditional": {
-              "label": "Basitleştirilmişten Geleneksele",
-              "tooltip": "Basitleştirilmiş Ç*nceyi Geleneksel Ç*nceye Çevir"
-            },
-            "traditional-to-simplified": {
-              "label": "Gelenekselden Basitleştirilmişe",
-              "tooltip": "Geleneksel Çince'yi Basitleştirilmiş Çince'ye dönüştür"
-            }
-          },
-          "tooltip": "Çince karakterleri Geleneksel veya Basitleştirilmiş Çinceye dönüştür"
-        },
-        "default-text-string": {
-          "label": "Şarkı sözleri arasında varsayılan karakter",
-          "tooltip": "Şarkı sözleri arasındaki boşluk için kullanılacak varsayılan karakteri seçin"
-        },
-        "line-effect": {
-          "label": "Çizgi etkisi",
-          "submenu": {
-            "fancy": {
-              "label": "Süslü",
-              "tooltip": "Mevcut satırda büyük, uygulama benzeri efektler kullan"
-            },
-            "focus": {
-              "label": "odak",
-              "tooltip": "Yalnızca geçerli satırı beyaz yapın"
-            },
-            "offset": {
-              "label": "telafi etmek,ofset",
-              "tooltip": "Geçerli satırın sağındaki ofset"
-            },
-            "scale": {
-              "label": "ölçek",
-              "tooltip": "Geçerli satırı ölçeklendirir"
-            }
-          },
-          "tooltip": "Geçerli satıra uygulanacak efekti seçin"
-        },
-        "precise-timing": {
-          "label": "Şarkı sözlerini mükemmel şekilde senkronize edin",
-          "tooltip": "Bir sonraki satırın görüntülenmesini milisaniyesine kadar hesaplayın (performans üzerinde küçük bir etkisi olabilir)"
-        },
-        "preferred-provider": {
-          "label": "Tercih edilen Sağlayıcı",
-          "none": {
-            "label": "Hiçbiri",
-            "tooltip": "Varsayılan sağlayıcı yok"
-          },
-          "tooltip": "Kullanmak İçin varsayılan sağlayıcıyı seçin"
-        },
-        "romanization": {
-          "label": "Sözleri Romanize Et",
-          "tooltip": "Sözler başka bir dilde gözüküyorsa, Latin versiyonunu dene."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Kesin olmasa bile şarkı sözlerini gösterin",
-          "tooltip": "Şarkı bulunamazsa, eklenti farklı bir arama sorgusuyla tekrar dener. \nİkinci denemenin sonucu tam olmayabilir."
-        },
-        "show-time-codes": {
-          "label": "Zaman kodlarını göster",
-          "tooltip": "Şarkı sözlerinin yanında zaman kodlarını gösterin"
-        }
-      },
-      "name": "Senkronize Şarkı Sözleri",
-      "refetch-btn": {
-        "fetching": "Getiriliyor...",
-        "normal": "Refetch şarkı sözleri"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Süre uyuşmazlığı nedeniyle şarkı sözleri senkronize olmayabilir.",
-        "inexact": "⚠️ - Bu şarkının sözleri tam olmayabilir",
-        "instrumental": "⚠️ - Bu enstrümantal bir şarkıdır"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Windows görev çubuğu üzerinden oynatmayı kontrol edebilmenize olanak sağlar",

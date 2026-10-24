@@ -604,16 +604,6 @@
       "description": "Lägger till stöd för Lumia Stream",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Lägger till stöd för låttexter till de flesta låtar",
-      "menu": {
-        "romanized-lyrics": "Translittererade låttexter"
-      },
-      "name": "Låttexter från Genius",
-      "renderer": {
-        "fetched-lyrics": "Hämtade låttexter från Genius"
-      }
-    },
     "music-together": {
       "description": "Dela en spellista med andra. När värden spelar en låt hör alla andra samma låt",
       "dialog": {
@@ -834,93 +824,6 @@
     "sponsorblock": {
       "description": "Hoppar automatiskt över icke-musikdelar som intro/outro eller delar av musikvideor där ingen musik spelas",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Visar synkroniserade låttexter med hjälp av tjänster som LRClib.",
-      "errors": {
-        "fetch": "⚠️\tEtt fel uppstod när låttexterna skulle hämtas.\n\tFörsök igen senare.",
-        "not-found": "⚠️ Inga låttexter hittades för den här låten."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Konvertera kinesiska tecken",
-          "submenu": {
-            "disabled": {
-              "label": "Inaktiverad",
-              "tooltip": "Inaktivera konvertering av kinesiska tecken"
-            },
-            "simplified-to-traditional": {
-              "label": "Förenklad till traditionell",
-              "tooltip": "Konvertera förenklad kinesiska till traditionell kinesiska"
-            },
-            "traditional-to-simplified": {
-              "label": "Traditionell till förenklad",
-              "tooltip": "Konvertera traditionell kinesiska till förenklad kinesiska"
-            }
-          },
-          "tooltip": "Konvertera kinesiska tecken mellan traditionell och förenklad form"
-        },
-        "default-text-string": {
-          "label": "Standardtecken mellan låttextrader",
-          "tooltip": "Välj vilket tecken som ska visas i mellanrummet mellan låttextrader"
-        },
-        "line-effect": {
-          "label": "Linjeeffekt",
-          "submenu": {
-            "fancy": {
-              "label": "Elegant",
-              "tooltip": "Använd stora effekter i appstil på den aktuella raden"
-            },
-            "focus": {
-              "label": "Fokus",
-              "tooltip": "Gör endast den aktuella raden vit"
-            },
-            "offset": {
-              "label": "Förskjutning",
-              "tooltip": "Förskjut den aktuella raden åt höger"
-            },
-            "scale": {
-              "label": "Skala",
-              "tooltip": "Skala den aktuella raden"
-            }
-          },
-          "tooltip": "Välj effekten som ska användas på den aktuella raden"
-        },
-        "precise-timing": {
-          "label": "Synkronisera låttexterna exakt",
-          "tooltip": "Beräkna till millisekunden när nästa rad ska visas (kan ha en liten inverkan på prestanda)"
-        },
-        "preferred-provider": {
-          "label": "Föredragen leverantör",
-          "none": {
-            "label": "Ingen",
-            "tooltip": "Ingen föredragen leverantör"
-          },
-          "tooltip": "Välj vilken leverantör som ska användas som standard"
-        },
-        "romanization": {
-          "label": "Translitterera låttexter",
-          "tooltip": "Om låttexterna är på ett annat språk försöker tillägget visa dem med latinska bokstäver."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Visa låttexter även om matchningen är osäker",
-          "tooltip": "Om låten inte hittas försöker tillägget igen med en annan sökfråga.\nResultatet från det andra försöket kanske inte stämmer exakt."
-        },
-        "show-time-codes": {
-          "label": "Visa tidskoder",
-          "tooltip": "Visa tidskoderna bredvid låttexterna"
-        }
-      },
-      "name": "Synkroniserade låttexter",
-      "refetch-btn": {
-        "fetching": "Hämtar...",
-        "normal": "Hämta låttexter igen"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ – Låttexterna kan vara osynkroniserade på grund av en skillnad i spårlängd.",
-        "inexact": "⚠️ – Låttexterna för den här låten kanske inte stämmer exakt",
-        "instrumental": "⚠️ – Det här är en instrumentallåt"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Kontrollera uppspelning från aktivitetsfältet i Windows",

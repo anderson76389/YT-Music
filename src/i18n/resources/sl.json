@@ -492,16 +492,6 @@
       "description": "Doda podporo za Lumia pretočno predvajanje",
       "name": "Lumina pretočno predavanje [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Doda podporo besedil za večino pesmi",
-      "menu": {
-        "romanized-lyrics": "Romanizerana besedila"
-      },
-      "name": "Besedila Genius",
-      "renderer": {
-        "fetched-lyrics": "Prestregel besedila za Genius"
-      }
-    },
     "music-together": {
       "description": "Delite seznam predvajanja z drugimi. Ko gostitelj predvaja skladbo, bodo vsi ostali slišali isto skladbo",
       "dialog": {

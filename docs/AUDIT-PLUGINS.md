@@ -1,8 +1,8 @@
 # Audit des plugins YT Music — 14 octobre 2026
 
-**Périmètre :** les 31 extensions hors **Anti-Pause & Purge Totale**. Le plugin Anti-Pause et ses fichiers n'ont pas été modifiés dans cet audit.
+**Périmètre :** les 30 extensions hors **Anti-Pause & Purge Totale**. Le plugin Anti-Pause et ses fichiers n'ont pas été modifiés dans cet audit.
 
-**Niveaux de preuve :** le script `tools/audit-plugin-sources.mjs` contrôle la présence des **32 points d'entrée** (Anti-Pause compris) et des 10 suppressions (dont Amuse et Amélioration des performances). Le workflow Windows exécute aussi lint, TypeScript, tests unitaires et compilation Electron ; il démarre le vrai portable sur une page de contrôle locale, sans connexion au site de musique. Ces contrôles ne certifient pas chaque fonction ou service externe.
+**Niveaux de preuve :** le script `tools/audit-plugin-sources.mjs` contrôle la présence des **31 points d'entrée** (Anti-Pause compris) et des 11 suppressions (dont Amuse et Amélioration des performances). Le workflow Windows exécute aussi lint, TypeScript, tests unitaires et compilation Electron ; il démarre le vrai portable sur une page de contrôle locale, sans connexion au site de musique. Ces contrôles ne certifient pas chaque fonction ou service externe.
 
 ## Problèmes corrigés par cet audit
 
@@ -15,7 +15,6 @@
 | Visualiseur | Même problème de session audio lors de l'activation tardive | Reprise de la session WebAudio existante |
 | Compresseur audio | Pouvait recharger la chanson pour tenter d'initialiser son contexte audio | Connexion à la source courante sans relancer le titre |
 | Passer les silences | Même absence de signal audio sur activation tardive | Reprise de la session WebAudio existante |
-| Paroles synchronisées | Attente illimitée de l'onglet, timer/observer/écouteurs restant après désactivation | Recherche bornée de l'onglet et nettoyage à l'arrêt |
 | Vitesse de lecture | Observateur et racine Solid conservés après la désactivation ; vitesse personnalisée conservée | Destruction des observateurs/éléments et retour à la vitesse normale |
 | Sélecteur de sous-titres | Retrait d'un bouton potentiellement détaché, éléments de rendu conservés ; options appliquées au changement de vidéo seulement | Destruction sûre du bouton et application des paramètres sans changer de piste |
 
@@ -50,7 +49,6 @@ Les points d'entrée sont présents et intégrés au build ; la colonne « test 
 | Passer les chansons non aimées | DOM du bouton J'aime et de la file d'attente | Non vérifié |
 | Passer les silences | Reprise WebAudio corrigée ici | Non vérifié |
 | SponsorBlock | Dépend du service SponsorBlock et de la disponibilité des segments | Non vérifié |
-| Paroles synchronisées | Nettoyage et attente bornée corrigés ici ; dépend des fournisseurs de paroles | Non vérifié |
 | Commandes multimédias barre des tâches | Fonction native **Windows** | Non vérifié |
 | Touch Bar | Fonction réservée aux machines **macOS** disposant d'une Touch Bar ; non applicable à Windows | Non applicable |
 | Lecteur transparent | Rendu restauré dans les versions précédentes ; redémarrage requis | Non vérifié |

@@ -597,16 +597,6 @@
       "description": "Thêm hỗ trợ Lumia Stream",
       "name": "Lumia Stream [Thử nghiệm]"
     },
-    "lyrics-genius": {
-      "description": "Thêm hỗ trợ lời bài hát cho hầu hết các bài hát",
-      "menu": {
-        "romanized-lyrics": "Chuyển lời bài hát sang chữ Latin"
-      },
-      "name": "Lời bài hát từ Genius",
-      "renderer": {
-        "fetched-lyrics": "Lời bài hát được tìm nạp cho Genius"
-      }
-    },
     "music-together": {
       "description": "Chia sẻ danh sách phát với người khác. Khi máy chủ phát một bài hát, những người khác cũng sẽ nghe bài hát đó",
       "dialog": {
@@ -827,93 +817,6 @@
     "sponsorblock": {
       "description": "Tự động bỏ qua các phần không phải âm nhạc như phần intro/outro hoặc các phần không được phát của video nhạc",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Cung cấp lời được đồng bộ với bài hát, sử dụng các nhà cung cấp như LRClib.",
-      "errors": {
-        "fetch": "⚠️\t\tĐã xảy ra lỗi khi tìm lời bài hát.\n\tVui lòng thử lại sau.",
-        "not-found": "⚠️ Không tìm thấy lời cho bài hát này."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Chuyển đổi kí tự tiếng Trung",
-          "submenu": {
-            "disabled": {
-              "label": "Vô hiệu hóa",
-              "tooltip": "Vô hiệu hóa chuyển đổi kí tự tiếng Trung"
-            },
-            "simplified-to-traditional": {
-              "label": "Giản thể sang Phồn thể",
-              "tooltip": "Chuyển đổi tiếng Trung Giản thể sang tiếng Trung Phồn thể"
-            },
-            "traditional-to-simplified": {
-              "label": "Phồn thể sang Giản thể",
-              "tooltip": "Chuyển đổi tiếng Trung Phồn thể sang tiếng Trung Giản thể"
-            }
-          },
-          "tooltip": "Chuyển đổi kí tự tiếng Trung sang Phồn thể hoặc Giản thể"
-        },
-        "default-text-string": {
-          "label": "Kí tự giữa các lời bài hát",
-          "tooltip": "Chọn kí tự mặc định cho khoảng trống giữa các lời bài hát"
-        },
-        "line-effect": {
-          "label": "Kiểu lời nhạc",
-          "submenu": {
-            "fancy": {
-              "label": "Màu mè",
-              "tooltip": "Làm đoạn lời nhạc đang nghe to hơn và nổi bật hơn"
-            },
-            "focus": {
-              "label": "Tập trung",
-              "tooltip": "Chỉ làm cho dòng hiện tại có màu trắng"
-            },
-            "offset": {
-              "label": "Lệch",
-              "tooltip": "Làm dòng hiện tại lệch sang bên phải"
-            },
-            "scale": {
-              "label": "Phóng to",
-              "tooltip": "Làm dòng hiện tại to hơn các dòng khác"
-            }
-          },
-          "tooltip": "Chọn kiểu để áp dụng cho dòng hiện tại"
-        },
-        "precise-timing": {
-          "label": "Làm cho lời bài hát được đồng bộ hoàn hảo",
-          "tooltip": "Tính toán chính xác đến mili giây thời gian hiển thị dòng tiếp theo (có thể có tác động nhỏ đến hiệu suất)"
-        },
-        "preferred-provider": {
-          "label": "Nhà cung cấp ưa thích",
-          "none": {
-            "label": "Không có",
-            "tooltip": "Không có nhà cung cấp ưu thích"
-          },
-          "tooltip": "Chọn nhà cung cấp lời bài hát mặc định để sử dụng"
-        },
-        "romanization": {
-          "label": "Chuyển lời bài hát sang chữ Latin",
-          "tooltip": "Nếu lời bài hát đang ở ngôn ngữ khác, thử hiển thị phiên bản bảng chữ cái La-tinh."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Hiển thị lời bài hát ngay cả khi không chính xác",
-          "tooltip": "Nếu không tìm thấy bài hát, plugin sẽ thử lại bằng truy vấn tìm kiếm khác.\nKết quả từ lần thử thứ hai có thể không chính xác."
-        },
-        "show-time-codes": {
-          "label": "Hiện mốc thời gian",
-          "tooltip": "Hiện mốc thời gian bên cạnh lời bài hát"
-        }
-      },
-      "name": "Lời bài hát được đồng bộ hoá",
-      "refetch-btn": {
-        "fetching": "Đang tìm nạp...",
-        "normal": "Tải lại lời bài hát"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Lời bài hát có thể không đồng bộ do thời lượng không khớp.",
-        "inexact": "⚠️ - Lời bài hát này có thể không chính xác",
-        "instrumental": "⚠️ - Đây là một bài hát không lời"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Điều khiển nhạc từ cửa sổ xem trước trên thanh tác vụ Windows của bạn",

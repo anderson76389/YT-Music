@@ -604,16 +604,6 @@
       "description": "添加 Lumia Stream 支持",
       "name": "Lumia Stream [测试]"
     },
-    "lyrics-genius": {
-      "description": "为大多数歌曲添加歌词支持",
-      "menu": {
-        "romanized-lyrics": "罗马化歌词"
-      },
-      "name": "Genius 歌词",
-      "renderer": {
-        "fetched-lyrics": "已从 Genius 获取歌词"
-      }
-    },
     "music-together": {
       "description": "与他人共享播放列表。当发起人播放歌曲时，其他人也会听到相同歌曲",
       "dialog": {
@@ -834,93 +824,6 @@
     "sponsorblock": {
       "description": "自动跳过非音乐部分，如 MV 的介绍/结语以及歌曲未开始的部分",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "透过 LRClib 等服务提供滚动歌词显示。",
-      "errors": {
-        "fetch": "⚠️ 获取歌词时发生错误。\n 请稍后再试。",
-        "not-found": "⚠️ 未找到此歌曲的歌词。"
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "转换中文字符",
-          "submenu": {
-            "disabled": {
-              "label": "已停用",
-              "tooltip": "禁用中文字符转换"
-            },
-            "simplified-to-traditional": {
-              "label": "简体到繁体",
-              "tooltip": "转换简体中文到繁体中文"
-            },
-            "traditional-to-simplified": {
-              "label": "繁体到简体",
-              "tooltip": "转换繁体中文到简体中文"
-            }
-          },
-          "tooltip": "转换简繁体中文字符"
-        },
-        "default-text-string": {
-          "label": "默认的歌词行间字符",
-          "tooltip": "选择在歌词间隙期间默认显示的字符"
-        },
-        "line-effect": {
-          "label": "歌词行特效",
-          "submenu": {
-            "fancy": {
-              "label": "Fancy",
-              "tooltip": "在当前行上使用大的、类似应用的效果"
-            },
-            "focus": {
-              "label": "高亮",
-              "tooltip": "仅将当前歌词行显示为白色"
-            },
-            "offset": {
-              "label": "偏移",
-              "tooltip": "将当前歌词行向右偏移"
-            },
-            "scale": {
-              "label": "放大",
-              "tooltip": "放大当前歌词行"
-            }
-          },
-          "tooltip": "选择当前歌词行应用的特效"
-        },
-        "precise-timing": {
-          "label": "让滚动歌词完全同步",
-          "tooltip": "以毫秒精度估算下句歌词的显示时间（可能对性能有小幅影响）"
-        },
-        "preferred-provider": {
-          "label": "首选歌词源",
-          "none": {
-            "label": "无",
-            "tooltip": "没有首选的歌词源"
-          },
-          "tooltip": "选择默认要用的源"
-        },
-        "romanization": {
-          "label": "将歌词罗马化",
-          "tooltip": "如果歌词以不同语言显示，试着展示拉丁字母版本。"
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "即使时值不精确依然显示歌词",
-          "tooltip": "若首次搜索未找到该歌曲的歌词，插件将尝试用不同的查询方式重新获取。\n重试查询的结果可能不精确。"
-        },
-        "show-time-codes": {
-          "label": "显示时值",
-          "tooltip": "在歌词旁显示时值"
-        }
-      },
-      "name": "滚动歌词",
-      "refetch-btn": {
-        "fetching": "正在获取…",
-        "normal": "重新获取歌词"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - 由于持续时间不对应，滚动歌词可能不同步。",
-        "inexact": "⚠️ - 此曲目的歌词可能不准确",
-        "instrumental": "⚠️ - 此曲目为纯音乐"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "从 Windows 任务栏控制音乐回放",

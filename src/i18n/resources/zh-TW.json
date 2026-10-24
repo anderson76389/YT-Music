@@ -604,16 +604,6 @@
       "description": "新增對 Lumia Stream 的支援",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "為更多歌曲新增字幕支援",
-      "menu": {
-        "romanized-lyrics": "羅馬拼音字幕"
-      },
-      "name": "第三方字幕",
-      "renderer": {
-        "fetched-lyrics": "為 Genius 取得字幕"
-      }
-    },
     "music-together": {
       "description": "與他人共享播放清單。當主持人播放歌曲時，其他成員也會同步收聽",
       "dialog": {
@@ -834,93 +824,6 @@
     "sponsorblock": {
       "description": "自動跳過贊助片段",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "使用 LRClib 等管道提供歌詞同步顯示。",
-      "errors": {
-        "fetch": "⚠️\t擷取歌詞時發生錯誤\n請稍後再試。",
-        "not-found": "⚠️未找到該首歌曲的歌詞。"
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "繁簡轉換",
-          "submenu": {
-            "disabled": {
-              "label": "已停用",
-              "tooltip": "停用繁簡轉換"
-            },
-            "simplified-to-traditional": {
-              "label": "簡體轉繁體",
-              "tooltip": "轉換簡體中文至繁體中文"
-            },
-            "traditional-to-simplified": {
-              "label": "繁體轉簡體",
-              "tooltip": "轉換繁體中文至簡體中文"
-            }
-          },
-          "tooltip": "轉換中文字符至繁體或簡體"
-        },
-        "default-text-string": {
-          "label": "預設歌詞中間隔的符號",
-          "tooltip": "選擇歌詞中間隔要使用的符號"
-        },
-        "line-effect": {
-          "label": "歌詞顯示效果",
-          "submenu": {
-            "fancy": {
-              "label": "絢麗",
-              "tooltip": "使用較為接近原生樣式並且放大目前該行歌詞"
-            },
-            "focus": {
-              "label": "聚焦",
-              "tooltip": "聚焦目前的歌詞"
-            },
-            "offset": {
-              "label": "凸行",
-              "tooltip": "凸行目前的歌詞"
-            },
-            "scale": {
-              "label": "放大",
-              "tooltip": "放大目前的歌詞"
-            }
-          },
-          "tooltip": "選擇要使用的歌詞顯示效果"
-        },
-        "precise-timing": {
-          "label": "使歌詞完美同步",
-          "tooltip": "更精確的計算下一行歌詞的顯示 (將會降低些許效能)"
-        },
-        "preferred-provider": {
-          "label": "偏好提供者",
-          "none": {
-            "label": "無",
-            "tooltip": "沒有偏好的提供者"
-          },
-          "tooltip": "選擇預設的歌詞提供者"
-        },
-        "romanization": {
-          "label": "羅馬拼音化歌詞",
-          "tooltip": "如果歌詞使用不同語言，嘗試使用拉丁文顯示。"
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "即使不精確依然強制顯示歌詞",
-          "tooltip": "當找不到符合該歌曲的歌詞時，該功能會嘗試不同的搜尋方式。\n使用不同的搜尋方式會導致不精確的結果。"
-        },
-        "show-time-codes": {
-          "label": "顯示時間線",
-          "tooltip": "在歌詞旁顯示時間線"
-        }
-      },
-      "name": "歌詞同步",
-      "refetch-btn": {
-        "fetching": "擷取中...",
-        "normal": "重新擷取歌詞"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️歌詞可能會出現不同步的情況。",
-        "inexact": "⚠️該歌曲的歌詞可能並不精確",
-        "instrumental": "⚠️該首歌曲為純音樂"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "允許工作列應用程式預覽介面顯示媒體控制相關按鈕",

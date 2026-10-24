@@ -10,7 +10,7 @@
 
 | Menu | Points de contrôle | Statut |
 |---|---|---|
-| **Plugins** | 34 entrées, activation/désactivation, sous-menus par plugin | Génération auditable, clic de case testé ; test GUI restant |
+| **Plugins** | 31 entrées, activation/désactivation, sous-menus par plugin | Génération auditable, clic de case testé ; test GUI restant |
 | **Options** | Mise à jour, reprise, page d'accueil, apparence, thème CSS, langue, démarrage, barre d'état, proxy et avancé | Callbacks vérifiés dans le code ; intégrations non toutes testées |
 | **Affichage** | Recharger, recharger sans cache, zoom, réinitialisation, plein écran | Traitement des rôles corrigé ; tests unitaires de dispatch réussis |
 | **Navigation** | Retour, avance, copie d’URL, redémarrage, fermeture | Actions câblées dans le code ; test GUI restant |
@@ -44,9 +44,8 @@ Le plugin [Anti-Pause & Purge Totale](../src/plugins/anti-pause/index.ts) combin
 
 ## Restant à tester dans la véritable application
 
-1. Ouvrir le menu Plugins et vérifier l'apparition des 42 entrées.
+1. Ouvrir le menu Plugins et vérifier l'apparition des entrées actuellement présentes.
 2. Activer/désactiver des plugins avec et sans sous-menu ; contrôler que le coche et les réglages survivent au redémarrage.
-3. Tester les sous-menus des plugins conservés, notamment paroles, téléchargements et périphériques audio avec leurs services et autorisations réels.
 4. Tester toutes les entrées des menus Options, Affichage et Navigation.
 5. Écouter plusieurs titres avec annonces possibles et vérifier si le blocage réseau réduit ou élimine le flash ; désactiver puis réactiver Anti-Pause pour détecter les résidus.
 

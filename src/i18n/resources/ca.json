@@ -597,16 +597,6 @@
       "description": "Afegeix suport pel Lumia Stream",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Afegeix suport per la lletra de la majoria de cançons",
-      "menu": {
-        "romanized-lyrics": "Lletra romanitzada"
-      },
-      "name": "Lletres de Genius",
-      "renderer": {
-        "fetched-lyrics": "S'ha buscat la lletra a Genius"
-      }
-    },
     "music-together": {
       "description": "Comparteix una llista de reproducció amb els demés. Quan l'amfitrió reprodueix una cançó, la resta també sentiran la mateixa",
       "dialog": {
@@ -827,93 +817,6 @@
     "sponsorblock": {
       "description": "Omet automàticament els segments dels vídeos que no son música, com la intro o el final",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Proporciona lletres sincronitzades amb les cançons, a través de proveïdors com LRClib.",
-      "errors": {
-        "fetch": "⚠️\tS'ha produït un error en descarregar la lletra.\n\tSi us plau, intenta-ho més tard.",
-        "not-found": "⚠️ No s'ha trobat la lletra per aquesta cançó."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Converteix Caràcters Xinesos",
-          "submenu": {
-            "disabled": {
-              "label": "Deshabilitat",
-              "tooltip": "Deshabilitar la conversió de caràcters Xinesos"
-            },
-            "simplified-to-traditional": {
-              "label": "Simplificat al Tradicional",
-              "tooltip": "Converteix Xinés Simplificat a Xinés Tradicional"
-            },
-            "traditional-to-simplified": {
-              "label": "Tradicional a Simplificat",
-              "tooltip": "Converteix Xinès Tradicional a Xinès Simplificat"
-            }
-          },
-          "tooltip": "Converteix caràcter Xinès a Tradicional o Simplificat"
-        },
-        "default-text-string": {
-          "label": "Caràcter per defecte entre lletres",
-          "tooltip": "Tria el caràcter per defecte que es mostrarà a l'espai entre les lletres"
-        },
-        "line-effect": {
-          "label": "Efecte de la línia",
-          "submenu": {
-            "fancy": {
-              "label": "Caprici",
-              "tooltip": "Utilitza efectes grans \"app-like\" en la línia actual"
-            },
-            "focus": {
-              "label": "Centrar",
-              "tooltip": "Mostra tan sols la línia actual en blanc"
-            },
-            "offset": {
-              "label": "Desplaçament",
-              "tooltip": "Desplaçament a la dreta de la línia actual"
-            },
-            "scale": {
-              "label": "Escala",
-              "tooltip": "Redimensiona la línia actual"
-            }
-          },
-          "tooltip": "Tria l'efecte a aplicar a la línia actual"
-        },
-        "precise-timing": {
-          "label": "Fes que les lletres es sincronitzin a la perfecció",
-          "tooltip": "Calcula al mil·lisegon l'aparició de la següent línia (pot tenir un petit impacte en el rendiment)"
-        },
-        "preferred-provider": {
-          "label": "Proveïdor preferit",
-          "none": {
-            "label": "Cap",
-            "tooltip": "Cap proveïdor preferit"
-          },
-          "tooltip": "Trieu el proveïdor predeterminat que voleu utilitzar"
-        },
-        "romanization": {
-          "label": "Romanitza les lletres",
-          "tooltip": "Si les lletres són en un idioma diferent, intenta mostrar la versió amb alfabet llatí."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Mostra la lletra tot i que sigui inexacta",
-          "tooltip": "Si no es troba la cançó, el plugin torna a intentar obtenir la lletra amb una cerca diferent.\nEl resultat d'aquesta segona cerca podria no ser exacte."
-        },
-        "show-time-codes": {
-          "label": "Mostra els codis de temps",
-          "tooltip": "Mostra els codis de temps al costat de la lletra"
-        }
-      },
-      "name": "Lletres sincronitzades",
-      "refetch-btn": {
-        "fetching": "Obtenint...",
-        "normal": "Tornar a obtenir la lletra"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - La lletra podria no estar ben sincronitzada, la durada no és coincident.",
-        "inexact": "⚠️ - La lletra d'aquesta cançó podria no ser exacta",
-        "instrumental": "⚠️ - Aquesta cançó és instrumental"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Controla la reproducció des de la barra de tasques del Windows",

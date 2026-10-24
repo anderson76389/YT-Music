@@ -604,16 +604,6 @@
       "description": "Fügt Unterstützung für Lumia Stream hinzu",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Für Songtextunterstützung für die meisten Lieder hinzu",
-      "menu": {
-        "romanized-lyrics": "Romanisierte Songtexte"
-      },
-      "name": "Songtexte von Genius",
-      "renderer": {
-        "fetched-lyrics": "Liedtexte für Genius abgerufen"
-      }
-    },
     "music-together": {
       "description": "Teile eine Wiedergabeliste mit anderen. Wenn der Host ein Lied abspielt, hören alle anderen das gleiche Lied",
       "dialog": {
@@ -834,93 +824,6 @@
     "sponsorblock": {
       "description": "Überspringt automatisch nicht-musikalische Teile wie Intro/Outro oder Teile von Musikvideos, in denen der Song nicht gespielt wird",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Bietet synchronisierte Liedtexte zu Songs, verwendet Anbieter wie LRClib.",
-      "errors": {
-        "fetch": "⚠️ - \tBeim Abrufen des Liedtexts ist ein Fehler aufgetreten. \n\tBitte versuchen Sie es später nochmal.",
-        "not-found": "⚠️ Kein Text für diesen Song gefunden."
-      },
-      "menu": {
-        "convert-chinese-character": {
-          "label": "Chinesische Zeichen Umwandeln",
-          "submenu": {
-            "disabled": {
-              "label": "Deaktiviert",
-              "tooltip": "Chinesische Zeichenkonvertierung deaktivieren"
-            },
-            "simplified-to-traditional": {
-              "label": "Vereinfacht zu Traditionell",
-              "tooltip": "Vereinfachtes Chinesisch in traditionelles Chinesisch umwandeln"
-            },
-            "traditional-to-simplified": {
-              "label": "Traditionell zu Vereinfacht",
-              "tooltip": "Traditionelles Chinesisch in vereinfachtes Chinesisch umwandeln"
-            }
-          },
-          "tooltip": "Chinesische Zeichen in traditionell oder vereinfacht umwandeln"
-        },
-        "default-text-string": {
-          "label": "Standardzeichen zwischen Texten",
-          "tooltip": "Standardzeichen für die Lücke zwischen Songtexten auswählen"
-        },
-        "line-effect": {
-          "label": "Zeileneffekt",
-          "submenu": {
-            "fancy": {
-              "label": "schick",
-              "tooltip": "Verwende große, app-ähnliche Effekte in der aktuellen Zeile"
-            },
-            "focus": {
-              "label": "Fokussieren",
-              "tooltip": "Nur aktive Zeile weiß darstellen"
-            },
-            "offset": {
-              "label": "Versatz",
-              "tooltip": "Verschiebe die aktuelle Zeile nach rechts"
-            },
-            "scale": {
-              "label": "Skalieren",
-              "tooltip": "Aktuelle Zeile skalieren"
-            }
-          },
-          "tooltip": "Effekt für aktive Zeile auswählen"
-        },
-        "precise-timing": {
-          "label": "Den Songtext perfekt synchronisieren",
-          "tooltip": "Auf die Millisekunde genau berechnen, wann die nächste Zeile angezeigt werden soll (Kann Einfluss auf die Leistung haben)"
-        },
-        "preferred-provider": {
-          "label": "bevorzugter Anbieter",
-          "none": {
-            "label": "Nichts",
-            "tooltip": "Kein bevorzugter Anbieter"
-          },
-          "tooltip": "Standardanbieter auswählen"
-        },
-        "romanization": {
-          "label": "Lateinische Umschrift anzeigen",
-          "tooltip": "Wenn der Liedtext in einer anderen Schrift ist, zeige nach Möglichkeit eine Version in lateinischer Schrift an."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Songtext anzeigen, auch wenn er ungenau ist",
-          "tooltip": "Die Erweiterung sucht mit anderen Suchparameter nochmals, wenn der Song nicht gefunden wurde.\nEs kann sein, dass das Ergebnis von der zweiten Anfrage nicht genau ist."
-        },
-        "show-time-codes": {
-          "label": "Zeitkodierungen anzeigen",
-          "tooltip": "Zeitkodierungen neben Songtext anzeigen"
-        }
-      },
-      "name": "Synchronisierte Texte",
-      "refetch-btn": {
-        "fetching": "Laden...",
-        "normal": "Songtext neu laden"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Es kann sein, dass die Synchronization nicht stimmt, da die Songdauer nicht übereinstimmt.",
-        "inexact": "⚠️ - Es ist möglich, dass der Songtext für diesen Song nicht übereinstimmt.",
-        "instrumental": "⚠️ - Das ist ein instrumentales Lied"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Wiedergabe aus der Windows Taskleiste kontrollieren",

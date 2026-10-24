@@ -568,16 +568,6 @@
       "description": "Přidává Lumia Stream podporu",
       "name": "Lumia Stream [Beta]"
     },
-    "lyrics-genius": {
-      "description": "Přidává lyrics podporu pro většinu písniček",
-      "menu": {
-        "romanized-lyrics": "Romanizované Lyrics"
-      },
-      "name": "Lyrics Genius",
-      "renderer": {
-        "fetched-lyrics": "Fetched lyrics pro Genius"
-      }
-    },
     "music-together": {
       "description": "Sdílejte playlist s ostatními. Když hostitel přehrává skladbu, uslyší jí i všichni ostatní",
       "dialog": {
@@ -798,75 +788,6 @@
     "sponsorblock": {
       "description": "Automaticky přeskakuje nehudební části jako intro/outro nebo části hudebních videí, kde nehraje písnčka",
       "name": "SponsorBlock"
-    },
-    "synced-lyrics": {
-      "description": "Poskytuje synchronizaci textů do písní, pomocí poskytovatelů, jako je LRClib.",
-      "errors": {
-        "fetch": "⚠️ Při hledání textu došlo k chybě.\n \tProsím zkuste to znovu později.",
-        "not-found": "⚠️ Pro tuto skladbu nebyl nalezen žádný text."
-      },
-      "menu": {
-        "default-text-string": {
-          "label": "Výchozí znak mezi texty",
-          "tooltip": "Vyberte výchozí znak pro mezeru mezi texty"
-        },
-        "line-effect": {
-          "label": "Efekt řádku",
-          "submenu": {
-            "fancy": {
-              "label": "Luxusní",
-              "tooltip": "Použijte velké, aplikací inspirované efekty na aktuální řádek"
-            },
-            "focus": {
-              "label": "Soustředění",
-              "tooltip": "Nechat pouze aktuální řádek bílý"
-            },
-            "offset": {
-              "label": "Posun",
-              "tooltip": "Posunout aktuální řádek doprava"
-            },
-            "scale": {
-              "label": "Zvětšení",
-              "tooltip": "Změnit velikost aktuálního řádku"
-            }
-          },
-          "tooltip": "Vyberte efekt pro aktuální řádek"
-        },
-        "precise-timing": {
-          "label": "Dokonale synchronizovat texty",
-          "tooltip": "Vypočítat zobrazení dalšího řádku na milisekundu (může mít menší dopad na výkon)"
-        },
-        "preferred-provider": {
-          "label": "Preferovaný poskytovatel",
-          "none": {
-            "label": "Žádný",
-            "tooltip": "Žádný preferovaný poskytovatel"
-          },
-          "tooltip": "Zvolte výchozího poskytovatele"
-        },
-        "romanization": {
-          "label": "Romanizovat texty",
-          "tooltip": "Pokud je text v jiném jazyce, zkusit zobrazit verzi v latince."
-        },
-        "show-lyrics-even-if-inexact": {
-          "label": "Zobrazit i nepřesné texty",
-          "tooltip": "Pokud se píseň nenajde, plugin to zkusí znovu s jiným vyhledávacím výrazem.\nVýsledek druhého pokusu nemusí být přesný."
-        },
-        "show-time-codes": {
-          "label": "Zobrazit časové kódy",
-          "tooltip": "Zobrazit časové kódy vedle textu"
-        }
-      },
-      "name": "Synchronizované texty",
-      "refetch-btn": {
-        "fetching": "Získávání...",
-        "normal": "Znovu načíst texty"
-      },
-      "warnings": {
-        "duration-mismatch": "⚠️ - Text nemusí být synchronizován kvůli neshodě v délce trvání.",
-        "inexact": "⚠️ - Text pro tuto skladbu nemusí být přesný",
-        "instrumental": "⚠️ - Tato skladba je instrumentální"
-      }
     },
     "taskbar-mediacontrol": {
       "description": "Ovládejte přehrávání z vašeho Windows hlavního panelu",

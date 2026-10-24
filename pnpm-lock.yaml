@@ -2820,16 +2820,6 @@ packages:
   known-css-properties@0.30.0:
     resolution: {integrity: sha512-VSWXYUnsPu9+WYKkfmJyLKtIvaRJi1kXUqVmBACORXZQxT5oZDsoZ2vQP+bQFDnWtpI/4eq3MLoRMjI2fnLzTQ==}
 
-  kuromoji@0.1.2:
-    resolution: {integrity: sha512-V0dUf+C2LpcPEXhoHLMAop/bOht16Dyr+mDiIE39yX3vqau7p80De/koFqpiTcL1zzdZlc3xuHZ8u5gjYRfFaQ==}
-
-  kuroshiro-analyzer-kuromoji@1.1.0:
-    resolution: {integrity: sha512-BSJFhpsQdPwfFLfjKxfLA9iL+/PC6LCR9vgwgb5Jc7jZwk9ilX8SAV6CwhAQZY611tiuhbB52ONYKDO8hgY1bA==}
-
-  kuroshiro@1.2.0:
-    resolution: {integrity: sha512-yBGCK9oDOY3LGZ/KXaN9m7ADcAuSczOR2FoMRYwHLUlis3/o/uxdMVROAjENFO0NQJgALhIdWxI/vIBVrMCk9w==}
-    engines: {node: '>=6.5.0'}
-
   lazy-val@1.0.5:
     resolution: {integrity: sha512-0/BnGCCfyUMkBpeDgWihanIAF9JmZhHBgUhEqzvf+adhNGLoP6TaiI5oF8oyb3I45P+PcnrqihSf01M0l0G5+Q==}
 
@@ -6560,20 +6550,6 @@ snapshots:
       json-buffer: 3.0.1
 
   known-css-properties@0.30.0: {}
-
-  kuromoji@0.1.2(patch_hash=4a948f1ea45c61779fa371feb020253ccf7a24e1f7c6b2e250b3ce53d86216d4):
-    dependencies:
-      async: 2.6.4
-      doublearray: 0.0.2
-      zlibjs: 0.3.1
-
-  kuroshiro-analyzer-kuromoji@1.1.0:
-    dependencies:
-      kuromoji: 0.1.2(patch_hash=4a948f1ea45c61779fa371feb020253ccf7a24e1f7c6b2e250b3ce53d86216d4)
-
-  kuroshiro@1.2.0:
-    dependencies:
-      '@babel/runtime': 8.0.0
 
   lazy-val@1.0.5: {}
 

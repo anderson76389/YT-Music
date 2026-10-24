@@ -68,6 +68,28 @@ export function polishSidebar(doc: Document, pathname: string): void {
   }
 }
 
+/** Masquer uniquement l'onglet natif « Paroles » de la page de lecture.
+ * Les autres onglets, contenus et commandes YouTube Music restent intacts.
+ */
+export function isNativeLyricsTabLabel(value: string): boolean {
+  return /^(?:paroles|lyrics)$/i.test(value.trim().replace(/\s+/g, ' '));
+}
+
+export function hideNativeLyricsTab(doc: Document): void {
+  const tabs = doc.querySelectorAll<HTMLElement>(
+    'ytmusic-player-page #tabs tp-yt-paper-tab, ytmusic-player-page #tabs yt-tab-shape',
+  );
+  for (const tab of tabs) {
+    const label = (
+      tab.querySelector<HTMLElement>('#tab-title, .tab-title, yt-formatted-string')
+        ?.textContent ?? tab.textContent ?? ''
+    ).trim();
+    if (isNativeLyricsTabLabel(label)) {
+      tab.style.setProperty('display', 'none', 'important');
+    }
+  }
+}
+
 export function setupSidebarPolish(doc: Document = document): () => void {
   let queued = false;
   const refresh = () => {
@@ -76,6 +98,7 @@ export function setupSidebarPolish(doc: Document = document): () => void {
     requestAnimationFrame(() => {
       queued = false;
       polishSidebar(doc, window.location.pathname);
+      hideNativeLyricsTab(doc);
     });
   };
 

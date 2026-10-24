@@ -38,7 +38,7 @@
 
 **YT Music** est un projet de bureau autonome maintenu dans **[ce dépôt GitHub](https://github.com/anderson76389/YT-Music)**. Il reprend et adapte du code open source de l'écosystème YouTube Music ; il n'a besoin d'aucun dépôt Pear Desktop pour être compilé à partir des sources enregistrées ici.
 
-L'objectif est de retrouver l'expérience du service musical dans une véritable application de bureau, avec **32 plugins conservés : thèmes, transparence, mode ambiant, paroles, audio et contrôles du lecteur**.
+L'objectif est de retrouver l'expérience du service musical dans une véritable application de bureau, avec **31 plugins conservés : thèmes, transparence, mode ambiant, audio et contrôles du lecteur**.
 
 Ce dépôt héberge les **fichiers sources** de cette édition. Il ne représente pas un client officiel de Google ou de YouTube et ne fournit pas de catalogue musical indépendant : la lecture et certaines fonctionnalités dépendent du service YouTube Music.
 
@@ -66,7 +66,6 @@ Les modules ci-dessous sont **présents dans le code source**. Leur disponibilit
 | | Fonction | Ce qu'elle apporte |
 |:--:|---|---|
 | 🎨 | **Thèmes et apparence** | Couleurs d'album, mode ambiant, barre de navigation floutée et personnalisation du lecteur. |
-| 🎤 | **Paroles synchronisées** | Affichage des paroles avec plusieurs fournisseurs prévus par le plugin. |
 | 🎚️ | **Réglages audio** | Égaliseur, fondu enchaîné (*crossfade*), compression et contrôle précis du volume. |
 | 🚫 | **SponsorBlock** | Module de gestion des segments communautaires lorsque la source et le service le permettent. |
 | 🖥️ | **Mini-lecteur et vidéo** | Mode image dans l'image, affichage discret et contrôle de la vidéo. |
@@ -77,7 +76,7 @@ Les modules ci-dessous sont **présents dans le code source**. Leur disponibilit
 
 ## 🧹 Nettoyage de la version 3.12.1
 
-Dix plugins ont été **supprimés des sources**, ainsi que leurs ressources : adaptateur de proxy d’authentification, Discord Rich Presence, Horloge, Lumia Stream, Music Together, Raccourcis & MPRIS, Scrobbler, Serveur API, Amuse et Amélioration des performances. Les autres **32 plugins sont conservés**.
+Dix plugins ont été **supprimés des sources**, ainsi que leurs ressources : adaptateur de proxy d’authentification, Discord Rich Presence, Horloge, Lumia Stream, Music Together, Raccourcis & MPRIS, Scrobbler, Serveur API, Amuse et Amélioration des performances. Les autres **31 plugins sont conservés** ; les paroles synchronisées ont également été supprimées.
 
 Les mentions « Beta/Bêta » ont été retirées des intitulés des plugins conservés, mais cela ne signifie pas que leurs fonctions ont toutes été certifiées en conditions réelles.
 
@@ -95,7 +94,7 @@ Depuis la barre supérieure, ouvre **Plugins** (à côté de **Paramètres**). P
 
 Les fonctionnalités avancées sont organisées autour des plugins présents dans [`src/plugins/`](src/plugins/).
 
-Vous pouvez notamment adapter l'expérience selon vos préférences : améliorer l'affichage des albums, activer les paroles synchronisées, utiliser les commandes multimédias, configurer un égaliseur ou activer des intégrations compatibles.
+Vous pouvez notamment adapter l'expérience selon vos préférences : améliorer l'affichage des albums, utiliser les commandes multimédias, configurer un égaliseur ou activer des intégrations compatibles.
 
 **Remarque :** les plugins ne sont pas tous nécessairement activés par défaut. Une fonctionnalité listée ici indique que son module existe dans le dépôt, pas qu'elle a été individuellement testée sur toutes les plateformes.
 

@@ -9,7 +9,6 @@ import { DefaultPresetList, type Preset } from '@/plugins/downloader/types';
 import { defaultConfig as defaults } from './defaults';
 
 import type { TrackerBlockerConfig } from '@/plugins/do-not-track';
-import type { SyncedLyricsPluginConfig } from '@/plugins/synced-lyrics/types';
 
 // HACK: electron-store is ESM, but rolldown has a bug that prevents it from being imported properly in CommonJS context, so we have to use require here
 /* oxlint-disable typescript/no-require-imports */
@@ -50,32 +49,6 @@ const migrations = {
       }
       store.set('plugins.do-not-track', blockerConfig);
       store.delete('plugins.adblocker');
-    }
-  },
-  '>=3.10.0'(store: IStore) {
-    const lyricGeniusConfig = store.get('plugins.lyrics-genius') as
-      | {
-          enabled?: boolean;
-          romanizedLyrics?: boolean;
-        }
-      | undefined;
-
-    if (lyricGeniusConfig) {
-      const syncedLyricsConfig = store.get('plugins.synced-lyrics') as
-        | SyncedLyricsPluginConfig
-        | undefined;
-
-      if (
-        !syncedLyricsConfig ||
-        syncedLyricsConfig?.enabled !== lyricGeniusConfig?.enabled
-      ) {
-        store.set('plugins.synced-lyrics', {
-          ...syncedLyricsConfig,
-          enabled: lyricGeniusConfig.enabled,
-        });
-      }
-
-      store.delete('plugins.lyrics-genius');
     }
   },
   '>=2.1.0'(store: IStore) {
@@ -205,3 +178,7 @@ export const store = new Store({
   clearInvalidConfig: false,
   migrations,
 });
+
+// Retirer même pour les profils déjà migrés les anciennes préférences de paroles.
+store.delete('plugins.synced-lyrics');
+store.delete('plugins.lyrics-genius');

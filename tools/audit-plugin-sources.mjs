@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Audit structurel reproductible des 32 extensions YT Music conservées.
+ * Audit structurel reproductible des 31 extensions YT Music conservées.
  * Cette vérification garantit l'inventaire, les entrées et leur compilation,
  * pas le fonctionnement des services externes ou du DOM Google en direct.
  */
@@ -17,7 +17,7 @@ const expected = [
   'navigation', 'notifications',
   'picture-in-picture', 'playback-speed', 'precise-volume',
   'quality-changer', 'skip-disliked-songs', 'skip-silences',
-  'sponsorblock', 'synced-lyrics', 'taskbar-mediacontrol', 'touchbar',
+  'sponsorblock', 'taskbar-mediacontrol', 'touchbar',
   'transparent-player', 'tuna-obs', 'unobtrusive-player',
   'video-toggle', 'visualizer',
 ].sort();
@@ -25,6 +25,7 @@ const removed = [
   'amuse', 'performance-improvement',
   'auth-proxy-adapter', 'discord', 'clock', 'lumiastream',
   'music-together', 'shortcuts', 'scrobbler', 'api-server',
+  'synced-lyrics',
 ];
 
 const dirs = readdirSync(root, { withFileTypes: true })
@@ -55,4 +56,4 @@ for (const id of actual) {
     `Nom de plugin absent : ${id}`);
   console.log(`OK ${id}`);
 }
-console.log(`Audit structurel terminé : ${actual.length}/32 plugins présents.`);
+console.log(`Audit structurel terminé : ${actual.length}/31 plugins présents.`);

@@ -172,3 +172,34 @@ ytmusic-app-layout#layout #page-manager::-webkit-scrollbar {
 ytmusic-nav-bar:has(.sign-in-link.ytmusic-nav-bar) ytmusic-settings-button {
   display: none !important;
 }
+/* YTMD-CAROUSEL-RIGHT-GUTTER
+   Les rangées de l'accueil, des albums et des playlists sont des carrousels
+   horizontaux natifs de YouTube Music. Garder leur overflow, leurs flèches et
+   leurs largeurs de cartes : simplement empêcher le panneau de déborder et
+   réserver une marge APRÈS la dernière carte, afin qu'elle puisse apparaître
+   complètement au dernier défilement, sans être coupée par le bord droit.
+   Ne touche ni à la zone du lecteur ni aux feuilles de style des plugins. */
+ytmusic-app-layout#layout ytmusic-section-list-renderer,
+ytmusic-app-layout#layout ytmusic-section-list-renderer ytmusic-carousel-shelf-renderer,
+ytmusic-app-layout#layout ytmusic-section-list-renderer ytmusic-immersive-carousel-shelf-renderer,
+ytmusic-app-layout#layout ytmusic-section-list-renderer ytmusic-shelf-renderer {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+ytmusic-app-layout#layout ytmusic-section-list-renderer ytmusic-carousel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+ytmusic-app-layout#layout ytmusic-section-list-renderer ytmusic-carousel .items-wrapper.ytmusic-carousel {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+ytmusic-app-layout#layout ytmusic-section-list-renderer ytmusic-carousel #items.ytmusic-carousel {
+  padding-inline-end: clamp(16px, 2vw, 32px);
+  scroll-padding-inline-end: clamp(16px, 2vw, 32px);
+}

@@ -9,6 +9,7 @@ import PreviousIcon from '@assets/media-icons-white/previous.png?asset&asarUnpac
 import { ipcMain, nativeImage, nativeTheme, type BrowserWindow } from 'electron';
 
 import { getSongControls } from '@/providers/song-controls';
+import { canRefreshThumbnail } from '@/providers/windows-thumbnail-state';
 import { registerCallback, SongInfoEvent } from '@/providers/song-info';
 
 // Il ne doit y avoir qu'un seul propriétaire de setThumbarButtons.
@@ -64,7 +65,7 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
   };
 
   const applyButtons = (force = false) => {
-    if (win.isDestroyed() || !win.isVisible()) return;
+    if (win.isDestroyed() || !canRefreshThumbnail(registered, win.isVisible())) return;
     if (!force && registered && appliedState === isPlaying) return;
 
     try {

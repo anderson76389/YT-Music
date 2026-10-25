@@ -22,6 +22,7 @@ import { setupSongInfo } from './providers/song-info-front';
 import { setupSidebarPolish } from './providers/sidebar-polish';
 import { applyAppearanceOptions } from './providers/settings-appearance';
 import { rememberAudioSession } from './providers/audio-session';
+import { getThumbnailPlayingState } from './providers/windows-thumbnail-state';
 
 import type { MusicPlayer } from '@/types/music-player';
 import type { MusicPlayerAppElement } from '@/types/music-player-app-element';
@@ -321,11 +322,26 @@ async function onApiLoaded() {
   // aucune modification de playVideo/pauseVideo ni des plugins.
   if (window.electronIs.windows()) {
     const reportThumbnailPlayback = () => {
-      window.ipcRenderer.send('ytmd:taskbar-playback-state', !video.paused && !video.ended);
+      // Le <video> peut rester en pause alors que la musique est lue via
+      // le lecteur YouTube. Utiliser en priorité son état (1 = lecture,
+      // 2 = pause) pour éviter une icône de miniature bloquée sur ▶.
+      let playerState: number | undefined;
+      try {
+        playerState = api?.getPlayerState();
+      } catch {
+        playerState = undefined;
+      }
+      window.ipcRenderer.send(
+        'ytmd:taskbar-playback-state',
+        getThumbnailPlayingState(playerState, video.paused, video.ended),
+      );
     };
     for (const eventName of ['play', 'playing', 'pause', 'ended', 'loadedmetadata', 'emptied']) {
       video.addEventListener(eventName, reportThumbnailPlayback, { passive: true });
     }
+    // Le changement d'état du lecteur couvre les pistes audio et les
+    // remplacements du média HTML, sans polling en arrière-plan.
+    api?.addEventListener('onStateChange', reportThumbnailPlayback);
     window.ipcRenderer.on('ytmd:request-playback-state', reportThumbnailPlayback);
     reportThumbnailPlayback();
   }

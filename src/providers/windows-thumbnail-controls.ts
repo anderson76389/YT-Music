@@ -1,11 +1,29 @@
+import NextIconBlack from '@assets/media-icons-black/next.png?asset&asarUnpack';
+import PauseIconBlack from '@assets/media-icons-black/pause.png?asset&asarUnpack';
+import PlayIconBlack from '@assets/media-icons-black/play.png?asset&asarUnpack';
+import PreviousIconBlack from '@assets/media-icons-black/previous.png?asset&asarUnpack';
 import NextIcon from '@assets/media-icons-white/next.png?asset&asarUnpack';
 import PauseIcon from '@assets/media-icons-white/pause.png?asset&asarUnpack';
 import PlayIcon from '@assets/media-icons-white/play.png?asset&asarUnpack';
 import PreviousIcon from '@assets/media-icons-white/previous.png?asset&asarUnpack';
-import { ipcMain, nativeImage, type BrowserWindow } from 'electron';
+import { ipcMain, nativeImage, nativeTheme, type BrowserWindow } from 'electron';
 
 import { getSongControls } from '@/providers/song-controls';
 import { registerCallback, SongInfoEvent } from '@/providers/song-info';
+
+// Il ne doit y avoir qu'un seul propriétaire de setThumbarButtons.
+// Le plugin optionnel règle la couleur des icônes sans recréer les boutons.
+const themeAwareWindows = new WeakSet<BrowserWindow>();
+const refreshers = new WeakMap<BrowserWindow, () => void>();
+
+export const setWindowsThumbnailThemeAware = (
+  win: BrowserWindow,
+  enabled: boolean,
+): void => {
+  if (enabled) themeAwareWindows.add(win);
+  else themeAwareWindows.delete(win);
+  refreshers.get(win)?.();
+};
 
 /**
  * Windows thumbnail-toolbar controls. Explorer cannot reliably register the
@@ -17,19 +35,22 @@ import { registerCallback, SongInfoEvent } from '@/providers/song-info';
 export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
   if (process.platform !== 'win32') return;
 
-  const previousIcon = nativeImage.createFromPath(PreviousIcon).resize({ width: 16, height: 16 });
-  const playIcon = nativeImage.createFromPath(PlayIcon).resize({ width: 16, height: 16 });
-  const pauseIcon = nativeImage.createFromPath(PauseIcon).resize({ width: 16, height: 16 });
-  const nextIcon = nativeImage.createFromPath(NextIcon).resize({ width: 16, height: 16 });
+  const makeIcons = (previous: string, play: string, pause: string, next: string) => ({
+    previous: nativeImage.createFromPath(previous).resize({ width: 16, height: 16 }),
+    play: nativeImage.createFromPath(play).resize({ width: 16, height: 16 }),
+    pause: nativeImage.createFromPath(pause).resize({ width: 16, height: 16 }),
+    next: nativeImage.createFromPath(next).resize({ width: 16, height: 16 }),
+  });
+  const whiteIcons = makeIcons(PreviousIcon, PlayIcon, PauseIcon, NextIcon);
+  const blackIcons = makeIcons(PreviousIconBlack, PlayIconBlack, PauseIconBlack, NextIconBlack);
 
-  if ([previousIcon, playIcon, pauseIcon, nextIcon].some((icon) => icon.isEmpty())) {
+  if ([...Object.values(whiteIcons), ...Object.values(blackIcons)].some((icon) => icon.isEmpty())) {
     console.warn('[YT Music] Impossible de charger les icônes des contrôles Windows.');
     return;
   }
 
   const { previous, playPause, next } = getSongControls(win);
   let isPlaying = false;
-  let rendererStateAvailable = false;
   let appliedState: boolean | undefined;
   let registered = false;
   let retries = 0;
@@ -47,19 +68,25 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
     if (!force && registered && appliedState === isPlaying) return;
 
     try {
+      // Icônes blanches par défaut. Le plugin optionnel permet d'adapter
+      // les icônes au thème système, sans créer de second gestionnaire.
+      const icons =
+        themeAwareWindows.has(win) && !nativeTheme.shouldUseDarkColors
+          ? blackIcons
+          : whiteIcons;
       const success = win.setThumbarButtons([
         {
-          icon: previousIcon,
+          icon: icons.previous,
           tooltip: 'Précédent',
           click: previous,
         },
         {
-          icon: isPlaying ? pauseIcon : playIcon,
+          icon: isPlaying ? icons.pause : icons.play,
           tooltip: isPlaying ? 'Pause' : 'Lecture',
           click: onPlayPauseClick,
         },
         {
-          icon: nextIcon,
+          icon: icons.next,
           tooltip: 'Suivant',
           click: next,
         },
@@ -123,22 +150,30 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
   ) => {
     if (win.isDestroyed() || event.sender !== win.webContents ||
         typeof playing !== 'boolean') return;
-    rendererStateAvailable = true;
     isPlaying = playing;
     applyButtons();
   };
   ipcMain.on('ytmd:taskbar-playback-state', onRendererPlaybackState);
 
+  const onThemeUpdated = () => {
+    if (themeAwareWindows.has(win)) applyButtons(true);
+  };
+  nativeTheme.on('updated', onThemeUpdated);
+
+  refreshers.set(win, () => applyButtons(true));
   win.on('closed', () => {
     cancelRetry();
+    nativeTheme.removeListener('updated', onThemeUpdated);
+    refreshers.delete(win);
+    themeAwareWindows.delete(win);
     ipcMain.removeListener('ytmd:taskbar-playback-state', onRendererPlaybackState);
   });
 
-  // Repli existant si la page ne peut pas encore envoyer les événements
-  // play/pause. Ignorer VideoSrcChanged : son champ isPaused est initialisé
-  // de façon approximative lors du chargement des métadonnées.
+  // Une seule routine met à jour les boutons. Les événements réels play/pause
+  // servent aussi de secours si le canal IPC du média est indisponible.
+  // Ignorer VideoSrcChanged : son champ isPaused peut être inexact.
   registerCallback((songInfo, event) => {
-    if (win.isDestroyed() || rendererStateAvailable ||
+    if (win.isDestroyed() ||
         event !== SongInfoEvent.PlayOrPaused ||
         typeof songInfo.isPaused !== 'boolean') return;
 

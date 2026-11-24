@@ -59,6 +59,12 @@ Ce dépôt **n'est pas un fork GitHub** de Pear Desktop. Son code source, ses co
 
 Le nouveau nom et l'identifiant d'application peuvent créer un **nouveau profil de configuration**. Les réglages, cookies ou extensions de l'ancienne installation ne sont pas supprimés automatiquement. Sauvegarde ton ancien dossier de données avant de supprimer une ancienne version ; ne copie pas à l'aveugle tout le répertoire, et vérifie les chemins lors de la migration.
 
+## Historique d'écoute
+
+Le raccourci **Historique**, sous Bibliothèque, ouvre la page native de YouTube Music avec la session Google déjà connectée. Il ne crée pas d'historique local ni de serveur de synchronisation. Les écoutes enregistrées par YouTube sont partagées entre appareils connectés au même compte/profil, sous réserve des paramètres d'historique et de la disponibilité du service. Un bloqueur de traqueurs ou des filtres réseau personnalisés peuvent empêcher l'enregistrement natif ; en cas de problème, vérifier ces réglages et tester avec le bloqueur désactivé. Les paramètres de confidentialité ne sont pas modifiés automatiquement.
+
+Pour vérifier en conditions réelles : écouter un morceau sur le téléphone puis ouvrir Historique sur le PC ; écouter un autre morceau sur le PC puis vérifier l'historique dans l'application officielle. Vérifier également la suppression native d'une entrée et l'absence d'enregistrement lorsque l'historique est suspendu.
+
 ## ✨ Fonctionnalités
 
 Les modules ci-dessous sont **présents dans le code source**. Leur disponibilité effective dépend de la version compilée, de l'activation des plugins et, pour certaines intégrations, de services externes.

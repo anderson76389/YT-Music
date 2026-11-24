@@ -43,7 +43,8 @@ registerWindowDefaultTrustedTypePolicy();
 async function listenForApiLoad() {
   if (!isApiLoaded) {
     api = document.querySelector('#movie_player');
-    if (api) {
+    if (api && document.querySelector('video')) {
+      isApiLoaded = true;
       await onApiLoaded();
 
       return;
@@ -313,8 +314,6 @@ async function onApiLoaded() {
     },
   );
 
-  setupSidebarPolish();
-
   const video = document.querySelector('video')!;
 
   // L'aperçu de Windows a besoin de l'état réel du lecteur, y compris avant
@@ -448,6 +447,8 @@ const updateSettingsAppearance = () => {
 };
 
 const main = async () => {
+  // Navigation is independent from playback and plugin initialization.
+  setupSidebarPolish();
   window.ipcRenderer.on('ytmd:appearance-settings-changed', updateSettingsAppearance);
   updateSettingsAppearance();
 
@@ -502,11 +503,11 @@ const initObserver = async () => {
     }
   });
 
-  const observer = new MutationObserver(() => {
+  const inspectPlayer = () => {
     const playerApi = document.querySelector<Element & MusicPlayer>(
       '#movie_player',
     );
-    if (playerApi) {
+    if (playerApi && document.querySelector('video')) {
       observer.disconnect();
 
       // Inject song-info provider
@@ -520,18 +521,17 @@ const initObserver = async () => {
       playerApi.addEventListener('videodatachange', dataLoadedListener);
 
       if (isPluginLoaded && !isApiLoaded) {
-        api = playerApi;
-        isApiLoaded = true;
-
-        onApiLoaded();
+        void listenForApiLoad();
       }
     }
-  });
+  };
 
+  const observer = new MutationObserver(inspectPlayer);
   observer.observe(document.documentElement, {
     childList: true,
     subtree: true,
   });
+  inspectPlayer();
 };
 
 initObserver().then(preload).then(main);

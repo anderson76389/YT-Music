@@ -63,9 +63,10 @@ export const setupRepeatChangedListener = singleton(() => {
       ).__dataHost.getState().queue.repeatMode,
     );
   });
-  repeatObserver.observe(document.querySelector('#right-controls .repeat')!, {
-    attributeFilter: ['title'],
-  });
+  const repeatButton = document.querySelector('#right-controls .repeat');
+  if (repeatButton) {
+    repeatObserver.observe(repeatButton, { attributeFilter: ['title'] });
+  }
 
   // Emit the initial value as well; as it's persistent between launches.
   // provided by App
@@ -181,11 +182,12 @@ export const setupAutoPlayChangedListener = singleton(() => {
     '.autoplay > tp-yt-paper-toggle-button',
   );
 
+  if (!autoplaySlider) return;
   const observer = new MutationObserver(() => {
     window.ipcRenderer.send('peard:autoplay-changed');
   });
 
-  observer.observe(autoplaySlider!, {
+  observer.observe(autoplaySlider, {
     attributes: true,
     childList: false,
     subtree: false,

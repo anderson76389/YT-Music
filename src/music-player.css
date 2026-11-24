@@ -203,3 +203,34 @@ ytmusic-app-layout#layout ytmusic-section-list-renderer ytmusic-carousel #items.
   padding-inline-end: clamp(16px, 2vw, 32px);
   scroll-padding-inline-end: clamp(16px, 2vw, 32px);
 }
+
+/* Direct access to the native, account-synced listening history. */
+a[data-ytmd-history-link] {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 48px;
+  border-radius: 8px;
+  padding-inline: 12px;
+  gap: 24px;
+  color: var(--ytmusic-text-primary, #fff);
+  font: inherit;
+  font-size: 14px;
+  text-decoration: none;
+  -webkit-app-region: no-drag;
+}
+a[data-ytmd-history-link] svg {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+}
+a[data-ytmd-history-link]:hover {
+  background-color: rgb(255 255 255 / 0.055);
+}
+a[data-ytmd-history-link][aria-current='page'] {
+  background-color: rgb(255 255 255 / 0.13);
+}
+a[data-ytmd-history-link]:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}

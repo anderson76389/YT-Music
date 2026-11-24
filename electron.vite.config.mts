@@ -78,7 +78,7 @@ export default defineConfig(({ mode }) => {
     ],
     build: {
       lib: {
-        entry: 'src/preload.ts',
+        entry: { preload: 'src/preload.ts', 'mini-player': 'src/mini-player-preload.ts' },
         formats: ['cjs'],
       },
       outDir: 'dist/preload',
@@ -87,7 +87,7 @@ export default defineConfig(({ mode }) => {
       },
       rolldownOptions: {
         external: mainAndPreloadExcludes,
-        input: './src/preload.ts',
+        input: { preload: './src/preload.ts', 'mini-player': './src/mini-player-preload.ts' },
       },
       minify: !isDev,
       cssMinify: !isDev,

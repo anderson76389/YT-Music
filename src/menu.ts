@@ -1,4 +1,5 @@
 import prompt from 'custom-electron-prompt';
+import { openMiniPlayer } from '@/providers/mini-player';
 import {
   app,
   type BrowserWindow,
@@ -664,6 +665,12 @@ export const mainMenuTemplate = async (
         {
           label: t('main.menu.view.submenu.toggle-fullscreen'),
           role: 'togglefullscreen',
+        },
+        { type: 'separator' },
+        {
+          label: 'Mini-lecteur',
+          id: 'ytmd-mini-player',
+          click: () => openMiniPlayer(win),
         },
       ],
     },

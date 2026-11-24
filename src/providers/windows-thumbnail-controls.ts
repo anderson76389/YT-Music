@@ -12,33 +12,6 @@ import { getSongControls } from '@/providers/song-controls';
 import { canRefreshThumbnail } from '@/providers/windows-thumbnail-state';
 import { registerCallback, SongInfoEvent } from '@/providers/song-info';
 
-// Native 16px BGRA glyphs, no additional assets or dependencies.
-function volumeGlyph(kind: 'down' | 'mute' | 'up', dark: boolean): Electron.NativeImage {
-  const pixels = Buffer.alloc(16 * 16 * 4);
-  const channel = dark ? 0 : 255;
-  const set = (x: number, y: number) => {
-    const offset = (y * 16 + x) * 4;
-    pixels[offset] = channel;
-    pixels[offset + 1] = channel;
-    pixels[offset + 2] = channel;
-    pixels[offset + 3] = 255;
-  };
-  for (let y = 4; y <= 11; y++) {
-    for (let x = 1; x <= 7; x++) {
-      if ((x <= 3 && y >= 6 && y <= 9) ||
-          (x >= 3 && Math.abs(y - 7.5) <= x - 2)) set(x, y);
-    }
-  }
-  for (let x = 10; x <= 14; x++) {
-    if (kind === 'mute') {
-      set(x, x - 4);
-      set(x, 20 - x);
-    } else set(x, 8);
-  }
-  if (kind === 'up') for (let y = 6; y <= 10; y++) set(12, y);
-  return nativeImage.createFromBitmap(pixels, { width: 16, height: 16, scaleFactor: 1 });
-}
-
 // Il ne doit y avoir qu'un seul propriétaire de setThumbarButtons.
 // Le plugin optionnel règle la couleur des icônes sans recréer les boutons.
 const themeAwareWindows = new WeakSet<BrowserWindow>();
@@ -77,19 +50,7 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
     return;
   }
 
-  const volumeIcons = (dark: boolean) => ({
-    down: volumeGlyph('down', dark),
-    mute: volumeGlyph('mute', dark),
-    up: volumeGlyph('up', dark),
-  });
-  const whiteVolume = volumeIcons(false);
-  const blackVolume = volumeIcons(true);
-  const { previous, playPause, next, muteUnmute } = getSongControls(win);
-  const adjustVolume = (direction: -1 | 1) => {
-    if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
-      win.webContents.send('ytmd:taskbar-adjust-volume', direction);
-    }
-  };
+  const { previous, playPause, next } = getSongControls(win);
   let isPlaying = false;
   let appliedState: boolean | undefined;
   let registered = false;
@@ -110,9 +71,10 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
     try {
       // Icônes blanches par défaut. Le plugin optionnel permet d'adapter
       // les icônes au thème système, sans créer de second gestionnaire.
-      const useBlack = themeAwareWindows.has(win) && !nativeTheme.shouldUseDarkColors;
-      const icons = useBlack ? blackIcons : whiteIcons;
-      const volume = useBlack ? blackVolume : whiteVolume;
+      const icons =
+        themeAwareWindows.has(win) && !nativeTheme.shouldUseDarkColors
+          ? blackIcons
+          : whiteIcons;
       const success = win.setThumbarButtons([
         {
           icon: icons.previous,
@@ -129,9 +91,6 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
           tooltip: 'Suivant',
           click: next,
         },
-        { icon: volume.down, tooltip: 'Volume -5 %', click: () => adjustVolume(-1) },
-        { icon: volume.mute, tooltip: 'Couper / rétablir le son', click: muteUnmute },
-        { icon: volume.up, tooltip: 'Volume +5 %', click: () => adjustVolume(1) },
       ]);
 
       if (success) {

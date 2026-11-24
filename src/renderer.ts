@@ -22,7 +22,7 @@ import { setupSongInfo } from './providers/song-info-front';
 import { setupSidebarPolish } from './providers/sidebar-polish';
 import { applyAppearanceOptions } from './providers/settings-appearance';
 import { rememberAudioSession } from './providers/audio-session';
-import { getAdjustedThumbnailVolume, getThumbnailPlayingState } from './providers/windows-thumbnail-state';
+import { getThumbnailPlayingState } from './providers/windows-thumbnail-state';
 
 import type { MusicPlayer } from '@/types/music-player';
 import type { MusicPlayerAppElement } from '@/types/music-player-app-element';
@@ -175,15 +175,6 @@ async function onApiLoaded() {
       clickFullscreenButton(fullscreen ?? false);
     },
   );
-
-  window.ipcRenderer.on('ytmd:taskbar-adjust-volume', (_, direction: unknown) => {
-    if (!api) return;
-    const volume = getAdjustedThumbnailVolume(api.getVolume(), direction);
-    if (volume === null) return;
-    const bar = document.querySelector<HTMLElement & { updateVolume?: (value: number) => void }>('ytmusic-player-bar');
-    if (typeof bar?.updateVolume === 'function') bar.updateVolume(volume);
-    else api.setVolume(volume);
-  });
 
   window.ipcRenderer.on('peard:toggle-mute', (_) => {
     document

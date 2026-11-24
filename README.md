@@ -65,8 +65,6 @@ Le raccourci **Historique**, sous Bibliothèque, ouvre la page native de YouTube
 
 Pour vérifier en conditions réelles : écouter un morceau sur le téléphone puis ouvrir Historique sur le PC ; écouter un autre morceau sur le PC puis vérifier l'historique dans l'application officielle. Vérifier également la suppression native d'une entrée et l'absence d'enregistrement lorsque l'historique est suspendu.
 
-Sous Windows, l’aperçu de la barre des tâches possède les trois boutons de lecture habituels et trois commandes de volume (−5 points, couper/rétablir, +5 points). La barre native de Windows ne peut pas contenir un curseur personnalisé.
-
 ## ✨ Fonctionnalités
 
 Les modules ci-dessous sont **présents dans le code source**. Leur disponibilité effective dépend de la version compilée, de l'activation des plugins et, pour certaines intégrations, de services externes.

@@ -65,6 +65,10 @@ Le raccourci **Historique**, sous Bibliothèque, ouvre la page native de YouTube
 
 Pour vérifier en conditions réelles : écouter un morceau sur le téléphone puis ouvrir Historique sur le PC ; écouter un autre morceau sur le PC puis vérifier l'historique dans l'application officielle. Vérifier également la suppression native d'une entrée et l'absence d'enregistrement lorsque l'historique est suspendu.
 
+### Mini-lecteur
+
+Ouvrir **Fenêtre → Mini-lecteur** pour afficher une petite fenêtre indépendante, au premier plan, avec la couverture, le titre, les commandes de lecture et un curseur de volume blanc. Elle pilote le lecteur principal sans lancer un second flux audio. Fermer la fenêtre ne coupe pas la musique. La miniature native de la barre des tâches conserve ses trois boutons.
+
 ## ✨ Fonctionnalités
 
 Les modules ci-dessous sont **présents dans le code source**. Leur disponibilité effective dépend de la version compilée, de l'activation des plugins et, pour certaines intégrations, de services externes.

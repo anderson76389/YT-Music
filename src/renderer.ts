@@ -136,11 +136,9 @@ async function onApiLoaded() {
     }
   });
   window.ipcRenderer.on('peard:update-volume', (_, volume: number) => {
-    document
-      .querySelector<HTMLElement & { updateVolume: (volume: number) => void }>(
-        'ytmusic-player-bar',
-      )
-      ?.updateVolume(volume);
+    const bar = document.querySelector<HTMLElement & { updateVolume?: (volume: number) => void }>('ytmusic-player-bar');
+    if (typeof bar?.updateVolume === 'function') bar.updateVolume(volume);
+    else api?.setVolume(volume);
   });
 
   const isFullscreen = () => {
@@ -315,6 +313,22 @@ async function onApiLoaded() {
   );
 
   const video = document.querySelector('video')!;
+  const reportMiniState = () => {
+    if (!api) return;
+    try {
+      window.ipcRenderer.send('ytmd:mini-player-state',
+        getThumbnailPlayingState(api.getPlayerState(), video.paused, video.ended),
+        api.getVolume(), api.isMuted());
+    } catch {
+      // The native player may be replacing its media.
+    }
+  };
+  window.ipcRenderer.on('ytmd:mini-request-state', reportMiniState);
+  for (const name of ['playing', 'pause', 'ended', 'volumechange', 'loadedmetadata']) {
+    video.addEventListener(name, reportMiniState, { passive: true });
+  }
+  api?.addEventListener('onStateChange', reportMiniState);
+  reportMiniState();
 
   // L'aperçu de Windows a besoin de l'état réel du lecteur, y compris avant
   // le premier chargement des métadonnées. Simple observation du média :

@@ -67,6 +67,43 @@ function isHistoryEntry(entry: HTMLElement): boolean {
 /** Native browse navigation uses the currently signed-in YouTube account.
  * The link remains usable if YouTube changes its internal navigate method.
  */
+function syncHistoryGeometry(doc: Document, library: HTMLElement, link: HTMLAnchorElement): void {
+  const row = library.querySelector<HTMLElement>('tp-yt-paper-item') ?? library;
+  const title = row.querySelector<HTMLElement>('#title, .title, yt-formatted-string');
+  const icon = row.querySelector<HTMLElement>('yt-icon, iron-icon, svg');
+  const parent = library.parentElement;
+  const view = doc.defaultView;
+  if (!parent || !view) return;
+
+  const rect = row.getBoundingClientRect();
+  const parentRect = parent.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return;
+
+  const style = view.getComputedStyle(row);
+  const titleStyle = title ? view.getComputedStyle(title) : style;
+  const values: Record<string, string> = {
+    '--ytmd-history-height': `${rect.height}px`,
+    '--ytmd-history-left': `${Math.max(0, rect.left - parentRect.left)}px`,
+    '--ytmd-history-right': `${Math.max(0, parentRect.right - rect.right)}px`,
+    '--ytmd-history-font-size': titleStyle.fontSize || '16px',
+    '--ytmd-history-font-weight': titleStyle.fontWeight || '500',
+    '--ytmd-history-radius': style.borderRadius || '8px',
+  };
+  if (icon) {
+    const iconRect = icon.getBoundingClientRect();
+    if (iconRect.width > 0) {
+      values['--ytmd-history-icon-size'] = `${iconRect.width}px`;
+      values['--ytmd-history-padding'] = `${Math.max(0, iconRect.left - rect.left)}px`;
+      if (title) {
+        values['--ytmd-history-gap'] = `${Math.max(0, title.getBoundingClientRect().left - iconRect.right)}px`;
+      }
+    }
+  }
+  for (const [key, value] of Object.entries(values)) {
+    if (link.style.getPropertyValue(key) !== value) link.style.setProperty(key, value);
+  }
+}
+
 function createHistoryLink(doc: Document): HTMLAnchorElement {
   const link = doc.createElement('a');
   link.setAttribute('data-ytmd-history-link', '');
@@ -111,6 +148,7 @@ export function ensureHistoryLinks(doc: Document, entries: HTMLElement[], pathna
     const link = links[0] ?? createHistoryLink(doc);
     links.slice(1).forEach((duplicate) => duplicate.remove());
     if (library.nextElementSibling !== link) library.after(link);
+    syncHistoryGeometry(doc, library, link);
     if (isHistoryPath(pathname)) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   }
@@ -204,11 +242,13 @@ export function setupSidebarPolish(doc: Document = document): () => void {
   const observer = new MutationObserver(refresh);
   observer.observe(doc.documentElement, { childList: true, subtree: true });
   const onRoute = () => refresh();
+  window.addEventListener('resize', onRoute);
   window.addEventListener('popstate', onRoute);
   window.addEventListener('yt-navigate-finish', onRoute);
   return () => {
     observer.disconnect();
     if (frame !== undefined) cancelAnimationFrame(frame);
+    window.removeEventListener('resize', onRoute);
     window.removeEventListener('popstate', onRoute);
     window.removeEventListener('yt-navigate-finish', onRoute);
   };

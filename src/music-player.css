@@ -209,20 +209,26 @@ a[data-ytmd-history-link] {
   display: flex;
   align-items: center;
   box-sizing: border-box;
-  min-height: 48px;
-  border-radius: 8px;
-  padding-inline: 12px;
-  gap: 24px;
+  height: var(--ytmd-history-height, 48px);
+  min-height: var(--ytmd-history-height, 48px);
+  flex-shrink: 0;
+  margin-left: var(--ytmd-history-left, 8px);
+  margin-right: var(--ytmd-history-right, 8px);
+  border-radius: var(--ytmd-history-radius, 8px);
+  padding-inline: var(--ytmd-history-padding, 16px);
+  gap: var(--ytmd-history-gap, 20px);
   color: var(--ytmusic-text-primary, #fff);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--ytmd-history-font-size, 16px);
+  font-weight: var(--ytmd-history-font-weight, 500);
+  line-height: normal;
   text-decoration: none;
   -webkit-app-region: no-drag;
 }
 a[data-ytmd-history-link] svg {
-  flex: 0 0 24px;
-  width: 24px;
-  height: 24px;
+  flex: 0 0 var(--ytmd-history-icon-size, 24px);
+  width: var(--ytmd-history-icon-size, 24px);
+  height: var(--ytmd-history-icon-size, 24px);
 }
 a[data-ytmd-history-link]:hover {
   background-color: rgb(255 255 255 / 0.055);

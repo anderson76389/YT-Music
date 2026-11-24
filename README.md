@@ -61,9 +61,11 @@ Le nouveau nom et l'identifiant d'application peuvent créer un **nouveau profil
 
 ## Historique d'écoute
 
-Le raccourci **Historique**, sous Bibliothèque, ouvre la page native de YouTube Music avec la session Google déjà connectée. Il ne crée pas d'historique local ni de serveur de synchronisation. Les écoutes enregistrées par YouTube sont partagées entre appareils connectés au même compte/profil, sous réserve des paramètres d'historique et de la disponibilité du service. Un bloqueur de traqueurs ou des filtres réseau personnalisés peuvent empêcher l'enregistrement natif ; en cas de problème, vérifier ces réglages et tester avec le bloqueur désactivé. Les paramètres de confidentialité ne sont pas modifiés automatiquement.
+Le raccourci **Historique**, sous Bibliothèque, ouvre la page native de YouTube Music avec la session Google déjà connectée. Il ne crée pas d'historique local ni de serveur de synchronisation. Les écoutes enregistrées par YouTube sont partagées entre appareils connectés au même compte/profil, sous réserve des paramètres d'historique et de la disponibilité du service. Les bloqueurs intégrés préservent les requêtes natives playback/watchtime nécessaires à l'historique ; aucune requête n'est créée artificiellement. Les filtres externes (DNS, VPN, extensions) peuvent encore empêcher cet enregistrement. Les paramètres de confidentialité ne sont pas modifiés automatiquement.
 
 Pour vérifier en conditions réelles : écouter un morceau sur le téléphone puis ouvrir Historique sur le PC ; écouter un autre morceau sur le PC puis vérifier l'historique dans l'application officielle. Vérifier également la suppression native d'une entrée et l'absence d'enregistrement lorsque l'historique est suspendu.
+
+Sous Windows, l’aperçu de la barre des tâches possède les trois boutons de lecture habituels et trois commandes de volume (−5 points, couper/rétablir, +5 points). La barre native de Windows ne peut pas contenir un curseur personnalisé.
 
 ## ✨ Fonctionnalités
 

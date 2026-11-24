@@ -16,3 +16,9 @@ export const getThumbnailPlayingState = (
   if (playerState === 2 || playerState === 0) return false;
   return !paused && !ended;
 };
+
+// All taskbar adjustments are relative to the real player volume (0–100).
+export function getAdjustedThumbnailVolume(current: number, direction: unknown): number | null {
+  if (!Number.isFinite(current) || (direction !== -1 && direction !== 1)) return null;
+  return Math.max(0, Math.min(100, Math.round(current) + direction * 5));
+}

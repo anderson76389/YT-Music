@@ -70,7 +70,7 @@ function isHistoryEntry(entry: HTMLElement): boolean {
  * The link remains usable if YouTube changes its internal navigate method.
  */
 function syncHistoryGeometry(doc: Document, library: HTMLElement, link: HTMLAnchorElement): void {
-  const row = library.querySelector<HTMLElement>('tp-yt-paper-item') ?? library;
+  const row = library.querySelector<HTMLElement>('tp-yt-paper-item, a[href]') ?? library;
   const title = row.querySelector<HTMLElement>('#title, .title, yt-formatted-string');
   const icon = row.querySelector<HTMLElement>('yt-icon, iron-icon, svg');
   const parent = library.parentElement;
@@ -81,25 +81,35 @@ function syncHistoryGeometry(doc: Document, library: HTMLElement, link: HTMLAnch
   const parentRect = parent.getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return;
 
+  const iconRect = icon?.getBoundingClientRect();
+  const titleRect = title?.getBoundingClientRect();
+  // The collapsed guide has a narrow, vertically stacked native item.
+  // Use the actual native row, not the overall window width (the hamburger
+  // can collapse the guide even in a maximized window).
+  const compact = rect.width <= 96 ||
+    (!!iconRect && !!titleRect && iconRect.height > 0 &&
+      titleRect.height > 0 && titleRect.top >= iconRect.bottom - 2);
+  link.toggleAttribute('data-ytmd-history-compact', compact);
   const style = view.getComputedStyle(row);
   const titleStyle = title ? view.getComputedStyle(title) : style;
   const values: Record<string, string> = {
     '--ytmd-history-height': `${rect.height}px`,
+    '--ytmd-history-width': `${rect.width}px`,
     '--ytmd-history-left': `${Math.max(0, rect.left - parentRect.left)}px`,
     '--ytmd-history-right': `${Math.max(0, parentRect.right - rect.right)}px`,
-    '--ytmd-history-font-size': titleStyle.fontSize || '16px',
+    '--ytmd-history-font-size': titleStyle.fontSize || (compact ? '10px' : '16px'),
     '--ytmd-history-font-weight': titleStyle.fontWeight || '500',
     '--ytmd-history-radius': style.borderRadius || '8px',
   };
-  if (icon) {
-    const iconRect = icon.getBoundingClientRect();
-    if (iconRect.width > 0) {
-      values['--ytmd-history-icon-size'] = `${iconRect.width}px`;
-      values['--ytmd-history-padding'] = `${Math.max(0, iconRect.left - rect.left)}px`;
-      if (title) {
-        values['--ytmd-history-gap'] = `${Math.max(0, title.getBoundingClientRect().left - iconRect.right)}px`;
-      }
-    }
+  if (iconRect && iconRect.width > 0) {
+    values['--ytmd-history-icon-size'] = `${iconRect.width}px`;
+    values['--ytmd-history-padding'] = compact ? '0px' : `${Math.max(0, iconRect.left - rect.left)}px`;
+    values['--ytmd-history-gap'] = titleRect
+      ? `${Math.max(0, compact ? titleRect.top - iconRect.bottom : titleRect.left - iconRect.right)}px`
+      : compact ? '4px' : '20px';
+  } else {
+    values['--ytmd-history-padding'] = compact ? '0px' : '16px';
+    values['--ytmd-history-gap'] = compact ? '4px' : '20px';
   }
   for (const [key, value] of Object.entries(values)) {
     if (link.style.getPropertyValue(key) !== value) link.style.setProperty(key, value);
@@ -119,6 +129,8 @@ function createHistoryLink(doc: Document): HTMLAnchorElement {
   icon.appendChild(path);
   const title = doc.createElement('span');
   title.textContent = 'Historique';
+  link.setAttribute('aria-label', 'Historique');
+  link.title = 'Historique';
   link.append(icon, title);
   link.addEventListener('click', (event) => {
     if (event.defaultPrevented || event.button !== 0 || event.ctrlKey ||
@@ -161,7 +173,7 @@ export function ensureHistoryLinks(doc: Document, entries: HTMLElement[], pathna
 }
 
 const GUIDE_SELECTOR =
-  '#guide ytmusic-guide-entry-renderer, #guide-wrapper ytmusic-guide-entry-renderer, ytmusic-guide-renderer ytmusic-guide-entry-renderer';
+  '#guide ytmusic-guide-entry-renderer, #guide-wrapper ytmusic-guide-entry-renderer, ytmusic-guide-renderer ytmusic-guide-entry-renderer, ytmusic-mini-guide-renderer ytmusic-mini-guide-entry-renderer, #mini-guide ytmusic-guide-entry-renderer';
 
 export function polishSidebar(doc: Document, pathname: string): void {
   const entries = Array.from(doc.querySelectorAll<HTMLElement>(GUIDE_SELECTOR));
@@ -229,19 +241,42 @@ export function hideNativeLyricsTab(doc: Document): void {
 
 export function setupSidebarPolish(doc: Document = document): () => void {
   let frame: number | undefined;
+  const observed = new Set<Element>();
+  const resizeObserver = new ResizeObserver(() => refresh());
+  const syncObservedRows = () => {
+    const next = new Set<Element>();
+    for (const library of doc.querySelectorAll<HTMLElement>(GUIDE_SELECTOR)) {
+      if (!isLibraryEntry(library)) continue;
+      next.add(library);
+      next.add(library.querySelector('tp-yt-paper-item, a[href]') ?? library);
+    }
+    for (const row of observed) {
+      if (!next.has(row)) {
+        resizeObserver.unobserve(row);
+        observed.delete(row);
+      }
+    }
+    for (const row of next) {
+      if (!observed.has(row)) {
+        resizeObserver.observe(row);
+        observed.add(row);
+      }
+    }
+  };
   const refresh = () => {
     if (frame !== undefined) return;
     frame = requestAnimationFrame(() => {
       frame = undefined;
       polishSidebar(doc, window.location.pathname);
       hideNativeLyricsTab(doc);
+      syncObservedRows();
     });
   };
 
   refresh();
   // Les nouveaux éléments sont ajoutés par YouTube Music lors des navigations.
   // Éviter d'observer les attributs pour ne pas boucler sur nos propres marqueurs.
-  const selector = '#guide, #guide-wrapper, ytmusic-guide-renderer, ytmusic-player-page #tabs';
+  const selector = '#guide, #guide-wrapper, ytmusic-guide-renderer, #mini-guide, ytmusic-mini-guide-renderer, ytmusic-player-page #tabs';
   const observer = new MutationObserver((records) => {
     if (hasRelevantMutation(records, selector)) refresh();
   });
@@ -252,6 +287,8 @@ export function setupSidebarPolish(doc: Document = document): () => void {
   window.addEventListener('yt-navigate-finish', onRoute);
   return () => {
     observer.disconnect();
+    resizeObserver.disconnect();
+    observed.clear();
     if (frame !== undefined) cancelAnimationFrame(frame);
     window.removeEventListener('resize', onRoute);
     window.removeEventListener('popstate', onRoute);

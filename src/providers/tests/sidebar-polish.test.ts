@@ -103,3 +103,35 @@ test('reprend la taille et les alignements du bouton natif Bibliothèque', () =>
   expect(link.style.getPropertyValue('--ytmd-history-gap')).toBe('20px');
   expect(link.style.getPropertyValue('--ytmd-history-font-size')).toBe('16px');
 });
+
+test('le bouton Historique passe en colonne puis retrouve sa géométrie étendue', () => {
+  const window = new Window({ url: 'https://music.youtube.com/' });
+  const doc = window.document as unknown as Document;
+  doc.body.innerHTML = '<div id="guide"><ytmusic-guide-entry-renderer><tp-yt-paper-item><yt-icon></yt-icon><span id="title" style="font-size:10px">Bibliothèque</span></tp-yt-paper-item></ytmusic-guide-entry-renderer></div>';
+  const rect = (left: number, top: number, width: number, height: number) => ({
+    left, top, right: left + width, bottom: top + height, width, height,
+    x: left, y: top, toJSON: () => ({}),
+  });
+  let compact = true;
+  doc.getElementById('guide')!.getBoundingClientRect = () => rect(0, 0, compact ? 72 : 240, 400);
+  doc.querySelector('tp-yt-paper-item')!.getBoundingClientRect = () => rect(8, 10, compact ? 56 : 224, compact ? 64 : 48);
+  doc.querySelector('yt-icon')!.getBoundingClientRect = () => rect(24, 22, 24, 24);
+  doc.getElementById('title')!.getBoundingClientRect = () => compact
+    ? rect(10, 50, 52, 12) : rect(68, 24, 100, 20);
+  polishSidebar(doc, '/history');
+  const link = doc.querySelector<HTMLAnchorElement>('[data-ytmd-history-link]')!;
+  expect(link.hasAttribute('data-ytmd-history-compact')).toBe(true);
+  expect(link.style.getPropertyValue('--ytmd-history-width')).toBe('56px');
+  expect(link.style.getPropertyValue('--ytmd-history-padding')).toBe('0px');
+  expect(link.style.getPropertyValue('--ytmd-history-gap')).toBe('4px');
+  expect(link.textContent).toBe('Historique');
+  expect(link.getAttribute('aria-current')).toBe('page');
+  compact = false;
+  polishSidebar(doc, '/library');
+  expect(link.hasAttribute('data-ytmd-history-compact')).toBe(false);
+  expect(link.style.getPropertyValue('--ytmd-history-width')).toBe('224px');
+  expect(link.style.getPropertyValue('--ytmd-history-padding')).toBe('16px');
+  expect(link.style.getPropertyValue('--ytmd-history-gap')).toBe('20px');
+  expect(link.hasAttribute('aria-current')).toBe(false);
+  expect(doc.querySelectorAll('[data-ytmd-history-link]').length).toBe(1);
+});

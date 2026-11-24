@@ -211,6 +211,8 @@ a[data-ytmd-history-link] {
   box-sizing: border-box;
   height: var(--ytmd-history-height, 48px);
   min-height: var(--ytmd-history-height, 48px);
+  width: var(--ytmd-history-width, auto);
+  max-width: calc(100% - var(--ytmd-history-left, 8px) - var(--ytmd-history-right, 8px));
   flex-shrink: 0;
   margin-left: var(--ytmd-history-left, 8px);
   margin-right: var(--ytmd-history-right, 8px);
@@ -230,6 +232,24 @@ a[data-ytmd-history-link] svg {
   width: var(--ytmd-history-icon-size, 24px);
   height: var(--ytmd-history-icon-size, 24px);
 }
+/* In the compact guide the native label is below the icon, not beside it. */
+a[data-ytmd-history-link][data-ytmd-history-compact] {
+  flex-direction: column;
+  justify-content: center;
+  padding-inline: 0;
+  gap: var(--ytmd-history-gap, 4px);
+  font-size: min(var(--ytmd-history-font-size, 10px), 11px);
+  text-align: center;
+}
+a[data-ytmd-history-link] span {
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+}
+a[data-ytmd-history-link][data-ytmd-history-compact] span {
+  flex: 0 0 auto;
+  line-height: 1.2;
+}
 a[data-ytmd-history-link]:hover {
   background-color: rgb(255 255 255 / 0.055);
 }
@@ -239,4 +259,14 @@ a[data-ytmd-history-link][aria-current='page'] {
 a[data-ytmd-history-link]:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: -2px;
+}
+
+/* No playback bar yet: don't reserve its height or paint an empty strip.
+   When playback starts, the native player-visible attribute restores the
+   normal bar height and all its controls, including the seek bar. */
+ytmusic-app-layout#layout:not([player-visible]):not([player-page-open]):not([player-ui-state='PLAYER_PAGE_OPEN']):not([player-ui-state='FULLSCREEN']) {
+  --ytmusic-player-bar-height: 0px !important;
+}
+ytmusic-app-layout#layout:not([player-visible]):not([player-page-open]):not([player-ui-state='PLAYER_PAGE_OPEN']):not([player-ui-state='FULLSCREEN']) #player-bar-background {
+  display: none !important;
 }

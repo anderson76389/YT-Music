@@ -16,11 +16,18 @@ export function openMiniPlayer(main: BrowserWindow): void {
 export function setupMiniPlayer(main: BrowserWindow): void {
   let mini: BrowserWindow | null = null;
   let ready = false;
+  let artwork: Electron.NativeImage | null = null;
+  let artworkDirty = false;
   const state: MiniPlayerState = {
     title: '', artist: '', cover: '', playing: false, volume: null, muted: false,
   };
   const publish = () => {
     if (ready && mini && !mini.isDestroyed()) {
+      if (artworkDirty) {
+        state.cover = artwork && !artwork.isEmpty()
+          ? artwork.resize({ width: 144 }).toDataURL() : '';
+        artworkDirty = false;
+      }
       mini.webContents.send('ytmd:mini-state', state);
     }
   };
@@ -34,8 +41,8 @@ export function setupMiniPlayer(main: BrowserWindow): void {
     if (event !== SongInfoEvent.VideoSrcChanged) return;
     state.title = song.title;
     state.artist = song.artist;
-    state.cover = song.image && !song.image.isEmpty()
-      ? song.image.resize({ width: 144 }).toDataURL() : '';
+    artwork = song.image ?? null;
+    artworkDirty = true;
     publish();
   });
   const onPlayerState = (event: Electron.IpcMainEvent, playing: unknown, volume: unknown, muted: unknown) => {
@@ -43,6 +50,7 @@ export function setupMiniPlayer(main: BrowserWindow): void {
         typeof playing !== 'boolean' || typeof muted !== 'boolean') return;
     const normalized = normalizeMiniVolume(volume);
     if (normalized === null) return;
+    if (state.playing === playing && state.volume === normalized && state.muted === muted) return;
     state.playing = playing;
     state.volume = normalized;
     state.muted = muted;
@@ -119,6 +127,8 @@ export function setupMiniPlayer(main: BrowserWindow): void {
       if (mini === window) {
         mini = null;
         ready = false;
+        state.cover = '';
+        artworkDirty = true;
       }
     });
     void window.loadFile(MiniPlayerHtml).catch((error: unknown) => {

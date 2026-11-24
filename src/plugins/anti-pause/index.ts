@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { ElectronBlocker } from '@ghostery/adblocker-electron';
 import { app, type BrowserWindow } from 'electron';
 
+import { hasRelevantMutation } from '@/providers/relevant-mutations';
 import { preserveNativeHistory } from '@/providers/history-network';
 import { createPlugin } from '@/utils';
 
@@ -33,6 +34,7 @@ type AntiPauseRendererState = {
   adState?: AdPlaybackSnapshot;
   stopHeartbeat?: () => void;
   dialogTimer?: number;
+  refreshTimer?: number;
   visibilityDescriptors?: Partial<
     Record<DocumentProperty, PropertyDescriptor | null>
   >;
@@ -134,6 +136,7 @@ export default createPlugin<
     adState: undefined as AdPlaybackSnapshot | undefined,
     stopHeartbeat: undefined as (() => void) | undefined,
     dialogTimer: undefined as number | undefined,
+    refreshTimer: undefined as number | undefined,
     visibilityDescriptors: undefined as
       | Partial<Record<DocumentProperty, PropertyDescriptor | null>>
       | undefined,
@@ -230,7 +233,17 @@ export default createPlugin<
         this.skipAdIfPresent();
       };
 
-      this.observer = new MutationObserver(refresh);
+      // Keep the dedicated player class/HTML media listeners immediate.
+      // Broad DOM changes only trigger one bounded check, not repeated queries
+      // for every cover, progress update or unrelated carousel mutation.
+      const relevant = 'video, #movie_player, ytmusic-you-there-renderer, .ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button, .ytp-ad-skip-button-slot';
+      this.observer = new MutationObserver((records) => {
+        if (this.refreshTimer !== undefined || !hasRelevantMutation(records, relevant)) return;
+        this.refreshTimer = window.setTimeout(() => {
+          this.refreshTimer = undefined;
+          refresh();
+        }, 80);
+      });
       this.observer.observe(document.documentElement, {
         childList: true,
         subtree: true,
@@ -287,6 +300,10 @@ export default createPlugin<
       if (this.dialogTimer !== undefined) {
         window.clearInterval(this.dialogTimer);
         this.dialogTimer = undefined;
+      }
+      if (this.refreshTimer !== undefined) {
+        window.clearTimeout(this.refreshTimer);
+        this.refreshTimer = undefined;
       }
       this.stopHeartbeat?.();
       this.stopHeartbeat = undefined;

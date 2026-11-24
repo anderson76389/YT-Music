@@ -1,3 +1,5 @@
+import { hasRelevantMutation } from './relevant-mutations';
+
 import type { MusicPlayerAppElement } from '@/types/music-player-app-element';
 
 /** Petits ajustements locaux de la navigation YouTube Music.
@@ -149,8 +151,9 @@ export function ensureHistoryLinks(doc: Document, entries: HTMLElement[], pathna
     links.slice(1).forEach((duplicate) => duplicate.remove());
     if (library.nextElementSibling !== link) library.after(link);
     syncHistoryGeometry(doc, library, link);
-    if (isHistoryPath(pathname)) link.setAttribute('aria-current', 'page');
-    else link.removeAttribute('aria-current');
+    if (isHistoryPath(pathname)) {
+      if (link.getAttribute('aria-current') !== 'page') link.setAttribute('aria-current', 'page');
+    } else if (link.hasAttribute('aria-current')) link.removeAttribute('aria-current');
   }
   for (const link of doc.querySelectorAll<HTMLAnchorElement>(HISTORY_LINK)) {
     if (!link.parentElement || !parents.has(link.parentElement)) link.remove();
@@ -170,7 +173,6 @@ export function polishSidebar(doc: Document, pathname: string): void {
       'data-ytmd-subscribe-hidden',
       isSubscribeGuideItem(labels[index]),
     );
-    entry.removeAttribute('data-ytmd-active-nav');
   });
 
   const routeLabel = preferredSidebarLabel(pathname);
@@ -198,9 +200,9 @@ export function polishSidebar(doc: Document, pathname: string): void {
     }
   }
 
-  if (activeIndex >= 0) {
-    entries[activeIndex].setAttribute('data-ytmd-active-nav', '');
-  }
+  entries.forEach((entry, index) => {
+    entry.toggleAttribute('data-ytmd-active-nav', index === activeIndex);
+  });
 }
 
 /** Masquer uniquement l'onglet natif « Paroles » de la page de lecture.
@@ -239,7 +241,10 @@ export function setupSidebarPolish(doc: Document = document): () => void {
   refresh();
   // Les nouveaux éléments sont ajoutés par YouTube Music lors des navigations.
   // Éviter d'observer les attributs pour ne pas boucler sur nos propres marqueurs.
-  const observer = new MutationObserver(refresh);
+  const selector = '#guide, #guide-wrapper, ytmusic-guide-renderer, ytmusic-player-page #tabs';
+  const observer = new MutationObserver((records) => {
+    if (hasRelevantMutation(records, selector)) refresh();
+  });
   observer.observe(doc.documentElement, { childList: true, subtree: true });
   const onRoute = () => refresh();
   window.addEventListener('resize', onRoute);

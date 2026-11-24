@@ -69,6 +69,10 @@ Pour vérifier en conditions réelles : écouter un morceau sur le téléphone p
 
 Ouvrir **Fenêtre → Mini-lecteur** pour afficher une petite fenêtre indépendante, au premier plan, avec la couverture, le titre, les commandes de lecture et un curseur de volume blanc. Elle pilote le lecteur principal sans lancer un second flux audio. Fermer la fenêtre ne coupe pas la musique. La miniature native de la barre des tâches conserve ses trois boutons.
 
+### Fluidité et démarrage
+
+Le bundle du renderer est lu une seule fois de façon asynchrone, le menu n'est construit qu'une fois au démarrage, les observateurs DOM ignorent les changements sans rapport avec les commandes et les couvertures du mini-lecteur ne sont converties que lorsqu'il est ouvert. Les événements de lecture identiques sont dédupliqués. L'accélération matérielle et les réglages audio restent inchangés. Le portable Windows peut encore solliciter le disque et l'antivirus lors de son extraction ; la version Setup évite cette extraction à chaque lancement. Les performances réelles dépendent du matériel et doivent être mesurées en conditions d'utilisation.
+
 ## ✨ Fonctionnalités
 
 Les modules ci-dessous sont **présents dans le code source**. Leur disponibilité effective dépend de la version compilée, de l'activation des plugins et, pour certaines intégrations, de services externes.

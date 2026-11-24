@@ -36,7 +36,7 @@ import {
   getAllLoadedMainPlugins,
   loadAllMainPlugins,
 } from '@/loader/main';
-import { refreshMenu, setApplicationMenu } from '@/menu';
+import { refreshMenu } from '@/menu';
 import musicPlayerCss from '@/music-player.css?inline';
 import { injectCSS, injectCSSAsFile } from '@/plugins/utils/main';
 import { restart, setupAppControls } from '@/providers/app-controls';
@@ -1087,6 +1087,16 @@ app.whenReady().then(async () => {
     app.setAppUserModelId(APP_ID);
   }
 
+  // Read the immutable packaged bundle once, asynchronously, before the
+  // preload asks for it. No synchronous disk/ASAR read during page loads.
+  let rendererBundle: [string, string] | undefined;
+  if (!(is.dev() && process.env.ELECTRON_RENDERER_URL)) {
+    const rendererPath = path.join(__dirname, '..', 'renderer');
+    const indexHTML = parse(await fs.promises.readFile(path.join(rendererPath, 'index.html'), 'utf-8'));
+    const scriptPath = path.join(rendererPath, indexHTML.querySelector('script')!.getAttribute('src')!);
+    const scriptString = await fs.promises.readFile(scriptPath, 'utf-8');
+    rendererBundle = [url.pathToFileURL(scriptPath).toString(), scriptString + ';0'];
+  }
   ipcMain.on('get-renderer-script', (event) => {
     // Inject index.html file as string using insertAdjacentHTML
     // In dev mode, get string from process.env.VITE_DEV_SERVER_URL, else use fs.readFileSync
@@ -1118,28 +1128,14 @@ app.whenReady().then(async () => {
       `,
       ];
     } else {
-      const rendererPath = path.join(__dirname, '..', 'renderer');
-      const indexHTML = parse(
-        fs.readFileSync(path.join(rendererPath, 'index.html'), 'utf-8'),
-      );
-      const scriptSrc = indexHTML.querySelector('script')!;
-      const scriptPath = path.join(
-        rendererPath,
-        scriptSrc.getAttribute('src')!,
-      );
-      const scriptString = fs.readFileSync(scriptPath, 'utf-8');
-      event.returnValue = [
-        url.pathToFileURL(scriptPath).toString(),
-        scriptString + ';0',
-      ];
+      event.returnValue = rendererBundle;
     }
   });
 
   mainWindow = await createMainWindow();
   traceStartup('main-window-factory-finished');
-  await setApplicationMenu(mainWindow);
-  traceStartup('application-menu-ready');
   await refreshMenu(mainWindow);
+  traceStartup('application-menu-ready');
   setUpTray(app, mainWindow);
 
   setupProtocolHandler(mainWindow);

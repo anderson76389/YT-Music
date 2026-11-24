@@ -313,28 +313,35 @@ async function onApiLoaded() {
   );
 
   const video = document.querySelector('video')!;
-  const reportMiniState = () => {
+  let previousMiniState: string | undefined;
+  const reportMiniState = (force = false) => {
     if (!api) return;
     try {
-      window.ipcRenderer.send('ytmd:mini-player-state',
-        getThumbnailPlayingState(api.getPlayerState(), video.paused, video.ended),
-        api.getVolume(), api.isMuted());
+      const playing = getThumbnailPlayingState(api.getPlayerState(), video.paused, video.ended);
+      const volume = api.getVolume();
+      const muted = api.isMuted();
+      const state = `${playing}:${volume}:${muted}`;
+      if (!force && previousMiniState === state) return;
+      previousMiniState = state;
+      window.ipcRenderer.send('ytmd:mini-player-state', playing, volume, muted);
     } catch {
       // The native player may be replacing its media.
     }
   };
-  window.ipcRenderer.on('ytmd:mini-request-state', reportMiniState);
+  window.ipcRenderer.on('ytmd:mini-request-state', () => reportMiniState(true));
+  const onMiniMediaEvent = () => reportMiniState();
   for (const name of ['playing', 'pause', 'ended', 'volumechange', 'loadedmetadata']) {
-    video.addEventListener(name, reportMiniState, { passive: true });
+    video.addEventListener(name, onMiniMediaEvent, { passive: true });
   }
-  api?.addEventListener('onStateChange', reportMiniState);
+  api?.addEventListener('onStateChange', onMiniMediaEvent);
   reportMiniState();
 
   // L'aperçu de Windows a besoin de l'état réel du lecteur, y compris avant
   // le premier chargement des métadonnées. Simple observation du média :
   // aucune modification de playVideo/pauseVideo ni des plugins.
   if (window.electronIs.windows()) {
-    const reportThumbnailPlayback = () => {
+    let previousPlaying: boolean | undefined;
+    const reportThumbnailPlayback = (force = false) => {
       // Le <video> peut rester en pause alors que la musique est lue via
       // le lecteur YouTube. Utiliser en priorité son état (1 = lecture,
       // 2 = pause) pour éviter une icône de miniature bloquée sur ▶.
@@ -344,18 +351,19 @@ async function onApiLoaded() {
       } catch {
         playerState = undefined;
       }
-      window.ipcRenderer.send(
-        'ytmd:taskbar-playback-state',
-        getThumbnailPlayingState(playerState, video.paused, video.ended),
-      );
+      const playing = getThumbnailPlayingState(playerState, video.paused, video.ended);
+      if (!force && previousPlaying === playing) return;
+      previousPlaying = playing;
+      window.ipcRenderer.send('ytmd:taskbar-playback-state', playing);
     };
+    const onThumbnailMediaEvent = () => reportThumbnailPlayback();
     for (const eventName of ['play', 'playing', 'pause', 'ended', 'loadedmetadata', 'emptied']) {
-      video.addEventListener(eventName, reportThumbnailPlayback, { passive: true });
+      video.addEventListener(eventName, onThumbnailMediaEvent, { passive: true });
     }
     // Le changement d'état du lecteur couvre les pistes audio et les
     // remplacements du média HTML, sans polling en arrière-plan.
-    api?.addEventListener('onStateChange', reportThumbnailPlayback);
-    window.ipcRenderer.on('ytmd:request-playback-state', reportThumbnailPlayback);
+    api?.addEventListener('onStateChange', onThumbnailMediaEvent);
+    window.ipcRenderer.on('ytmd:request-playback-state', () => reportThumbnailPlayback(true));
     reportThumbnailPlayback();
   }
 

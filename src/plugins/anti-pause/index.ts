@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { ElectronBlocker } from '@ghostery/adblocker-electron';
 import { app, type BrowserWindow } from 'electron';
 
+import { preserveNativeHistory } from '@/providers/history-network';
 import { createPlugin } from '@/utils';
 
 import { processAdPlayback, restoreAdPlayback, type AdPlaybackSnapshot } from './ad-skip';
@@ -100,6 +101,7 @@ export default createPlugin<
         );
 
         if (!this.running || generation !== this.generation) return;
+        preserveNativeHistory(blocker);
         blocker.enableBlockingInSession(window.webContents.session);
         this.blocker = blocker;
       } catch (error) {

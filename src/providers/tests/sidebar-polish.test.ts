@@ -84,3 +84,22 @@ test('ne duplique pas une entrée native et répare un guide reconstruit', () =>
   polishSidebar(doc, '/history');
   expect(doc.querySelectorAll('[data-ytmd-history-link]').length).toBe(1);
 });
+
+test('reprend la taille et les alignements du bouton natif Bibliothèque', () => {
+  const window = new Window({ url: 'https://music.youtube.com/' });
+  const doc = window.document as unknown as Document;
+  doc.body.innerHTML = '<div id="guide"><ytmusic-guide-entry-renderer><tp-yt-paper-item><yt-icon></yt-icon><span id="title" style="font-size:16px;font-weight:500">Bibliothèque</span></tp-yt-paper-item></ytmusic-guide-entry-renderer></div>';
+  const rect = (left: number, width: number, height: number) => ({ left, right: left + width, width, height, x: left, y: 0, top: 0, bottom: height, toJSON: () => ({}) });
+  doc.getElementById('guide')!.getBoundingClientRect = () => rect(0, 250, 200);
+  doc.querySelector('tp-yt-paper-item')!.getBoundingClientRect = () => rect(8, 234, 48);
+  doc.querySelector('yt-icon')!.getBoundingClientRect = () => rect(24, 24, 24);
+  doc.getElementById('title')!.getBoundingClientRect = () => rect(68, 100, 20);
+  polishSidebar(doc, '/');
+  const link = doc.querySelector<HTMLAnchorElement>('[data-ytmd-history-link]')!;
+  expect(link.style.getPropertyValue('--ytmd-history-height')).toBe('48px');
+  expect(link.style.getPropertyValue('--ytmd-history-left')).toBe('8px');
+  expect(link.style.getPropertyValue('--ytmd-history-right')).toBe('8px');
+  expect(link.style.getPropertyValue('--ytmd-history-padding')).toBe('16px');
+  expect(link.style.getPropertyValue('--ytmd-history-gap')).toBe('20px');
+  expect(link.style.getPropertyValue('--ytmd-history-font-size')).toBe('16px');
+});

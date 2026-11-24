@@ -4,6 +4,8 @@ import path from 'node:path';
 import { ElectronBlocker } from '@ghostery/adblocker-electron';
 import { app, net } from 'electron';
 
+import { preserveNativeHistory } from '@/providers/history-network';
+
 let blocker: ElectronBlocker | undefined;
 
 const EASYLIST = 'https://easylist.to/easylist/easylist.txt';
@@ -54,6 +56,7 @@ export const loadTrackerBlockerEngine = async (
     if (blocker && session && blocker.isBlockingEnabled(session)) {
       blocker.disableBlockingInSession(session);
     }
+    preserveNativeHistory(next);
     blocker = next;
     if (session) blocker.enableBlockingInSession(session);
   } catch (error) {

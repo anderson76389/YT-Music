@@ -6,11 +6,15 @@ import { isTrustedArtworkUrl } from '../trusted-artwork-url';
 
 test('LRU releases old covers and stays bounded over thousands of changes', () => {
   const cache = new BoundedCache<number, string>(12, 24 * 1024 * 1024);
+  let maxEntries = 0;
+  let maxWeight = 0;
   for (let i = 0; i < 43200; i++) {
     cache.set(i, String(i), 2 * 1024 * 1024);
-    expect(cache.size <= 12).toBe(true);
-    expect(cache.totalWeight <= 24 * 1024 * 1024).toBe(true);
+    maxEntries = Math.max(maxEntries, cache.size);
+    maxWeight = Math.max(maxWeight, cache.totalWeight);
   }
+  expect(maxEntries).toBeLessThanOrEqual(12);
+  expect(maxWeight).toBeLessThanOrEqual(24 * 1024 * 1024);
   expect(cache.get(0)).toBeUndefined();
   expect(cache.get(43199)).toBe('43199');
   cache.set(43200, 'oversized', 25 * 1024 * 1024);

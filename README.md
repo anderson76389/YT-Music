@@ -77,6 +77,8 @@ Le bundle du renderer est lu une seule fois de façon asynchrone, le menu n'est 
 
 Les couvertures natives sont mises en cache uniquement en mémoire (12 entrées, estimation maximale de 24 Mio) ; les téléchargements sont limités à 8 Mio et 6 secondes, et les réponses d'un morceau précédent sont invalidées. Le lecteur ne dépend plus d'une file d'attente bloquée par les images. Les erreurs de sous-frames ne rechargent plus la fenêtre principale. Les tests synthétiques ne remplacent pas les mesures de consommation sur un vrai PC.
 
+Voir [la procédure de validation finale et de mesure Windows](docs/final-validation.md). Le script PowerShell inclus permet une mesure locale sans télémétrie ni transmission des données.
+
 ## ✨ Fonctionnalités
 
 Les modules ci-dessous sont **présents dans le code source**. Leur disponibilité effective dépend de la version compilée, de l'activation des plugins et, pour certaines intégrations, de services externes.

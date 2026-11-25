@@ -39,6 +39,27 @@ jobs:
       - name: Installer les dependances verrouillees
         run: pnpm install --frozen-lockfile
 
+      - name: Auditer les vulnérabilités des dépendances de production
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          pnpm audit --prod --json | Out-File -Encoding utf8 dependency-audit.json
+          $auditExit = $LASTEXITCODE
+          if ($auditExit -ne 0) {
+            Write-Warning 'Audit npm : des vulnérabilités ou une erreur réseau doivent être examinées.'
+          }
+          exit $auditExit
+
+      - name: Conserver le rapport de sécurité
+        if: ${{ always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-security-audit
+          path: dependency-audit.json
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Linter
         id: lint
         run: pnpm lint

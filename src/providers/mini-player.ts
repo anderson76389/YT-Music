@@ -1,6 +1,5 @@
-import { join } from 'node:path';
-
 import MiniPlayerHtml from '@assets/mini-player.html?asset';
+import MiniPlayerPreload from '@assets/mini-player-preload.cjs?asset';
 import { BrowserWindow, ipcMain } from 'electron';
 
 import { getSongControls } from './song-controls';
@@ -110,7 +109,7 @@ export function setupMiniPlayer(main: BrowserWindow): void {
       backgroundColor: '#171719',
       title: 'YT Music — Mini-lecteur',
       webPreferences: {
-        preload: join(__dirname, '..', 'preload', 'mini-player.cjs'),
+        preload: MiniPlayerPreload,
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,

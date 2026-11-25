@@ -945,11 +945,23 @@ async function createMainWindow() {
                   await new Promise((resolve) => setTimeout(resolve, 100));
                 }
                 if (miniPlayerPass) {
+                  await win.webContents.executeJavaScript(
+                    "window.ipcRenderer.send('ytmd:mini-player-state', true, 65, false); true", true);
+                  let volumePass = false;
+                  for (let attempt = 0; attempt < 30 && !mini.isDestroyed(); attempt++) {
+                    volumePass = await mini.webContents.executeJavaScript(
+                      "document.querySelector('#volume').value === '65' && !document.querySelector('#volume').disabled", true,
+                    ) === true;
+                    if (volumePass) break;
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                  }
+                  traceStartup('mini-volume-state', String(volumePass));
+                  miniPlayerPass = volumePass;
                   await mini.webContents.executeJavaScript("document.querySelector('#close').click(); true", true).catch(() => {});
                   for (let attempt = 0; attempt < 20 && !mini.isDestroyed(); attempt++) {
                     await new Promise((resolve) => setTimeout(resolve, 100));
                   }
-                  miniPlayerPass = mini.isDestroyed() && !win.isDestroyed();
+                  miniPlayerPass = miniPlayerPass && mini.isDestroyed() && !win.isDestroyed();
                 }
               } finally {
                 if (!mini.isDestroyed()) mini.destroy();

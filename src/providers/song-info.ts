@@ -1,7 +1,9 @@
-import { Mutex } from 'async-mutex';
 import { type BrowserWindow, ipcMain, nativeImage, net } from 'electron';
 
 import * as config from '@/config';
+
+import { LatestRequest } from './latest-request';
+import { loadSongArtwork } from './song-artwork';
 
 import type { GetPlayerResponse } from '@/types/get-player-response';
 
@@ -61,7 +63,7 @@ export const getImage = async (src: string): Promise<Electron.NativeImage> => {
 
 const handleData = async (
   data: GetPlayerResponse,
-  win: Electron.BrowserWindow,
+  signal: AbortSignal,
 ): Promise<SongInfo | null> => {
   if (!data) {
     return null;
@@ -97,9 +99,7 @@ const handleData = async (
     if (microformat.pageOwnerDetails?.externalChannelId) {
       songInfo.artistUrl = `https://music.\u0079\u006f\u0075\u0074\u0075\u0062\u0065.com/channel/${microformat.pageOwnerDetails.externalChannelId}`;
     }
-    // Used for options.resumeOnStart
-    config.set('url', microformat.urlCanonical);
-    songInfo.alternativeTitle = microformat.linkAlternates.find(
+    songInfo.alternativeTitle = microformat.linkAlternates?.find(
       (link) => link.title,
     )?.title;
     songInfo.tags = Array.isArray(microformat.tags) ? microformat.tags : [];
@@ -131,7 +131,7 @@ const handleData = async (
         // HACK: Podcast's participant is not the artist
         if (!config.get('options.usePodcastParticipantAsArtist')) {
           songInfo.artist = cleanupName(
-            data.microformat.microformatDataRenderer.pageOwnerDetails.name,
+            data.microformat?.microformatDataRenderer?.pageOwnerDetails?.name ?? songInfo.artist,
           );
         }
         break;
@@ -140,30 +140,20 @@ const handleData = async (
         // HACK: This is a workaround for "podcast" types where "musicVideoType" doesn't exist. Google :facepalm:
         if (
           !config.get('options.usePodcastParticipantAsArtist') &&
-          (data.responseContext.serviceTrackingParams
+          (data.responseContext?.serviceTrackingParams
             ?.at(0)
             ?.params?.find((it) => it.key === 'ipcc')?.value ?? '1') != '0'
         ) {
           songInfo.artist = cleanupName(
-            data.microformat.microformatDataRenderer.pageOwnerDetails.name,
+            data.microformat?.microformatDataRenderer?.pageOwnerDetails?.name ?? songInfo.artist,
           );
         }
         break;
     }
 
     const thumbnails = videoDetails.thumbnail?.thumbnails;
-    songInfo.imageSrc = thumbnails?.at(-1)?.url?.split('?')?.at(0);
-
-    if (
-      songInfo.imageSrc &&
-      !(await net.fetch(songInfo.imageSrc, { method: 'HEAD' })).ok
-    ) {
-      songInfo.imageSrc = thumbnails.at(-1)?.url;
-    }
-
-    if (songInfo.imageSrc) songInfo.image = await getImage(songInfo.imageSrc);
-
-    win.webContents.send('peard:update-song-info', songInfo);
+    songInfo.imageSrc = thumbnails?.at(-1)?.url;
+    if (songInfo.imageSrc) songInfo.image = await loadSongArtwork(songInfo.imageSrc, signal);
   }
 
   return songInfo;
@@ -189,68 +179,65 @@ export const registerCallback = (callback: SongInfoCallback) => {
 };
 
 const registerProvider = (win: BrowserWindow) => {
-  const dataMutex = new Mutex();
+  const request = new LatestRequest();
   let songInfo: SongInfo | null = null;
+  let pendingPlayback: { isPaused?: boolean; elapsedSeconds?: number } = {};
 
-  // This will be called when the song-info-front finds a new request with song data
-  ipcMain.on('peard:video-src-changed', async (_, data: GetPlayerResponse) => {
-    const tempSongInfo = await dataMutex.runExclusive<SongInfo | null>(
-      async () => {
-        songInfo = await handleData(data, win);
-        return songInfo;
-      },
-    );
-
-    if (tempSongInfo) {
-      for (const c of callbacks) {
-        c(tempSongInfo, SongInfoEvent.VideoSrcChanged);
+  const notify = (info: SongInfo, event: SongInfoEvent) => {
+    for (const callback of callbacks) {
+      try {
+        callback(info, event);
+      } catch (error) {
+        console.error('[YT Music] Song info callback failed', error);
       }
     }
-  });
-  ipcMain.on(
-    'peard:play-or-paused',
-    async (
-      _,
-      {
-        isPaused,
-        elapsedSeconds,
-      }: { isPaused: boolean; elapsedSeconds: number },
-    ) => {
-      const tempSongInfo = await dataMutex.runExclusive<SongInfo | null>(() => {
-        if (!songInfo) {
-          return null;
-        }
+  };
 
-        songInfo.isPaused = isPaused;
-        songInfo.elapsedSeconds = elapsedSeconds;
-
-        return songInfo;
-      });
-
-      if (tempSongInfo) {
-        for (const c of callbacks) {
-          c(tempSongInfo, SongInfoEvent.PlayOrPaused);
-        }
-      }
-    },
-  );
-
-  ipcMain.on('peard:time-changed', async (_, seconds: number) => {
-    const tempSongInfo = await dataMutex.runExclusive<SongInfo | null>(() => {
-      if (!songInfo) {
-        return null;
-      }
-
-      songInfo.elapsedSeconds = seconds;
-
-      return songInfo;
-    });
-
-    if (tempSongInfo) {
-      for (const c of callbacks) {
-        c(tempSongInfo, SongInfoEvent.TimeChanged);
-      }
+  const onTrack = async (event: Electron.IpcMainEvent, data: GetPlayerResponse) => {
+    if (win.isDestroyed() || event.sender !== win.webContents || !data?.videoDetails?.videoId) return;
+    const signal = request.begin();
+    songInfo = null;
+    pendingPlayback = {};
+    try {
+      const next = await handleData(data, signal);
+      if (!next || !request.isCurrent(signal) || win.isDestroyed() || win.webContents.isDestroyed()) return;
+      Object.assign(next, pendingPlayback);
+      songInfo = next;
+      const canonical = data.microformat?.microformatDataRenderer?.urlCanonical;
+      if (canonical && config.get('url') !== canonical) config.set('url', canonical);
+      win.webContents.send('peard:update-song-info', next);
+      notify(next, SongInfoEvent.VideoSrcChanged);
+    } catch (error) {
+      if (request.isCurrent(signal)) console.warn('[YT Music] Song metadata unavailable', error);
     }
+  };
+
+  const onPlayback = (event: Electron.IpcMainEvent, state: { isPaused: boolean; elapsedSeconds: number }) => {
+    if (win.isDestroyed() || event.sender !== win.webContents ||
+        !state || typeof state.isPaused !== 'boolean' || !Number.isFinite(state.elapsedSeconds)) return;
+    pendingPlayback = { isPaused: state.isPaused, elapsedSeconds: state.elapsedSeconds };
+    if (!songInfo) return;
+    songInfo.isPaused = state.isPaused;
+    songInfo.elapsedSeconds = state.elapsedSeconds;
+    notify(songInfo, SongInfoEvent.PlayOrPaused);
+  };
+
+  const onTime = (event: Electron.IpcMainEvent, seconds: number) => {
+    if (win.isDestroyed() || event.sender !== win.webContents || !Number.isFinite(seconds)) return;
+    pendingPlayback.elapsedSeconds = seconds;
+    if (!songInfo || songInfo.elapsedSeconds === seconds) return;
+    songInfo.elapsedSeconds = seconds;
+    notify(songInfo, SongInfoEvent.TimeChanged);
+  };
+
+  ipcMain.on('peard:video-src-changed', onTrack);
+  ipcMain.on('peard:play-or-paused', onPlayback);
+  ipcMain.on('peard:time-changed', onTime);
+  win.once('closed', () => {
+    request.cancel();
+    ipcMain.removeListener('peard:video-src-changed', onTrack);
+    ipcMain.removeListener('peard:play-or-paused', onPlayback);
+    ipcMain.removeListener('peard:time-changed', onTime);
   });
 };
 

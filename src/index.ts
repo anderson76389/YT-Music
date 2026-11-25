@@ -48,7 +48,7 @@ import {
 } from '@/providers/protocol-handler';
 import { setupSongInfo } from '@/providers/song-info';
 import { setupWindowsThumbnailControls } from '@/providers/windows-thumbnail-controls';
-import { setupMiniPlayer } from '@/providers/mini-player';
+import { openMiniPlayer, setupMiniPlayer } from '@/providers/mini-player';
 import { setUpTray } from '@/tray';
 import { LoggerPrefix } from '@/utils';
 import { isTesting } from '@/utils/testing';
@@ -914,12 +914,47 @@ async function createMainWindow() {
         reason?: string;
       }) => {
         traceStartup('bridge-and-menu', JSON.stringify(result));
-        fs.writeFileSync(smokeMarker, JSON.stringify({
-          ...result,
-          portable: Boolean(process.env.PORTABLE_EXECUTABLE_FILE),
-          windowCreated: true,
-        }));
-        app.exit(result.bridgeReady && result.menuClicksPass && result.settingsPass ? 0 : 2);
+        return (async () => {
+          let miniPlayerPass = false;
+          if (result.bridgeReady && result.menuClicksPass && result.settingsPass) {
+            openMiniPlayer(win);
+            const mini = BrowserWindow.getAllWindows().find((candidate) => candidate !== win &&
+              candidate.getTitle() === 'YT Music — Mini-lecteur');
+            if (mini) {
+              try {
+                for (let attempt = 0; attempt < 40 && !mini.isDestroyed(); attempt++) {
+                  if (mini.webContents.getURL().startsWith('file:') && !mini.webContents.isLoading()) {
+                    miniPlayerPass = await mini.webContents.executeJavaScript(
+                      `Boolean(window.miniPlayer?.command && window.miniPlayer?.onState &&
+                        document.querySelector('#volume[type="range"]') &&
+                        document.querySelector('#previous') && document.querySelector('#play') &&
+                        document.querySelector('#next') && document.querySelector('#close'))`,
+                      true,
+                    ) === true;
+                    break;
+                  }
+                  await new Promise((resolve) => setTimeout(resolve, 100));
+                }
+                if (miniPlayerPass) {
+                  await mini.webContents.executeJavaScript("document.querySelector('#close').click(); true", true).catch(() => {});
+                  for (let attempt = 0; attempt < 20 && !mini.isDestroyed(); attempt++) {
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                  }
+                  miniPlayerPass = mini.isDestroyed() && !win.isDestroyed();
+                }
+              } finally {
+                if (!mini.isDestroyed()) mini.destroy();
+              }
+            }
+          }
+          fs.writeFileSync(smokeMarker, JSON.stringify({
+            ...result,
+            miniPlayerPass,
+            portable: Boolean(process.env.PORTABLE_EXECUTABLE_FILE),
+            windowCreated: true,
+          }));
+          app.exit(result.bridgeReady && result.menuClicksPass && result.settingsPass && miniPlayerPass ? 0 : 2);
+        })();
       }).catch((error: unknown) => {
         fs.writeFileSync(smokeMarker, JSON.stringify({ bridgeReady: false, error: String(error) }));
         app.exit(3);
@@ -1003,6 +1038,7 @@ app.once('browser-window-created', (_event, win) => {
       }
 
       if (
+        isMainFrame &&
         errorCode !== -3 &&
         // Workaround for #2435
         !URL.parse(validatedURL)?.hostname?.includes('doubleclick.net')

@@ -118,13 +118,13 @@ jobs:
           }
           $report = Get-Content -LiteralPath $marker -Raw | ConvertFrom-Json
           $report | ConvertTo-Json | Write-Host
-          if ($report.bridgeReady -ne $true -or $report.portable -ne $true -or $report.menuClicksPass -ne $true -or $report.settingsPass -ne $true) {
+          if ($report.bridgeReady -ne $true -or $report.portable -ne $true -or $report.menuClicksPass -ne $true -or $report.settingsPass -ne $true -or $report.miniPlayerPass -ne $true) {
             $trace = "$marker.trace"
             if (Test-Path -LiteralPath $trace) {
               Write-Host 'Trace de demarrage :'
               Get-Content -LiteralPath $trace | Select-Object -Last 70 | Write-Host
             }
-            throw "Echec du lancement portable, de l'activation d'un plugin ou des commandes Parametres."
+            throw "Echec du lancement portable, de l'activation d'un plugin, des commandes Parametres ou du mini-lecteur."
           }
           Remove-Item Env:\YTMD_SMOKE_RESULT
           Write-Host 'Portable : demarrage, plugin, 8 options, coches rafraichies et 2 groupes radio des Parametres OK.'

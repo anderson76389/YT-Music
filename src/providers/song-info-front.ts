@@ -256,6 +256,7 @@ export const setupSongInfo = (api: MusicPlayer) => {
     );
 
   const waitingEvent = new Set<string>();
+  let activeVideoId: string | undefined;
   const waitingTimeouts = new Map<string, NodeJS.Timeout>();
 
   const clearVideoTimeout = (videoId: string) => {
@@ -272,11 +273,15 @@ export const setupSongInfo = (api: MusicPlayer) => {
   api.addEventListener('videodatachange', (name, videoData) => {
     videoEventDispatcher(name, videoData);
 
-    if (name === 'dataupdated' && waitingEvent.has(videoData.videoId)) {
+    if (name === 'dataupdated' && activeVideoId === videoData.videoId && waitingEvent.has(videoData.videoId)) {
       waitingEvent.delete(videoData.videoId);
       clearVideoTimeout(videoData.videoId);
       sendSongInfo(videoData);
     } else if (name === 'dataloaded') {
+      activeVideoId = videoData.videoId;
+      for (const timer of waitingTimeouts.values()) clearTimeout(timer);
+      waitingTimeouts.clear();
+      waitingEvent.clear();
       const video = document.querySelector<HTMLVideoElement>('video');
       video?.dispatchEvent(srcChangedEvent);
 
@@ -334,6 +339,7 @@ export const setupSongInfo = (api: MusicPlayer) => {
 
   function sendSongInfo(videoData: VideoDataChangeValue) {
     const data = api.getPlayerResponse();
+    if (!data?.videoDetails || data.videoDetails.videoId !== videoData.videoId) return;
 
     let playerOverlay: PlayerOverlays | undefined;
 
@@ -351,8 +357,8 @@ export const setupSongInfo = (api: MusicPlayer) => {
       playerOverlay?.playerOverlayRenderer?.browserMediaSession?.browserMediaSessionRenderer?.album?.runs?.at(
         0,
       )?.text;
-    data.videoDetails.elapsedSeconds = 0;
-    data.videoDetails.isPaused = false;
+    data.videoDetails.elapsedSeconds = api.getCurrentTime();
+    data.videoDetails.isPaused = api.getPlayerState() !== 1;
 
     window.ipcRenderer.send('peard:video-src-changed', data);
   }

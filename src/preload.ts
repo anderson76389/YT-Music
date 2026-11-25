@@ -18,7 +18,7 @@ import {
 // @ts-expect-error dummy
 globalThis.customElements = { define() {} };
 
-new MutationObserver((mutations, observer) => {
+const adapterObserver = new MutationObserver((mutations, observer) => {
   for (const mutation of mutations) {
     for (const node of mutation.addedNodes) {
       const elem = node as HTMLElement;
@@ -36,7 +36,9 @@ new MutationObserver((mutations, observer) => {
       return;
     }
   }
-}).observe(document, { subtree: true, childList: true });
+});
+adapterObserver.observe(document, { subtree: true, childList: true });
+window.addEventListener('load', () => adapterObserver.disconnect(), { once: true });
 
 loadI18n().then(async () => {
   await setLanguage(config.get('options.language') ?? 'en');

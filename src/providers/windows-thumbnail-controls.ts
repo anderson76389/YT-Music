@@ -163,6 +163,7 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
 
   refreshers.set(win, () => applyButtons(true));
   win.on('closed', () => {
+    unsubscribe();
     cancelRetry();
     nativeTheme.removeListener('updated', onThemeUpdated);
     refreshers.delete(win);
@@ -173,7 +174,7 @@ export const setupWindowsThumbnailControls = (win: BrowserWindow): void => {
   // Une seule routine met à jour les boutons. Les événements réels play/pause
   // servent aussi de secours si le canal IPC du média est indisponible.
   // Ignorer VideoSrcChanged : son champ isPaused peut être inexact.
-  registerCallback((songInfo, event) => {
+  const unsubscribe = registerCallback((songInfo, event) => {
     if (win.isDestroyed() ||
         event !== SongInfoEvent.PlayOrPaused ||
         typeof songInfo.isPaused !== 'boolean') return;

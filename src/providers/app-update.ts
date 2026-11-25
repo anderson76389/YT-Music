@@ -85,6 +85,7 @@ export async function checkAndInstallUpdate(
   try {
     prepareUpdater();
     const result = await updater.checkForUpdates();
+    if (win.isDestroyed()) return;
     const latest = result?.updateInfo?.version;
     if (!latest || !isVersionNewer(app.getVersion(), latest)) {
       if (!options.silent) {
@@ -124,6 +125,7 @@ export async function checkAndInstallUpdate(
       if (!win.isDestroyed()) win.setProgressBar(-1);
     }
 
+    if (win.isDestroyed()) return;
     const done = await dialog.showMessageBox(win, {
       type: 'question',
       title: 'Mise à jour téléchargée',

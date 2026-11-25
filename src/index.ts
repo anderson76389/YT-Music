@@ -1003,6 +1003,7 @@ app.once('browser-window-created', (_event, win) => {
       }
 
       if (
+        isMainFrame &&
         errorCode !== -3 &&
         // Workaround for #2435
         !URL.parse(validatedURL)?.hostname?.includes('doubleclick.net')

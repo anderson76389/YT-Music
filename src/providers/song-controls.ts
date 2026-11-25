@@ -7,13 +7,8 @@ import { LikeType } from '@/types/datahost-get-state';
 type ArgsType<T> = T | string[] | undefined;
 
 const parseNumberFromArgsType = (args: ArgsType<number>) => {
-  if (typeof args === 'number') {
-    return args;
-  } else if (Array.isArray(args)) {
-    return Number(args[0]);
-  } else {
-    return null;
-  }
+  const value = typeof args === 'number' ? args : Array.isArray(args) ? Number(args[0]) : NaN;
+  return Number.isFinite(value) ? value : null;
 };
 
 const parseBooleanFromArgsType = (args: ArgsType<boolean>) => {
@@ -49,7 +44,7 @@ export const getSongControls = (win: BrowserWindow) => {
     seekTo: (seconds: ArgsType<number>) => {
       const secondsNumber = parseNumberFromArgsType(seconds);
       if (secondsNumber !== null) {
-        win.webContents.send('peard:seek-to', seconds);
+        win.webContents.send('peard:seek-to', Math.max(0, secondsNumber));
       }
     },
     goBack: (seconds: ArgsType<number>) => {
@@ -71,14 +66,14 @@ export const getSongControls = (win: BrowserWindow) => {
     switchRepeat: (n: ArgsType<number> = 1) => {
       const repeat = parseNumberFromArgsType(n);
       if (repeat !== null) {
-        win.webContents.send('peard:switch-repeat', n);
+        win.webContents.send('peard:switch-repeat', repeat);
       }
     },
     // General
     setVolume: (volume: ArgsType<number>) => {
       const volumeNumber = parseNumberFromArgsType(volume);
       if (volumeNumber !== null) {
-        win.webContents.send('peard:update-volume', volume);
+        win.webContents.send('peard:update-volume', Math.max(0, Math.min(100, volumeNumber)));
       }
     },
     setFullscreen: (isFullscreen: ArgsType<boolean>) => {

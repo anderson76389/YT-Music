@@ -51,6 +51,7 @@ slider.addEventListener('input',()=>{
   if(!pendingFrame) pendingFrame=requestAnimationFrame(()=>{pendingFrame=0;api.command('volume',Number(slider.value));});
 });
 api.onState(s=>{
+  document.documentElement.dataset.miniReady='true';
   byId('title').textContent=s.title||'Aucun titre';
   byId('artist').textContent=s.artist||'YT Music';
   const cover=byId('cover');

@@ -7,10 +7,10 @@ import { getSongControls } from './song-controls';
 import { registerCallback, SongInfoEvent } from './song-info';
 import { normalizeMiniVolume, type MiniPlayerState } from './mini-player-state';
 
-const openers = new WeakMap<BrowserWindow, () => void>();
+const openers = new WeakMap<BrowserWindow, () => BrowserWindow>();
 
-export function openMiniPlayer(main: BrowserWindow): void {
-  openers.get(main)?.();
+export function openMiniPlayer(main: BrowserWindow): BrowserWindow | undefined {
+  return openers.get(main)?.();
 }
 
 export function setupMiniPlayer(main: BrowserWindow): void {
@@ -93,7 +93,7 @@ export function setupMiniPlayer(main: BrowserWindow): void {
       mini.show();
       mini.focus();
       requestState();
-      return;
+      return mini;
     }
     ready = false;
     const window = new BrowserWindow({
@@ -114,12 +114,16 @@ export function setupMiniPlayer(main: BrowserWindow): void {
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
+        partition: 'ytmd-mini-player-local',
       },
     });
     mini = window;
     window.setMenu(null);
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     window.webContents.on('will-navigate', (event) => event.preventDefault());
+    window.webContents.on('preload-error', (_event, file, error) => {
+      console.error('[YT Music] Mini-player preload failed', file, error);
+    });
     window.once('ready-to-show', () => {
       if (!window.isDestroyed()) window.show();
     });
@@ -135,6 +139,7 @@ export function setupMiniPlayer(main: BrowserWindow): void {
       console.error('[YT Music] Mini-lecteur indisponible', error);
       if (!window.isDestroyed()) window.close();
     });
+    return window;
   });
 
   main.once('closed', () => {

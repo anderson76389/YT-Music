@@ -917,21 +917,30 @@ async function createMainWindow() {
         return (async () => {
           let miniPlayerPass = false;
           if (result.bridgeReady && result.menuClicksPass && result.settingsPass) {
-            openMiniPlayer(win);
-            const mini = BrowserWindow.getAllWindows().find((candidate) => candidate !== win &&
-              candidate.getTitle() === 'YT Music — Mini-lecteur');
+            const mini = openMiniPlayer(win);
+            traceStartup('mini-created', mini ? String(mini.id) : 'missing');
             if (mini) {
+              mini.webContents.on('preload-error', (_event, file, error) =>
+                traceStartup('mini-preload-error', file + ' ' + String(error)));
+              mini.webContents.on('did-fail-load', (_event, code, desc) =>
+                traceStartup('mini-load-error', String(code) + ' ' + desc));
               try {
-                for (let attempt = 0; attempt < 40 && !mini.isDestroyed(); attempt++) {
+                for (let attempt = 0; attempt < 60 && !mini.isDestroyed(); attempt++) {
                   if (mini.webContents.getURL().startsWith('file:') && !mini.webContents.isLoading()) {
-                    miniPlayerPass = await mini.webContents.executeJavaScript(
-                      `Boolean(window.miniPlayer?.command && window.miniPlayer?.onState &&
-                        document.querySelector('#volume[type="range"]') &&
+                    const probe = await mini.webContents.executeJavaScript(
+                      `({ bridge: Boolean(window.miniPlayer?.command && window.miniPlayer?.onState),
+                        controls: Boolean(document.querySelector('#volume[type="range"]') &&
                         document.querySelector('#previous') && document.querySelector('#play') &&
-                        document.querySelector('#next') && document.querySelector('#close'))`,
+                        document.querySelector('#next') && document.querySelector('#close')),
+                        ready: document.documentElement.dataset.miniReady === 'true',
+                        title: document.title })`,
                       true,
-                    ) === true;
-                    break;
+                    ) as { bridge: boolean; controls: boolean; ready: boolean; title: string };
+                    traceStartup('mini-probe', JSON.stringify(probe));
+                    if (probe.bridge && probe.controls && probe.ready) {
+                      miniPlayerPass = true;
+                      break;
+                    }
                   }
                   await new Promise((resolve) => setTimeout(resolve, 100));
                 }
